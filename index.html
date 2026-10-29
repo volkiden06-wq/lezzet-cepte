@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f04416"><title>LEZZET CEPTE | Pide • Lahmacun • Kebap</title>
+<style>
+:root{--red:#df1824;--red2:#b90d18;--ink:#171719;--muted:#73737b;--cream:#faf8f6;--line:#ece8e5;--green:#16834a;--shadow:0 14px 40px #24100e12}*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#fff;color:var(--ink)}button,input,select,textarea{font:inherit}button,a{cursor:pointer}a{text-decoration:none;color:inherit}.wrap{width:min(1160px,calc(100% - 36px));margin:auto}.topbar{height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 max(18px,calc((100% - 1160px)/2));border-bottom:1px solid var(--line);position:sticky;top:0;background:#ffffffed;backdrop-filter:blur(12px);z-index:5}.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:-.8px;font-size:20px}.brand-mark{display:grid;place-items:center;width:43px;height:43px;background:var(--red);color:white;border-radius:13px;font-size:15px;letter-spacing:-1px;box-shadow:0 5px 15px #df18243b}.brand small{display:block;font-size:9px;letter-spacing:1.4px;color:#777;font-weight:800}.red{color:var(--red)}.top-actions{display:flex;align-items:center;gap:9px}.btn,.primary,.ghost,.cart-btn{border:0;border-radius:12px;padding:12px 16px;font-weight:800}.primary{background:var(--red);color:white;box-shadow:0 7px 18px #df18242e}.primary:hover{background:var(--red2)}.ghost{background:#fff;border:1px solid var(--line)}.cart-btn{background:#19191b;color:#fff}.cart-btn b{background:var(--red);padding:3px 7px;border-radius:8px;margin-left:5px}.hero{display:grid;grid-template-columns:1.03fr .97fr;gap:35px;align-items:center;padding-top:44px;padding-bottom:36px}.eyebrow{font-size:11px;letter-spacing:1.7px;font-weight:900;color:var(--red)}h1{font-size:clamp(38px,5vw,64px);letter-spacing:-2.8px;line-height:1.04;margin:14px 0}.hero h1 em{font-style:normal;color:var(--red)}.hero p{color:var(--muted);font-size:17px;line-height:1.7;max-width:470px}.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin:25px 0}.trust{display:flex;gap:16px;flex-wrap:wrap;color:#606067;font-size:12px;font-weight:700}.hero-photo{height:390px;border-radius:28px;overflow:hidden;position:relative;background:#30201c}.hero-photo img{width:100%;height:100%;object-fit:cover}.photo-label{position:absolute;bottom:18px;left:18px;background:#fff;padding:12px 16px;border-radius:14px;font-weight:900;box-shadow:var(--shadow)}.photo-label span{display:block;color:var(--red);font-size:11px;margin-top:3px}.promo{background:#19191b;color:white;border-radius:24px;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:18px;overflow:hidden;position:relative}.promo h2{font-size:28px;margin:8px 0}.promo p{color:#c5c5c9;margin-bottom:18px}.promo .eyebrow{color:#ff7b80}.promo-img{width:36%;height:150px;border-radius:17px;object-fit:cover}.section{padding:54px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:22px}.section h2{font-size:32px;letter-spacing:-1px;margin:6px 0}.search{width:min(340px,100%);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:8px}.search input{border:0;outline:0;width:100%}.cats{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:24px}.cat{border:1px solid var(--line);border-radius:999px;background:#fff;padding:10px 17px;font-weight:800;color:#555}.cat.active,.cat:hover{background:var(--red);color:white;border-color:var(--red)}.products{display:grid;grid-template-columns:repeat(4,1fr);gap:17px}.product{border:1px solid var(--line);border-radius:19px;overflow:hidden;background:#fff;transition:.2s}.product:hover{transform:translateY(-3px);box-shadow:var(--shadow)}.product img{width:100%;height:165px;object-fit:cover;background:#eee}.product-body{padding:14px}.product h3{margin:0 0 6px;font-size:16px}.product p{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.5;min-height:36px}.product-bottom{display:flex;justify-content:space-between;align-items:center;gap:8px}.price{font-weight:950;color:var(--red);font-size:18px}.add{border:0;border-radius:10px;background:#fff0f1;color:var(--red);font-weight:950;font-size:20px;width:38px;height:38px}.loyalty{margin:10px auto 50px;background:#fff0f1;border:1px solid #ffdcde;border-radius:22px;padding:25px;display:flex;align-items:center;justify-content:space-between;gap:15px}.loyalty h2{margin:5px 0;font-size:23px}.loyalty p{color:#666;margin:0}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px}.feature{border:1px solid var(--line);padding:23px;border-radius:17px}.feature b{display:block;margin:10px 0}.feature p{color:var(--muted);font-size:13px;line-height:1.6;margin:0}.footer{border-top:1px solid var(--line);padding:24px 0;color:#777;font-size:12px}.footer-inner{display:flex;justify-content:space-between;align-items:center;gap:14px}.hidden{display:none!important}.modal-back{position:fixed;inset:0;background:#111b;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}.modal-back.show{display:flex}.modal{background:white;width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:22px;padding:25px;box-shadow:0 25px 90px #0004}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.close{border:0;background:#f2f2f2;border-radius:10px;width:38px;height:38px;font-size:23px}.field{display:grid;gap:6px;margin:12px 0}.field label{font-size:12px;font-weight:800;color:#555}.field input,.field select,.field textarea{border:1px solid #ddd;border-radius:10px;padding:11px;width:100%;background:white}.cart-row{display:flex;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid var(--line)}.qty{display:flex;gap:8px;align-items:center}.qty button{border:1px solid var(--line);background:white;border-radius:8px;width:28px;height:28px}.total{display:flex;justify-content:space-between;font-size:20px;font-weight:950;padding:17px 0}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#19191b;color:#fff;padding:13px 18px;border-radius:12px;z-index:50;box-shadow:var(--shadow);display:none;max-width:90%;text-align:center}.toast.show{display:block}.admin{min-height:100vh;background:#f5f5f7;display:grid;grid-template-columns:235px 1fr}.sidebar{background:#171719;color:white;padding:23px 15px;display:flex;flex-direction:column;gap:25px}.sidebar .brand{padding:0 8px}.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;color:#c9c9ce;text-align:left;padding:12px;border-radius:10px;font-weight:750}.nav button.active,.nav button:hover{background:var(--red);color:#fff}.admin-main{padding:30px;min-width:0}.admin-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:24px}.admin-head h1{font-size:30px;letter-spacing:-1px;margin:3px 0}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.stat,.panel{background:#fff;border:1px solid #ececf0;border-radius:16px;padding:18px}.stat span{color:#777;font-size:12px}.stat strong{display:block;font-size:26px;margin-top:8px}.panel{margin-bottom:15px}.panel h3{margin:0 0 15px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:12px;border-bottom:1px solid #eee;white-space:nowrap}th{color:#777;font-size:11px}.small-btn{border:0;background:#fff0f1;color:var(--red);padding:8px 10px;border-radius:8px;font-weight:800}.admin-form{max-width:650px}.notice{background:#fff8e7;padding:13px;border-radius:10px;color:#755516;font-size:13px;line-height:1.5;margin:12px 0}.status{display:inline-block;padding:5px 8px;border-radius:7px;background:#e9f8ef;color:#16834a;font-size:11px;font-weight:800}
+@media(max-width:850px){.hero{grid-template-columns:1fr;padding-top:28px}.hero-photo{height:300px}.products{grid-template-columns:repeat(2,1fr)}.promo-img{display:none}.stats{grid-template-columns:repeat(2,1fr)}.admin{grid-template-columns:1fr}.sidebar{position:static;padding:12px;gap:12px}.sidebar .brand{display:none}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.back-site{max-width:180px}.admin-main{padding:18px}.section-head{align-items:stretch;flex-direction:column}.search{width:100%}}@media(max-width:520px){.topbar{height:65px;padding:0 12px}.brand{font-size:16px}.brand-mark{width:37px;height:37px}.top-actions{gap:5px}.top-actions .ghost{display:none}.cart-btn{padding:10px}.hero h1{font-size:43px}.hero-photo{height:250px}.promo{padding:22px}.products{gap:10px}.product img{height:125px}.product-body{padding:10px}.product h3{font-size:14px}.product p{font-size:11px}.price{font-size:16px}.loyalty{align-items:flex-start;flex-direction:column}.features{grid-template-columns:1fr}.footer-inner{flex-wrap:wrap}.stats{gap:8px}.stat{padding:13px}.stat strong{font-size:21px}}
+
+/* Sipariş Yönetimi — modern filtre paneli */
+.orders-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.orders-toolbar input,.orders-toolbar select{min-height:42px;border:1px solid #d7dfe7;border-radius:12px;padding:10px 13px;background:#fff;color:#24364a;box-sizing:border-box}
+.orders-toolbar .order-search{flex:1;min-width:220px}
+.order-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.order-filter{border:1px solid #d5dde5;background:#f7f9fb;border-radius:11px;padding:10px 13px;font-weight:700;color:#334155;cursor:pointer}
+.order-filter.active{background:#193b5b;color:#fff;border-color:#193b5b}
+.order-counts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.order-count{background:#fff;border:1px solid #e2e8ef;border-radius:30px;padding:9px 13px;font-size:13px;white-space:nowrap;color:#334155}
+.order-count b{margin-left:5px}
+.order-count .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px}
+.orders-card{background:#fff;border:1px solid #e6ebf0;border-radius:18px;overflow:hidden;box-shadow:0 8px 22px rgba(31,55,77,.06)}
+.orders-card-title{font-size:18px;font-weight:800;padding:17px 20px;border-bottom:1px solid #edf0f4;margin:0;color:#15263a}
+.orders-card .table-wrap{margin:0;border-radius:0}
+.orders-card table{min-width:880px}
+.orders-card th{background:#f7f9fb;color:#64748b;font-size:12px;letter-spacing:.03em}
+.order-empty{text-align:center;padding:54px 20px;color:#7b8797}
+.order-empty .empty-icon{font-size:48px;opacity:.65;margin-bottom:10px}
+.order-status-select{border:1px solid #d9e1e9;border-radius:9px;padding:8px;max-width:155px;background:#fff}
+.order-status-pill{display:inline-block;border-radius:30px;padding:6px 10px;font-size:12px;font-weight:800;background:#eef2f7;color:#526174}
+@media(max-width:760px){.orders-toolbar .order-search{min-width:100%;flex-basis:100%}.order-filter{flex:1;min-width:100px}.order-count{font-size:12px;padding:8px 10px}.orders-card-title{font-size:16px}}
+
+/* LEZZET CEPTE yeni ana sayfa tasarımı */
+:root{--red:#ed1024;--red2:#c90018;--ink:#101216;--line:#e5e7eb;--muted:#657080}
+body{background:#f7f8fa}
+.topbar{height:72px;padding:0 22px 0 292px;gap:18px;box-shadow:0 2px 14px #11111108}
+.topbar .brand{display:none}
+.top-actions{margin-left:auto;gap:8px}
+.top-actions .ghost{background:#fff;border-color:#e5e7eb}
+#customer{display:grid;grid-template-columns:244px minmax(0,1fr) 330px;grid-template-rows:auto auto auto auto;gap:18px 20px;max-width:none;width:100%;margin:0;padding:20px 22px 38px 264px;align-items:start}
+.customer-left{grid-column:1;grid-row:1/5;position:fixed;left:0;top:0;bottom:0;width:244px;background:linear-gradient(180deg,#11151b,#090b0f);color:#fff;padding:20px 13px;display:flex;flex-direction:column;z-index:7;overflow:auto}
+.side-logo{display:flex;align-items:center;flex-direction:column;text-align:center;color:#fff;padding:4px 0 25px;border-bottom:1px solid #ffffff18}
+.side-logo .chef{font-size:30px;margin-bottom:3px}
+.side-logo b{font-size:22px;letter-spacing:-1px}.side-logo b span{color:#ff2638}
+.side-logo small{font-size:10px;letter-spacing:.7px;color:#c7c9ce;margin-top:4px}
+.customer-nav{display:grid;gap:5px;padding-top:18px}
+.customer-nav a{display:flex;align-items:center;gap:13px;padding:12px 13px;border-radius:11px;color:#e6e8eb;font-weight:750;font-size:14px}
+.customer-nav a:hover,.customer-nav a.selected{background:var(--red);color:#fff;box-shadow:0 6px 18px #ed102438}
+.customer-nav a:first-child{font-size:15px}
+.side-contact{margin-top:auto;padding:15px 12px;border:1px solid #ffffff1c;border-radius:13px;display:grid;gap:7px;font-size:13px;color:#fff}
+.side-contact span,.side-contact small{color:#b9bec8}.side-contact a{font-weight:900;margin-top:5px}
+.hero{grid-column:2;grid-row:1;width:100%;margin:0;padding:0;display:block;position:relative}
+.hero>div:first-child{display:none}
+.hero-photo{height:315px;border-radius:15px;box-shadow:0 9px 25px #1112}
+.photo-label{left:18px;bottom:16px}
+.campaign-sidebar{grid-column:3;grid-row:1/5;background:#fff;border:1px solid #f3bfc4;border-radius:16px;overflow:hidden;position:sticky;top:88px;max-height:calc(100vh - 106px);display:flex;flex-direction:column;box-shadow:0 7px 22px #ed102410}
+.campaign-side-head{background:linear-gradient(120deg,#f3162a,#c90018);color:#fff;padding:15px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.campaign-side-head>div{display:flex;gap:8px;align-items:center;font-size:18px}
+.campaign-all{background:#ffffff16;color:#fff;border:1px solid #ffffff72;border-radius:8px;padding:7px 8px;font-size:11px;font-weight:800}
+.campaign-list{padding:9px;display:grid;gap:9px;overflow:auto}
+.campaign-card{display:grid;grid-template-columns:42% 1fr;gap:10px;padding:8px;border:1px solid #f1d9dc;border-radius:12px;background:#fff;min-height:142px;box-shadow:0 3px 10px #1111}
+.campaign-card img{width:100%;height:100%;min-height:125px;max-height:170px;object-fit:cover;border-radius:9px;background:#f2f2f2}
+.campaign-card-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.campaign-tag{background:#fff0b6;color:#8a4c00;border-radius:6px;padding:4px 6px;font-size:9px;font-weight:950}
+.campaign-card h3{font-size:14px;line-height:1.25;margin:0;color:#17191d;overflow-wrap:anywhere}
+.campaign-card p{font-size:11px;line-height:1.4;color:#6b7280;margin:0;overflow-wrap:anywhere}
+.campaign-card .campaign-action{margin-top:auto;width:100%;background:var(--red);color:#fff;border:0;border-radius:8px;padding:8px 6px;font-size:12px;font-weight:900}
+.campaign-empty{padding:25px 10px;text-align:center;color:#7b8492;font-size:13px;line-height:1.6}
+.campaign-help{background:#fff5f5;color:#b90d18;padding:10px;text-align:center;font-size:12px;font-weight:800;border-top:1px solid #ffe0e3}
+#menu{grid-column:2;grid-row:2;width:100%;padding:0;margin:0}
+#menu .section-head{margin-bottom:15px;align-items:center}
+#menu .section-head h2{font-size:25px}
+#menu .cats{gap:8px;margin-bottom:17px}
+#menu .cat{padding:9px 13px;font-size:12px}
+#menu .products{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+#menu .product{border-radius:13px;box-shadow:0 3px 12px #1111}
+#menu .product img{height:130px}
+#menu .product-body{padding:11px}
+#menu .product h3{font-size:14px}
+#menu .product .add{background:var(--red);color:#fff;width:auto;height:auto;padding:8px 12px;font-size:13px}
+.loyalty{grid-column:2;grid-row:3;width:100%;margin:0;padding:20px;background:#fff0f1}
+.features{grid-column:2;grid-row:4;width:100%;margin:0;gap:10px}
+.features .feature{padding:15px}
+#campaigns{scroll-margin-top:90px}
+@media(max-width:1250px){#customer{grid-template-columns:205px minmax(0,1fr) 285px;gap:15px;padding-right:15px;padding-left:220px}.customer-left{width:205px}.campaign-card{grid-template-columns:1fr}.campaign-card img{height:115px;min-height:115px}.campaign-card-copy{gap:5px}#menu .products{grid-template-columns:repeat(2,minmax(0,1fr))}.topbar{padding-left:225px}}
+@media(max-width:900px){.topbar{padding:0 12px}.top-actions .ghost#trackBtn,.top-actions .ghost#notifyBtn{display:none}#customer{display:flex;flex-direction:column;padding:14px;width:100%}.customer-left{position:static;width:100%;border-radius:13px;padding:12px;order:0}.side-logo{display:none}.customer-nav{display:flex;overflow:auto;padding:0;gap:6px}.customer-nav a{white-space:nowrap;flex:0 0 auto;padding:10px}.side-contact{display:none}.hero{order:1}.campaign-sidebar{order:2;position:static;max-height:none;width:100%}.campaign-list{grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}.campaign-card{grid-template-columns:40% 1fr}#menu{order:3}#menu .products{grid-template-columns:repeat(2,minmax(0,1fr))}.loyalty{order:4}.features{order:5}.hero-photo{height:260px}}
+@media(max-width:520px){.topbar{height:auto;min-height:62px}.top-actions{gap:4px}.top-actions .primary{padding:9px 10px;font-size:12px}.cart-btn{padding:9px 10px;font-size:12px}.campaign-list{grid-template-columns:1fr}.campaign-card{grid-template-columns:38% 1fr}.campaign-card img{min-height:130px}.hero-photo{height:220px}#menu .section-head h2{font-size:22px}}
+
+/* Ana sayfa hizalama düzeltmesi ve kampanya detayları */
+#customer{grid-template-columns:minmax(0,1fr) 330px;grid-template-rows:auto auto auto auto;padding:18px 22px 38px 264px;column-gap:20px;row-gap:18px}
+.hero{grid-column:1!important;grid-row:1!important}
+#menu{grid-column:1!important;grid-row:2!important}
+.loyalty{grid-column:1!important;grid-row:3!important}
+.features{grid-column:1!important;grid-row:4!important}
+.campaign-sidebar{grid-column:2!important;grid-row:1/5!important}
+.hero-photo{height:300px}
+#menu .section-head{display:flex;justify-content:space-between;align-items:center;gap:18px}
+#menu .section-head>div{min-width:0}
+#menu .search{max-width:360px}
+.campaign-card{cursor:pointer;transition:transform .18s,box-shadow .18s}
+.campaign-card:hover{transform:translateY(-2px);box-shadow:0 7px 18px #1112}
+.campaign-card .campaign-action{cursor:pointer}
+.campaign-detail{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.campaign-detail img{width:100%;max-height:320px;object-fit:cover;border-radius:14px;background:#f4f4f4}
+.campaign-detail h3{font-size:24px;margin:0}
+.campaign-detail p{color:#5b6472;line-height:1.6;margin:0}
+.campaign-product{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid #eceff3;border-radius:12px;padding:12px}
+.campaign-product small{display:block;color:#6b7280;margin-top:4px}
+@media(max-width:1250px){#customer{grid-template-columns:minmax(0,1fr) 285px;padding-left:220px;gap:15px}.hero{grid-column:1!important}#menu,.loyalty,.features{grid-column:1!important}.campaign-sidebar{grid-column:2!important}}
+@media(max-width:900px){#customer{display:flex;flex-direction:column;padding:14px;width:100%}.hero,.campaign-sidebar,#menu,.loyalty,.features{width:100%;grid-column:auto!important;grid-row:auto!important}.hero{order:1}.campaign-sidebar{order:2}.campaign-list{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-photo{height:260px}#menu .section-head{align-items:stretch;flex-direction:column}#menu .search{max-width:none}}
+@media(max-width:520px){.campaign-list{grid-template-columns:1fr}.hero-photo{height:220px}}
+
+/* Raporlar ekranı — tarih aralığı ve günlük kasa özeti */
+.report-range-card{background:#fff;border:1px solid #e6ebf0;border-radius:17px;padding:18px 19px;margin-bottom:16px;box-shadow:0 5px 18px #172b4d08}
+.report-range-top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.report-range-title{font-size:17px;font-weight:850;color:#24364b}
+.report-range-fields{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.report-range-fields label{font-size:12px;font-weight:750;color:#475569}
+.report-range-fields input{border:1px solid #d6dde6;border-radius:10px;padding:9px 10px;min-height:38px}
+.report-quick{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}
+.report-quick button{border:0;border-radius:20px;background:#eef2f7;color:#334155;padding:7px 13px;font-size:12px;font-weight:750;cursor:pointer}
+.report-quick button:hover{background:#dfe7f1}
+.report-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:12px}
+.report-kpi{background:#f8fafc;border:1px solid #e8edf2;border-left:4px solid #d4b04c;border-radius:13px;padding:13px 12px;min-width:0}
+.report-kpi.primary-kpi{border-left-color:#26804a;background:#f0f9f4}
+.report-kpi span{display:block;color:#64748b;font-size:11px;font-weight:700;margin-bottom:7px}
+.report-kpi strong{display:block;font-size:19px;color:#152a43;overflow-wrap:anywhere}
+.report-subline{font-size:12px;color:#8a95a4;margin-top:10px}
+.report-day-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:17px 0}
+.report-day-row label{font-weight:800;font-size:13px;color:#334155}
+.report-day-row input{margin-left:8px;border:1px solid #d6dde6;border-radius:10px;padding:9px}
+.report-daily-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:17px}
+.report-daily-card{background:#fff;border:1px solid #e5eaf0;border-top:4px solid #159d55;border-radius:15px;padding:18px;box-shadow:0 5px 15px #182c420d}
+.report-daily-card:nth-child(2){border-top-color:#06a6c8}.report-daily-card:nth-child(3){border-top-color:#3264e8}.report-daily-card:nth-child(4){border-top-color:#7939cc}.report-daily-card:nth-child(5){border-top-color:#374151}
+.report-daily-card strong{display:block;font-size:25px;color:#18324d;margin-bottom:7px}
+.report-daily-card span{font-size:12px;color:#64748b;font-weight:750}
+.report-table-card{background:#fff;border:1px solid #e5eaf0;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 5px 18px #172b4d08}
+.report-table-title{font-size:16px;font-weight:850;padding:17px 20px;border-bottom:1px solid #edf1f5;margin:0}
+.report-table-card .table-wrap{margin:0;border-radius:0}
+.report-table-card table{min-width:690px}
+.report-table-card tbody tr:nth-child(odd){background:#f0f4ff}
+.report-table-card td,.report-table-card th{padding:13px 15px}
+.report-tools{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:1100px){.report-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.report-daily-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.report-daily-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.report-range-fields{width:100%}.report-range-fields input{max-width:145px}.report-daily-card{padding:13px}.report-daily-card strong{font-size:21px}}
+
+/* Bildirim görsel yükleme ve müşteri arama filtreleri */
+#notificationImagePreview img{display:block;max-width:220px;max-height:150px;object-fit:cover;border-radius:12px;margin-top:10px;border:1px solid #e5e7eb}
+.customer-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.customer-head h3{margin-bottom:5px}.customer-head .muted{margin:0;color:#718096;font-size:13px}
+.customer-total{font-size:13px;font-weight:850;color:#193b5b;background:#edf4fa;border-radius:20px;padding:8px 12px}
+.customer-filters{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}
+.customer-filters input,.customer-filters select{border:1px solid #d9e1e9;border-radius:11px;padding:11px 13px;min-height:42px;background:#fff}
+.customer-filters input{flex:1;min-width:220px}
+.customer-table-wrap{overflow:auto;border:1px solid #e8edf2;border-radius:12px}
+.customer-table-wrap table{width:100%;border-collapse:collapse;min-width:460px}
+.customer-table-wrap th{background:#f7f9fb;color:#64748b;text-align:left;font-size:12px;padding:13px}
+.customer-table-wrap td{padding:13px;border-top:1px solid #edf1f5}
+.customer-table-wrap tbody tr:nth-child(even){background:#fafbfd}
+.customer-empty{padding:25px;text-align:center;color:#748094}
+
+/* Ürün kategorisi seçimi ve kategori adlarını düzenleme */
+.category-manage-list{display:grid;gap:9px;margin-top:12px}
+.category-manage-row{display:grid;grid-template-columns:minmax(130px,.8fr) minmax(180px,1.3fr) auto;align-items:center;gap:10px;padding:10px;border:1px solid #e7ecf1;border-radius:12px;background:#fbfcfd}
+.category-manage-row label{font-weight:800;color:#334155;overflow-wrap:anywhere}
+.category-manage-row input,.admin-form select[name="category"]{width:100%;min-height:40px;border:1px solid #d5dde6;border-radius:9px;padding:9px 11px;background:#fff}
+@media(max-width:650px){.category-manage-row{grid-template-columns:1fr}.category-manage-row button{width:100%}}
+
+.category-move-controls{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+.category-move-controls button{min-width:38px;padding:8px 10px}
+.category-move-controls button:disabled{opacity:.35;cursor:not-allowed}
+.category-move-controls .danger{background:#fff0f1;color:#c8102e;border:1px solid #ffd1d7}
+@media(max-width:650px){.category-move-controls{justify-content:flex-start}}
+
+/* Kurumsal ürün ve kategori yönetimi */
+.category-create-panel,.product-create-panel{border:1px solid #e4eaf1;border-radius:16px;box-shadow:0 7px 24px #15263b08;padding:22px;margin-bottom:18px}
+.category-create-heading,.product-panel-heading{display:flex;align-items:center;gap:13px;margin-bottom:17px}
+.category-create-heading h3,.product-panel-heading h3{font-size:19px;font-weight:900;color:#172b43;margin:0 0 5px}
+.category-create-heading p,.product-panel-heading p{font-size:13px;color:#778396;margin:0}
+.category-icon{width:44px;height:44px;border-radius:12px;background:#fff0f1;color:#d9162b;display:grid;place-items:center;font-size:24px;font-weight:900;flex-shrink:0}
+.category-create-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:13px;align-items:end}
+.category-create-form .field{margin:0}
+.category-create-form input{min-height:44px;border:1px solid #d8e0e9;border-radius:10px;padding:10px 13px}
+.category-create-form button{min-height:44px;white-space:nowrap}
+.product-panel-heading{justify-content:space-between;align-items:flex-start}
+.panel-step{background:#eef3f8;color:#475569;border-radius:20px;padding:7px 10px;font-size:10px;letter-spacing:.5px;font-weight:900}
+.category-manage-row{background:#fff;border-color:#e3e9f0;box-shadow:0 2px 8px #14243a05}
+.category-manage-row label{font-size:13px}
+.category-manage-row input{background:#f9fbfd}
+.category-manage-row .small-btn{border-radius:8px;font-weight:800}
+.product-create-panel .field label{font-size:12px;color:#43536a;font-weight:850}
+.product-create-panel input,.product-create-panel select{border:1px solid #d7e0e9;border-radius:10px;min-height:42px;padding:10px 12px;background:#fff}
+#page>.panel h3{color:#20334a}
+#page .table-wrap{border:1px solid #e4eaf0;border-radius:12px;overflow:auto}
+#page .table-wrap th{background:#f5f8fb;color:#63748a;font-size:11px;letter-spacing:.4px}
+#page .table-wrap td{padding:12px 14px}
+@media(max-width:650px){.category-create-form{grid-template-columns:1fr}.category-create-form button{width:100%}.category-create-panel,.product-create-panel{padding:15px}.panel-step{display:none}}
+
+/* Kategori yönetimi satırlarını ekran genişliğine sığdır */
+.category-manage-list{width:100%;min-width:0}
+.category-manage-row{display:grid;grid-template-columns:minmax(100px,.7fr) minmax(0,1fr) auto;align-items:center;gap:8px;width:100%;min-width:0;box-sizing:border-box;padding:10px 12px;overflow:hidden}
+.category-manage-row label{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;font-size:12px}
+.category-manage-row input{width:100%;min-width:0;max-width:100%;box-sizing:border-box;padding:8px 10px;font-size:13px}
+.category-manage-row .small-btn{padding:8px 10px;white-space:nowrap;font-size:12px}
+.category-move-controls{grid-column:1/-1;display:flex;justify-content:flex-end;gap:6px;min-width:0}
+.category-move-controls button{min-width:34px;padding:7px 9px}
+@media(max-width:760px){
+ .category-manage-row{grid-template-columns:minmax(75px,.55fr) minmax(0,1fr);gap:8px}
+ .category-manage-row>button[data-rename-category]{grid-column:1/-1;justify-self:end}
+ .category-move-controls{grid-column:1/-1;justify-content:flex-start}
+}
+@media(max-width:430px){
+ .category-manage-row{grid-template-columns:minmax(0,1fr);gap:7px}
+ .category-manage-row label,.category-manage-row input,.category-manage-row>button[data-rename-category]{grid-column:1;width:100%}
+ .category-move-controls{grid-column:1}
+}
+
+/* Kategori satırlarını tek hizada tut */
+.category-manage-row{display:grid;grid-template-columns:minmax(110px,.55fr) minmax(120px,1fr) auto auto;align-items:center;gap:8px;width:100%;min-width:0;box-sizing:border-box;padding:10px 12px;overflow:hidden}
+.category-manage-row label{grid-column:1;grid-row:1;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;font-size:12px}
+.category-manage-row input{grid-column:2;grid-row:1;width:100%;min-width:0;max-width:100%;box-sizing:border-box;padding:8px 10px;font-size:13px}
+.category-manage-row>button[data-rename-category]{grid-column:3;grid-row:1;padding:8px 10px;white-space:nowrap;font-size:12px}
+.category-move-controls{grid-column:4;grid-row:1;display:flex;align-items:center;justify-content:flex-end;gap:5px;min-width:0}
+.category-move-controls button{min-width:34px;padding:7px 9px}
+@media(max-width:760px){
+ .category-manage-row{grid-template-columns:minmax(90px,.6fr) minmax(0,1fr);gap:8px}
+ .category-manage-row label{grid-column:1;grid-row:1}
+ .category-manage-row input{grid-column:2;grid-row:1}
+ .category-manage-row>button[data-rename-category]{grid-column:1;grid-row:2;justify-self:start}
+ .category-move-controls{grid-column:2;grid-row:2;justify-content:flex-end}
+}
+@media(max-width:430px){
+ .category-manage-row{grid-template-columns:minmax(0,1fr) auto;gap:7px}
+ .category-manage-row label{grid-column:1/-1;grid-row:1}
+ .category-manage-row input{grid-column:1/-1;grid-row:2}
+ .category-manage-row>button[data-rename-category]{grid-column:1;grid-row:3;width:auto}
+ .category-move-controls{grid-column:2;grid-row:3}
+}
+
+/* LEZZET CEPTE — iştah açıcı sıcak tema: domates kırmızısı, mandalina, köz kahvesi ve krema */
+:root{
+ --red:#f04416;
+ --red2:#d92d0b;
+ --ink:#24160f;
+ --muted:#78665b;
+ --cream:#fff8ee;
+ --line:#f0dfcf;
+ --green:#218653;
+ --shadow:0 14px 40px #52220f18;
+ --orange:#ff8a00;
+ --tomato:#f04416;
+ --toast:#3a2116;
+}
+body{background:#fffaf3;color:var(--ink)}
+.topbar{background:#fffaf3ed;border-bottom-color:#f1ddc8}
+.brand-mark{background:linear-gradient(135deg,#ff8a00,#f04416);box-shadow:0 6px 18px #f044163d}
+.brand small{color:#8a6b56}
+.primary,.btn.primary{background:linear-gradient(135deg,#ff8a00,#f04416);box-shadow:0 7px 18px #f0441630}
+.primary:hover,.btn.primary:hover{background:linear-gradient(135deg,#f07800,#d92d0b)}
+.cart-btn{background:#2c1b13}
+.cart-btn b{background:#f04416}
+.eyebrow,.red,.hero h1 em,.photo-label span{color:#f04416}
+.hero-photo{background:#422516;box-shadow:0 16px 36px #5a2a141f}
+.promo{background:linear-gradient(115deg,#2b1a12,#4a2515 65%,#7a2b13);border:1px solid #6a3820}
+.promo .eyebrow{color:#ffad47}
+.promo .primary{background:linear-gradient(135deg,#ff9c00,#f04416)}
+.photo-label{background:#fffaf3;color:#2c1b13}
+.product-card,.campaign-card,.panel,.modal-card,.admin-card,.stat-card,.report-range-card,.report-table-card{
+ border-color:#f0dfcf;
+}
+.product-card{background:#fffdf9;box-shadow:0 8px 24px #6530130d}
+.product-card:hover,.campaign-card:hover{box-shadow:0 14px 28px #65301318}
+.product-card .price,.price,.campaign-price{color:#e63a12}
+.category-pill.active,.category.active,.nav-link.active{background:#f04416!important;color:#fff!important;border-color:#f04416!important}
+.badge,.discount-badge,.campaign-badge{background:#f04416;color:#fff}
+footer,.site-footer{background:linear-gradient(120deg,#24160f,#492416);color:#fff2e5}
+.admin-sidebar,.sidebar,.admin-nav{background:linear-gradient(180deg,#24160f,#3a2116)!important;color:#fff8ee}
+.admin-sidebar a.active,.sidebar a.active,.admin-nav a.active{background:linear-gradient(100deg,#ff8a00,#f04416)!important;color:#fff!important}
+.admin-topbar,.admin-header{background:#fffaf3;border-bottom-color:#f0dfcf}
+.report-kpi.primary-kpi{background:#fff3e4;border-left-color:#f04416}
+.report-daily-card{border-top-color:#f04416}
+.report-daily-card:nth-child(2){border-top-color:#ff8a00}
+.report-daily-card:nth-child(3){border-top-color:#e13b19}
+.report-daily-card:nth-child(4){border-top-color:#a85520}
+input:focus,select:focus,textarea:focus{outline:2px solid #ffb36b;outline-offset:1px;border-color:#f04416}
+button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2px}
+.toast{background:#2c1b13;color:#fffaf3}
+@media(prefers-reduced-motion:no-preference){
+ .primary,.cart-btn,.product-card,.campaign-card,.category-pill{transition:background .18s ease,box-shadow .18s ease,transform .18s ease}
+ .product-card:hover,.campaign-card:hover{transform:translateY(-2px)}
+}
+</style></head><body>
+<header class="topbar" id="siteHeader"><a class="brand" href="#home"><span class="brand-mark">LC</span><span>LEZZET<span class="red">CEPTE</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
+<main id="customer">
+<aside class="customer-left">
+ <a class="side-logo" href="#home"><span class="chef">♨</span><b><span>LEZZET</span> CEPTE</b><small>PİDE · LAHMACUN · KEBAP</small></a>
+ <nav class="customer-nav" id="customerNav">
+  <a class="selected" href="#home" data-side-page="home">⌂ <span>Ana Sayfa</span></a>
+  <div id="customerCategoryLinks"></div>
+ </nav>
+ <div class="side-contact"><b>🛵 Hızlı Teslimat</b><span>Gebze ve çevresi</span><a href="tel:05421511186">☎ 0542 151 11 86</a><small>Sipariş Hattı</small></div>
+</aside>
+<section class="hero wrap" id="home"><div><span class="eyebrow">SICAK · TAZE · TAM LEZZET</span><h1>Lezzet şimdi<br><em>bir tık uzağında.</em></h1><p>En sevdiğin pide, çıtır lahmacun ve ateşten kebaplar. Menünü seç, siparişini kolayca oluştur.</p><div class="hero-actions"><a class="primary" href="#menu">MENÜYÜ KEŞFET →</a><button class="ghost" id="campaignJump">🎁 Günün kampanyası</button></div><div class="trust"><span>✓ Taze hazırlanır</span><span>✓ Kolay sipariş</span><span>✓ Gel-al seçeneği</span></div></div><div class="hero-photo"><img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85" alt="Izgara yemekler" onerror="this.style.display='none'"><div class="photo-label">ATEŞTEN SOFRANA<span>Pide · Lahmacun · Kebap</span></div></div></section>
+<aside class="campaign-sidebar" id="campaigns"><div class="campaign-side-head"><div><span>📣</span><b>KAMPANYALAR</b></div><button id="promoNotify" class="campaign-all">Bildirimler</button></div><div id="campaignList" class="campaign-list"></div><div class="campaign-help">🎁 Yeni fırsatları kaçırma!</div></aside>
+<section class="wrap section" id="menu"><div class="section-head"><div><span class="eyebrow">SENİN İÇİN HAZIRLANDI</span><h2>Menüyü keşfet</h2></div><label class="search">⌕ <input id="search" placeholder="Ürün veya kategori ara..."></label></div><div class="cats" id="categories"></div><div class="products" id="products"></div></section>
+<section class="wrap loyalty"><div><span class="eyebrow">LEZZETİN KAZANDIRDIĞI</span><h2>Kampanyaları ilk sen öğren.</h2><p>Bildirimlere izin vererek yeni fırsatlardan haberdar ol.</p></div><button class="primary" id="loyaltyBtn">BİLDİRİMLERİ AÇ</button></section>
+<section class="wrap features"><div class="feature"><span>🔥</span><b>Özenle hazırlanır</b><p>Menüden ürününü seç, siparişini kolayca oluştur.</p></div><div class="feature"><span>🛍️</span><b>Kolay sipariş</b><p>Sepetini düzenle, teslimat veya gel-al tercihini belirt.</p></div><div class="feature"><span>🔔</span><b>Kampanya fırsatları</b><p>Bildirim izni verdiğinde desteklenen cihazlarda duyuruları al.</p></div></section></main>
+<footer class="footer"><div class="wrap footer-inner"><a class="brand" href="#home"><span class="brand-mark">LC</span><span>LEZZET<span class="red">CEPTE</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><span>© <span id="year"></span> LEZZET CEPTE</span><button class="ghost" id="footerAdmin">Yönetici girişi</button></div></footer>
+<section class="admin hidden" id="admin"><aside class="sidebar"><a class="brand" href="#"><span class="brand-mark">LC</span><span>LEZZET<span class="red">CEPTE</span><small>YÖNETİM PANELİ</small></span></a><nav class="nav" id="nav"><button class="active" data-page="overview">▦ Genel Bakış</button><button data-page="orders">▤ Siparişler</button><button data-page="products">▧ Ürün & Menü</button><button data-page="campaigns">◇ Kampanyalar</button><button data-page="notifications">♧ Bildirim Gönder</button><button data-page="customers">♙ Müşteriler</button><button data-page="reports">▥ Raporlar</button><button data-page="settings">⚙ Ayarlar</button></nav><button class="ghost" id="backSite">← Siteye dön</button></aside><div class="admin-main"><div class="admin-head"><div><span class="eyebrow">İŞLETME YÖNETİMİ</span><h1 id="pageTitle">Genel Bakış</h1></div><span id="adminDate"></span></div><div id="page"></div></div></section>
+<div class="modal-back" id="modalBack"><section class="modal"><div class="modal-head"><h2 id="modalTitle">Sepetim</h2><button class="close" id="closeModal">×</button></div><div id="modalBody"></div></section></div><div class="modal-back" id="historyBack"><section class="modal"><div class="modal-head"><h2>Geçmiş Siparişlerim</h2><button class="close" id="historyClose">×</button></div><p style="color:#777;font-size:13px">Sipariş verirken kullandığınız telefon numarasını girin.</p><form id="historyForm"><div class="field"><label>Telefon numarası</label><input name="phone" type="tel" required placeholder="05xx xxx xx xx"></div><button class="primary" style="width:100%">SİPARİŞLERİMİ GÖSTER</button></form><div id="historyResult"></div></section></div><div class="modal-back" id="trackBack"><section class="modal"><div class="modal-head"><h2>Sipariş Takip</h2><button class="close" id="trackClose">×</button></div><form id="trackForm"><div class="field"><label>Sipariş numarası</label><input name="id" required></div><div class="field"><label>Telefon</label><input name="phone" type="tel" required></div><button class="primary" style="width:100%">SORGULA</button></form><div id="trackResult"></div><p class="notice">Sipariş takibi, sunucu/veritabanı kurulumu tamamlandığında cihazlar arasında çalışır.</p></section></div><div class="toast" id="toast"></div>
+<script>
+(()=>{'use strict';const $=s=>document.querySelector(s);const money=n=>new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:0}).format(n);const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const img=(id)=>`https://images.unsplash.com/${id}?auto=format&fit=crop&w=700&q=80`;
+const defaults=[['Pide','Kıymalı Pide',300,'İncecik hamur, bol kıymalı harç.','photo-1571407970349-bc81e7e96d47'],['Pide','Kaşarlı Pide',280,'Uzayan peynir, fırından sıcak.','photo-1579751626657-72bc17010498'],['Pide','Kuşbaşılı Pide',350,'Özenle hazırlanan etli pide.','photo-1601050690597-df0568f70950'],['Lahmacun','Lahmacun',100,'İnce hamur, bol lezzet.','photo-1627626775846-1226d1ab7e20'],['Kebap','Adana Kebap',450,'Ateşte pişen klasik lezzet.','photo-1544025162-d76694265947'],['Kebap','Urfa Kebap',450,'Baharat dengesiyle nefis kebap.','photo-1555939594-58d7cb561ad1'],['Kebap','Tavuk Şiş',350,'Izgaradan sıcak ve yumuşacık.','photo-1532550907401-a500c9a57435'],['Dürümler','Adana Dürüm',299,'Bol malzemeli, doyurucu dürüm.','photo-1626700051175-6818013e1d4f'],['Çorbalar','Mercimek Çorbası',100,'Günün sıcak çorbası.','photo-1547592166-23ac45744acd'],['İçecekler','Ayran',35,'Serinleten klasik eşlikçi.','photo-1553909489-cd47e0ef937f'],['Tatlılar','Künefe',160,'Sıcak servis edilen tatlı.','photo-1578985545062-69928b1d9587'],['Izgaralar','Izgara Köfte',450,'Izgara köfte ve garnitür.','photo-1529042410759-befb1204b468']].map((x,i)=>({id:i+1,category:x[0],name:x[1],price:x[2],description:x[3],image:img(x[4]),active:true}));
+let products=load('lc_products',defaults),cart=load('lc_cart',[]),orders=load('lc_orders',[]),campaigns=load('lc_campaigns',[{title:'Günün Kampanyası',message:'Lezzet dolu fırsatları kaçırma!',active:true}]),customers=load('lc_customers',[]),currentCat='Tümü',adminPage='overview';function load(k,d){try{const x=localStorage.getItem(k);return x?JSON.parse(x):d}catch{return d}}function save(){[['lc_products',products],['lc_cart',cart],['lc_orders',orders],['lc_campaigns',campaigns],['lc_customers',customers]].forEach(([k,v])=>localStorage.setItem(k,JSON.stringify(v)))}function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2800)}
+function renderCampaignSidebar(){
+ const host=$('#campaignList');if(!host)return;
+ const active=(campaigns||[]).filter(c=>c.active!==false);
+ host.innerHTML=active.length?active.map((c,i)=>`<article class="campaign-card"><img src="${c.image||img('photo-1565299624946-b28f40a0ae38')}" alt="${escapeHtml(c.title||'Kampanya')}" onerror="this.onerror=null;this.src='${img('photo-1565299624946-b28f40a0ae38')}'"><div class="campaign-card-copy"><span class="campaign-tag">ÖZEL KAMPANYA</span><h3>${escapeHtml(c.title||'Kampanya')}</h3><p>${escapeHtml(c.message||'Fırsatı kaçırma!')}</p><button class="campaign-action" data-campaign-order="${i}">İncele / Sipariş Ver</button></div></article>`).join(''):'<div class="campaign-empty">🎁<br><b>Yeni kampanyalar burada görünecek.</b><br>Yönetim panelinden görselli kampanya ekleyebilirsin.</div>';
+ host.querySelectorAll('[data-campaign-order]').forEach(b=>b.onclick=()=>{const c=active[+b.dataset.campaignOrder];if(!c)return;const linked=products.find(p=>String(p.id)===String(c.productId)&&p.active);const linkedHtml=linked?`<div class="campaign-product"><div><b>${escapeHtml(linked.name)}</b><small>${money(linked.price)} · ${escapeHtml(linked.description||'')}</small></div><button class="primary" id="campaignAddProduct">Sepete Ekle</button></div>`:'<div class="notice">Bu kampanyaya henüz özel bir ürün bağlanmamış. Menüden ilgili ürünleri inceleyebilirsin.</div>';openModal('Kampanya Detayı',`<div class="campaign-detail"><img src="${c.image||img('photo-1565299624946-b28f40a0ae38')}" alt="${escapeHtml(c.title||'Kampanya')}"><span class="campaign-tag">ÖZEL KAMPANYA</span><h3>${escapeHtml(c.title||'Kampanya')}</h3><p>${escapeHtml(c.message||'Kampanya açıklaması bulunmuyor.')}</p>${linkedHtml}<button class="ghost" id="campaignBrowse">Menüde diğer ürünleri gör</button></div>`);const addBtn=$('#campaignAddProduct');if(addBtn&&linked)addBtn.onclick=()=>{add(linked.id);closeModal();cartModal();toast(linked.name+' sepete eklendi')};$('#campaignBrowse').onclick=()=>{closeModal();currentCat='Tümü';$('#search').value='';renderCats();renderProducts();$('#menu').scrollIntoView({behavior:'smooth'})}});
+}
+function getCategoryOrder(){
+ const productCategories=[...new Set(products.map(p=>String(p.category||'').trim()).filter(Boolean))];
+ let stored=[];try{stored=JSON.parse(localStorage.getItem('lc_category_order')||'[]')}catch(e){}
+ const saved=Array.isArray(stored)?stored.map(c=>String(c||'').trim()).filter(Boolean):[];
+ return [...new Set([...saved,...productCategories])];
+}
+function saveCategoryOrder(order){localStorage.setItem('lc_category_order',JSON.stringify(order))}
+function renderCustomerNavCategories(){const host=$('#customerCategoryLinks');if(!host)return;const icons=['🍲','🥖','🍕','🍢','🌯','🍖','🍰','🥤','🍽️'];host.innerHTML=getCategoryOrder().map((c,i)=>`<a href="#menu" data-side-cat="${escapeHtml(c)}">${icons[i%icons.length]} <span>${escapeHtml(c)}</span></a>`).join('')}
+function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories').innerHTML=cats.map(c=>`<button class="cat ${currentCat===c?'active':''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('');$('#categories').querySelectorAll('button').forEach(b=>b.onclick=()=>{currentCat=b.dataset.cat;renderCats();renderProducts()});renderCustomerNavCategories()}function renderProducts(){const q=$('#search').value.toLocaleLowerCase('tr');const list=[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).filter(p=>p.active&&(currentCat==='Tümü'||p.category===currentCat)&&(`${p.name} ${p.category} ${p.description}`).toLocaleLowerCase('tr').includes(q));$('#products').innerHTML=list.length?list.map(p=>`<article class="product"><img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.style.background='#eee';this.removeAttribute('src')"><div class="product-body"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description)}</p><div class="product-bottom"><span class="price">${money(p.price)}</span><button class="add" data-add="${p.id}" aria-label="Sepete ekle">+</button></div></div></article>`).join(''):'<p>Aramana uygun ürün bulunamadı.</p>';$('#products').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(+b.dataset.add))}function add(id){const p=products.find(x=>x.id===id);if(!p)return;const row=cart.find(x=>x.id===id);if(row)row.qty++;else cart.push({id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function renderCartCount(){$('#cartCount').textContent=cart.reduce((s,x)=>s+x.qty,0)}function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show')}function total(){return cart.reduce((s,x)=>s+(products.find(p=>p.id===x.id)?.price||0)*x.qty,0)}function cartModal(){const rows=cart.map(x=>{const p=products.find(p=>p.id===x.id);return p?`<div class="cart-row"><div><b>${escapeHtml(p.name)}</b><div class="price">${money(p.price*x.qty)}</div></div><div class="qty"><button data-minus="${p.id}">−</button><b>${x.qty}</b><button data-plus="${p.id}">+</button><button data-remove="${p.id}" aria-label="Sil">×</button></div></div>`:''}).join('');openModal('Sepetim',`${rows||'<p>Sepetin henüz boş. Menüden ürün ekleyebilirsin.</p>'}${rows?`<div class="total"><span>Toplam</span><span>${money(total())}</span></div><form id="checkout"><div class="field"><label>Ad soyad</label><input name="name" required placeholder="Adınız soyadınız"></div><div class="field"><label>Telefon</label><input name="phone" required type="tel" placeholder="05xx xxx xx xx"></div><div class="field"><label>Sipariş türü</label><select name="type"><option>Adrese teslim</option><option>Gel-al</option></select></div><div class="field"><label>Ödeme yöntemi</label><select name="paymentMethod" required><option value="Kapıda Nakit">KAPIDA NAKİT</option><option value="Kapıda Kredi Kartı">KAPIDA KREDİ KARTI</option></select></div><div class="field"><label>Adres / sipariş notu</label><textarea name="note" rows="2" placeholder="Teslimat adresi veya not"></textarea></div><button class="primary" style="width:100%">SİPARİŞ OLUŞTUR · ${money(total())}</button><p style="color:#777;font-size:12px">Demo sürüm: sipariş bu tarayıcıya kaydedilir; işletmeye otomatik gönderilmez.</p></form>`:''}`);$('#modalBody').querySelectorAll('[data-plus]').forEach(b=>b.onclick=()=>changeQty(+b.dataset.plus,1));$('#modalBody').querySelectorAll('[data-minus]').forEach(b=>b.onclick=()=>changeQty(+b.dataset.minus,-1));$('#modalBody').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{cart=cart.filter(x=>x.id!==+b.dataset.remove);save();renderCartCount();cartModal()});const f=$('#checkout');if(f)f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f);const order={id:Date.now(),name:fd.get('name'),phone:fd.get('phone'),type:fd.get('type'),paymentMethod:fd.get('paymentMethod'),note:fd.get('note'),items:cart.map(x=>({...x,name:products.find(p=>p.id===x.id)?.name,price:products.find(p=>p.id===x.id)?.price})),total:total(),status:'Yeni',date:new Date().toISOString()};(async()=>{try{const resp=await fetch('/.netlify/functions/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});if(!resp.ok)throw new Error('API');const result=await resp.json();order.id=result.id||order.id;orders.unshift(order);customers.push({name:order.name,phone:order.phone});cart=[];save();renderCartCount();closeModal();openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${String(order.id).slice(-6)}</div><p>Durum: <b>Yeni</b></p><p>Sipariş numaranızı saklayın.</p></div>`);if(!$('#admin').classList.contains('hidden'))renderAdmin()}catch(err){toast('Sipariş sunucusu henüz yapılandırılmamış. Sipariş gönderilmedi.');}})()}}function changeQty(id,n){const x=cart.find(x=>x.id===id);if(x)x.qty+=n;cart=cart.filter(x=>x.qty>0);save();renderCartCount();cartModal()}
+function adminLogin(){openModal('Yönetici girişi',`<p>Demo panelini açmak için kodu gir.</p><form id="loginForm"><div class="field"><label>Demo kodu</label><input name="pin" type="password" inputmode="numeric" required placeholder="Demo kodu"></div><button class="primary" style="width:100%">GİRİŞ YAP</button></form><p style="font-size:12px;color:#777">Demo kodu: 2468. Gerçek yayında güvenli sunucu girişiyle değiştirilmelidir.</p>`);$('#loginForm').onsubmit=e=>{e.preventDefault();if(new FormData(e.target).get('pin')==='2468'){closeModal();$('#customer').classList.add('hidden');$('#siteHeader').classList.add('hidden');document.querySelector('.footer').classList.add('hidden');$('#admin').classList.remove('hidden');renderAdmin()}else toast('Kod hatalı')}}
+const titles={overview:'Genel Bakış',orders:'Siparişler',products:'Ürün & Menü',campaigns:'Kampanyalar',notifications:'Bildirim Gönder',customers:'Müşteriler',reports:'Raporlar',settings:'Ayarlar'};let orderManagementFilter='Aktifler';
+function orderWhen(o){const raw=o.date||o.created_at||o.createdAt;const d=raw?new Date(raw):null;return d&&!Number.isNaN(d.getTime())?d:null}
+function orderStatus(o){return o.status||'Yeni'}
+function orderManagementTable(list){
+ if(!list.length)return '<div class="order-empty"><div class="empty-icon">📦</div><b>Sipariş bulunamadı</b><p>Seçilen filtrelere uygun sipariş bulunamadı.</p></div>';
+ return `<div class="table-wrap"><table><thead><tr><th>MASA</th><th>👤 MÜŞTERİ</th><th>ÜRÜNLER</th><th>TOPLAM</th><th>DURUM</th><th>TARİH / SAAT</th><th>İŞLEMLER</th></tr></thead><tbody>${list.map(o=>{const d=orderWhen(o);const items=(o.items||[]).map(i=>`${escapeHtml(i.name||i.title||'Ürün')} × ${i.qty||1}`).join(', ');return `<tr><td>${escapeHtml(o.table||o.tableNo||o.masa||o.type||'Web')}</td><td><b>${escapeHtml(o.name||o.customer_name||'Müşteri')}</b><br><small>${escapeHtml(o.phone||'')}</small></td><td>${items||'—'}<br><small>${escapeHtml(o.paymentMethod||o.payment_method||'')}</small></td><td><b>${money(+o.total||0)}</b></td><td><span class="order-status-pill">${escapeHtml(orderStatus(o))}</span></td><td>${d?d.toLocaleDateString('tr-TR')+'<br>'+d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):'—'}</td><td><select class="order-status-select" data-status="${o.id}">${['Yeni','Bekliyor','Hazırlanıyor','Yola çıktı','Teslim edildi','İptal','Kapalı'].map(s=>`<option ${orderStatus(o)===s?'selected':''}>${s}</option>`).join('')}</select></td></tr>`}).join('')}</tbody></table></div>`;
+}
+function wireOrdersPage(){
+ if(adminPage!=='orders')return;
+ const statuses=['Yeni','Bekliyor','Hazırlanıyor','Yola çıktı','Teslim edildi','İptal','Kapalı'];
+ const activeStatuses=['Yeni','Bekliyor','Hazırlanıyor','Yola çıktı'];
+ const update=()=>{
+  const q=($('#orderSearch').value||'').toLocaleLowerCase('tr');
+  const tableNo=($('#orderTableNo').value||'').toLocaleLowerCase('tr');
+  const day=$('#orderDateFilter').value;
+  const filtered=orders.filter(o=>{
+   const st=orderStatus(o),d=orderWhen(o);
+   if(orderManagementFilter==='Aktifler'&&!activeStatuses.includes(st))return false;
+   if(orderManagementFilter==='Bekliyor'&&!['Yeni','Bekliyor'].includes(st))return false;
+   if(orderManagementFilter==='Kapalı'&&st!=='Kapalı')return false;
+   if(!['Aktifler','Bekliyor','Tümü'].includes(orderManagementFilter)&&st!==orderManagementFilter)return false;
+   if(day&&(!d||d.toISOString().slice(0,10)!==day))return false;
+   if(tableNo&&!String(o.table||o.tableNo||o.masa||'').toLocaleLowerCase('tr').includes(tableNo))return false;
+   const blob=[o.name,o.customer_name,o.phone,o.table,o.tableNo,o.masa,o.type,...(o.items||[]).map(i=>i.name||i.title)].join(' ').toLocaleLowerCase('tr');
+   if(q&&!blob.includes(q))return false;
+   return true;
+  });
+  const count=(predicate)=>orders.filter(predicate).length;
+  const defs=[['Sipariş',orders.length,'#173b5c'],['Bekliyor',count(o=>['Yeni','Bekliyor'].includes(orderStatus(o)),'#f59e0b'),'#f59e0b'],['Hazırlanıyor',count(o=>orderStatus(o)==='Hazırlanıyor'),'#3b82f6'],['Teslim',count(o=>orderStatus(o)==='Teslim edildi'),'#22c55e'],['İptal',count(o=>orderStatus(o)==='İptal'),'#ef4444'],['Kapalı',count(o=>orderStatus(o)==='Kapalı'),'#94a3b8']];
+  $('#orderCounts').innerHTML=defs.map(([label,n,color])=>`<span class="order-count"><i class="dot" style="background:${color}"></i>${label}<b>${n}</b></span>`).join('');
+  $('#ordersCardTitle').textContent=orderManagementFilter==='Aktifler'?'Aktif Siparişler':orderManagementFilter==='Tümü'?'Tüm Siparişler':orderManagementFilter+' Siparişler';
+  $('#ordersTableHost').innerHTML=orderManagementTable(filtered);
+  $('#ordersTableHost').querySelectorAll('[data-status]').forEach(sel=>sel.onchange=()=>{const o=orders.find(x=>String(x.id)===String(sel.dataset.status));if(o){o.status=sel.value;save();update();toast('Sipariş durumu güncellendi')}});
+ };
+ document.querySelectorAll('[data-order-filter]').forEach(b=>b.onclick=()=>{orderManagementFilter=b.dataset.orderFilter;document.querySelectorAll('[data-order-filter]').forEach(x=>x.classList.toggle('active',x===b));update()});
+ ['orderSearch','orderTableNo','orderDateFilter'].forEach(id=>$('#'+id).addEventListener(id==='orderDateFilter'?'change':'input',update));
+ $('#refreshOrders').onclick=update;
+ $('#toggleOrderSound').onclick=()=>{const b=$('#toggleOrderSound');const on=b.textContent.includes('Açık');b.textContent=on?'🔇 Ses Kapalı':'🔊 Ses Açık';toast('Ses düğmesi görünümü güncellendi; gerçek yeni sipariş ses bildirimi ayrıca bağlanmalıdır')};
+ update();
+}
+function renderCustomerResults(){
+ const q=($('#customerSearch')?.value||'').trim().toLocaleLowerCase('tr');
+ const filter=$('#customerFilter')?.value||'all';
+ const unique=new Map();
+ (customers||[]).forEach(c=>{const name=String(c.name||c.customer_name||'').trim(),phone=String(c.phone||'').trim();const key=(phone||name).toLocaleLowerCase('tr');if(key)unique.set(key,{name,phone})});
+ const list=[...unique.values()].filter(c=>{
+  const hay=(c.name+' '+c.phone).toLocaleLowerCase('tr');
+  if(q&&!hay.includes(q))return false;
+  if(filter==='withPhone'&&!c.phone)return false;
+  if(filter==='withoutPhone'&&c.phone)return false;
+  return true;
+ }).sort((a,b)=>a.name.localeCompare(b.name,'tr'));
+ $('#customerTotal').textContent=`${list.length} / ${unique.size} müşteri`;
+ $('#customerResults').innerHTML=list.length?`<div class="customer-table-wrap"><table><thead><tr><th>MÜŞTERİ ADI</th><th>TELEFON</th></tr></thead><tbody>${list.map(c=>`<tr><td><b>${escapeHtml(c.name||'İsimsiz')}</b></td><td>${escapeHtml(c.phone||'—')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="customer-empty">Aramanıza uygun müşteri bulunamadı.</div>';
+}
+function renderAdmin(){ $('#pageTitle').textContent=titles[adminPage];$('#adminDate').textContent=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});$('#nav').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.page===adminPage));const revenue=orders.filter(o=>o.status!=='İptal').reduce((s,o)=>s+o.total,0);const stat=(label,val)=>`<div class="stat"><span>${label}</span><strong>${val}</strong></div>`;let html='';if(adminPage==='overview'){html=`<div class="stats">${stat('Toplam sipariş',orders.length)}${stat('Sipariş toplamı',money(revenue))}${stat('Aktif ürün',products.filter(p=>p.active).length)}${stat('Müşteri kaydı',customers.length)}</div><div class="panel"><h3>Son siparişler</h3>${orders.length?ordersTable(orders.slice(0,8)):'<p>Henüz sipariş yok. Müşteri tarafındaki siparişler demo olarak burada görünür.</p>'}</div><div class="notice">Bu panel şu anda aynı tarayıcıdaki demo verilerini kullanır. Birden fazla cihazdan gerçek sipariş ve bildirim için sunucu/veritabanı bağlantısı kurulmalıdır.</div>`}else if(adminPage==='orders'){html=`<div class="orders-toolbar"><input id="orderTableNo" placeholder="Masa No..." style="width:130px"><input id="orderDateFilter" type="date" aria-label="Tarih"><button class="order-filter active" data-order-filter="Aktifler">Aktifler</button><button class="order-filter" data-order-filter="Bekliyor">⏳ Bekliyor</button><button class="order-filter" data-order-filter="Hazırlanıyor">👨‍🍳 Hazırlanıyor</button><button class="order-filter" data-order-filter="Teslim edildi">✅ Teslim</button><button class="order-filter" data-order-filter="İptal">❌ İptal</button><button class="order-filter" data-order-filter="Kapalı">🔒 Kapalı</button><button class="order-filter" data-order-filter="Tümü">🧾 Tümü</button></div><div class="orders-toolbar"><input id="orderSearch" class="order-search" placeholder="⌕ Siparişlerde ara (masa, ürün, müşteri, telefon...)"><button class="small-btn" id="refreshOrders">↻ Yenile</button><button class="small-btn" id="toggleOrderSound">🔊 Ses Açık</button></div><div class="order-counts" id="orderCounts"></div><div class="orders-card"><h3 class="orders-card-title">📋 <span id="ordersCardTitle">Aktif Siparişler</span></h3><div id="ordersTableHost"></div></div>`}else if(adminPage==='products'){html=`<div class="panel category-create-panel"><div class="category-create-heading"><div class="category-icon">▦</div><div><h3>Yeni kategori oluştur</h3><p>Menü kategorilerini buradan ekleyip ürünleri düzenli şekilde grupla.</p></div></div><form id="categoryCreateForm" class="category-create-form"><div class="field"><label>Kategori adı</label><input name="categoryName" required maxlength="48" placeholder="Örn. Kampanyalı Menüler"></div><button class="primary">＋ Kategori Oluştur</button></form></div><div class="panel admin-form product-create-panel"><div class="product-panel-heading"><div><h3>Yeni ürün ekle</h3><p>Ürün bilgilerini, fiyatını ve görselini gir.</p></div><span class="panel-step">ÜRÜN YÖNETİMİ</span></div><form id="productForm"><div class="field"><label>Ürün adı</label><input name="name" required></div><div class="field"><label>Kategori</label><select name="category" id="productCategorySelect" required><option value="">Kategori seçin</option>${getCategoryOrder().map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}</select><small>Kategori adlarını aşağıdaki kategori yönetiminden istediğin zaman değiştirebilirsin.</small></div><div class="field"><label>Fiyat (TL)</label><input name="price" type="number" min="1" required></div><div class="field"><label>Açıklama</label><input name="description"></div><div class="field"><label>Ürün görseli (bilgisayardan seç)</label><input name="imageFile" type="file" accept="image/*" required><small>JPG, PNG veya WebP. Görsel tarayıcıda küçültülerek saklanır.</small><div id="productImagePreview"></div></div><button class="primary">ÜRÜN EKLE</button></form></div><div class="panel"><h3>Ürün listesi</h3><div class="table-wrap"><table><thead><tr><th>Ürün</th><th>Kategori</th><th>Fiyat</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).map(p=>`<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.category)}</td><td>${money(p.price)}</td><td>${p.active?'Aktif':'Gizli'}</td><td><button class="small-btn" data-toggle="${p.id}">${p.active?'Gizle':'Aktifleştir'}</button> <button class="small-btn" data-delprod="${p.id}">Sil</button></td></tr>`).join('')}</tbody></table></div></div><div class="panel"><h3>Kategori yönetimi</h3><p class="muted">Bir kategori adını değiştirirsen o kategoriye bağlı tüm ürünler yeni adla güncellenir.</p><div class="category-manage-list">${getCategoryOrder().map((c,i,arr)=>`<div class="category-manage-row"><label>${escapeHtml(c)}</label><input aria-label="${escapeHtml(c)} yeni adı" id="categoryRename${i}" value="${escapeHtml(c)}"><button class="small-btn" data-rename-category="${encodeURIComponent(c)}" data-input="categoryRename${i}">KAYDET</button><div class="category-move-controls"><button class="small-btn" data-move-category="${encodeURIComponent(c)}" data-direction="-1" ${i===0?'disabled':''} title="Yukarı taşı">↑</button><button class="small-btn" data-move-category="${encodeURIComponent(c)}" data-direction="1" ${i===arr.length-1?'disabled':''} title="Aşağı taşı">↓</button><button class="small-btn danger" data-delete-category="${encodeURIComponent(c)}">Sil</button></div></div>`).join("")||'<p>Henüz kategori yok. İlk ürününü eklediğinde kategori burada görünür.</p>'}</div></div>`}else if(adminPage==='campaigns'){html=`<div class="panel admin-form"><h3>Kampanya oluştur</h3><form id="campaignForm"><div class="field"><label>Kampanya başlığı</label><input name="title" required></div><div class="field"><label>İlişkili ürün (müşteri kampanyaya tıklayınca bu ürünü inceleyebilir)</label><select name="productId"><option value="">Ürün seç (isteğe bağlı)</option>${products.filter(p=>p.active).map(p=>`<option value="${p.id}">${escapeHtml(p.name)} — ${money(p.price)}</option>`).join('')}</select></div><div class="field"><label>Mesaj</label><textarea name="message" required rows="3"></textarea></div><div class="field"><label>Kampanya görseli (bilgisayardan seç)</label><input name="imageFile" type="file" accept="image/*" required><small>JPG, PNG veya WebP. Görsel tarayıcıda küçültülerek saklanır.</small><div id="campaignImagePreview"></div></div><button class="primary">KAMPANYAYI KAYDET</button></form></div><div class="panel"><h3>Kayıtlı kampanyalar</h3>${campaigns.map((c,i)=>`<div class="cart-row"><div><b>${escapeHtml(c.title)}</b><p>${escapeHtml(c.message)}</p></div><button class="small-btn" data-delcamp="${i}">Sil</button></div>`).join('')}</div>`}else if(adminPage==='notifications'){html=`<div class="panel admin-form"><h3>Bildirim taslağı hazırla</h3><form id="notificationForm"><div class="field"><label>Başlık</label><input name="title" required placeholder="Günün kampanyası"></div><div class="field"><label>Mesaj</label><textarea name="message" rows="4" required placeholder="Kampanya detaylarını yaz..."></textarea></div><div class="field"><label>Hedef kitle</label><select name="target"><option>Tüm bildirim aboneleri</option><option>Yeni müşteriler</option><option>Kayıtlı müşteriler</option></select></div><div class="field"><label>Bildirim görseli (bilgisayardan seç)</label><input name="imageFile" type="file" accept="image/*"><small>Görsel otomatik küçültülür. Bildirim önizlemesinde kullanılır.</small><div id="notificationImagePreview"></div></div><button class="primary">BİLDİRİM TASLAĞINI OLUŞTUR</button></form><div class="notice">Önemli: Bu demo bildirim taslağı oluşturur, telefonlara gönderim yapmaz. Gerçek toplu bildirim için HTTPS site, bildirim abonelikleri, servis çalışanı ve güvenli sunucu/FCM bağlantısı gerekir. İzin vermeyen kullanıcılara bildirim gönderilemez.</div><div id="notificationPreview"></div></div>`}else if(adminPage==='customers'){html=`<div class="panel"><div class="customer-head"><div><h3>Müşteriler</h3><p class="muted">Kayıtlı müşteri bilgilerini ara ve süz.</p></div><div class="customer-total" id="customerTotal"></div></div><div class="customer-filters"><input id="customerSearch" type="search" placeholder="⌕ Müşteri adı veya telefon ara..."><select id="customerFilter"><option value="all">Tüm müşteriler</option><option value="withPhone">Telefonu olanlar</option><option value="withoutPhone">Telefonu olmayanlar</option></select><button class="small-btn" id="customerClear">Temizle</button></div><div id="customerResults"></div><div class="notice">Telefon bilgileri pazarlama mesajı izni yerine geçmez. Ticari ileti izinlerini ayrıca kaydedip yönetmelisin.</div></div>`}else if(adminPage==='reports'){html=`<section class="report-range-card"><div class="report-range-top"><div class="report-range-title">🗓️ Tarih Aralığı Raporu</div><div class="report-range-fields"><label>Başlangıç</label><input id="reportStart" type="date"><label>Bitiş</label><input id="reportEnd" type="date"><button class="primary" id="applyReport">Filtrele</button></div></div><div class="report-quick"><button data-report-days="0">Bugün</button><button data-report-days="7">Son 7 gün</button><button data-report-days="30">Son 30 gün</button><button data-report-days="90">Son 90 gün</button></div><div class="report-kpis" id="reportTopKpis"></div><div class="report-subline" id="reportRangeNote"></div></section><div class="report-day-row"><label>Tarih: <input id="reportDay" type="date"></label><div class="report-tools"><button class="small-btn" id="backupReport">📥 Tüm kayıtları yedekle</button><button class="small-btn" id="exportReport">CSV indir</button></div></div><div class="report-daily-grid" id="reportDayKpis"></div><div id="reportResults"></div>`}else{html=`<div class="panel"><h3>Uygulama ayarları</h3><p><b>Uygulama:</b> LEZZET CEPTE</p><p><b>Veri saklama:</b> Bu tarayıcının yerel depolaması</p><p><b>Gerçek yayın için:</b> Yönetici kimlik doğrulaması, veritabanı, yedekleme, HTTPS ve bildirim sunucusu kurulmalıdır.</p><button class="small-btn" id="exportData">Demo verilerini JSON indir</button> <button class="small-btn" id="clearData">Demo verilerini sıfırla</button></div>`}$('#page').innerHTML=html;if(adminPage==='customers'){renderCustomerResults();$('#customerSearch').addEventListener('input',renderCustomerResults);$('#customerFilter').addEventListener('change',renderCustomerResults);$('#customerClear').onclick=()=>{$('#customerSearch').value='';$('#customerFilter').value='all';renderCustomerResults()}}if(adminPage==='notifications'){const nf=$('#notificationForm');const file=nf.elements.imageFile;file?.addEventListener('change',async()=>{const host=$('#notificationImagePreview');if(!file.files[0]){host.innerHTML='';delete nf.dataset.image;return}try{const image=await readImageCompressed(file.files[0]);host.innerHTML=`<img src="${image}" alt="Bildirim görseli önizleme">`;nf.dataset.image=image}catch(err){host.textContent=err.message}});nf.onsubmit=e=>{e.preventDefault();const f=new FormData(nf),image=nf.dataset.image||'';$('#notificationPreview').innerHTML=`<div class="panel"><h3>${escapeHtml(f.get('title'))}</h3>${image?`<img src="${image}" alt="Bildirim görseli" style="max-width:260px;max-height:180px;object-fit:cover;border-radius:12px">`:''}<p>${escapeHtml(f.get('message'))}</p><p>Hedef: ${escapeHtml(f.get('target'))}</p><p class="notice">Bu bir önizlemedir. Gerçek telefon bildirimi için sunucu ve bildirim abonelikleri gerekir.</p></div>`;toast('Bildirim önizlemesi oluşturuldu')}}if(adminPage==='orders')wireOrdersPage();if(adminPage==='reports'){const today=new Date().toISOString().slice(0,10);$('#reportEnd').value=today;$('#reportStart').value=today.slice(0,8)+'01';$('#reportDay').value=today;$('#applyReport').onclick=renderReportResults;$('#reportDay').onchange=renderReportResults;$('#reportStart').onchange=renderReportResults;$('#reportEnd').onchange=renderReportResults;document.querySelectorAll('[data-report-days]').forEach(b=>b.onclick=()=>{const n=+b.dataset.reportDays;const e=new Date();$('#reportEnd').value=e.toISOString().slice(0,10);const s=new Date(e);if(n===0)s.setHours(0,0,0,0);else s.setDate(s.getDate()-n+1);$('#reportStart').value=s.toISOString().slice(0,10);renderReportResults()});renderReportResults()}wireAdmin()}
+function ordersTable(list){return `<div class="table-wrap"><table><thead><tr><th>Sipariş</th><th>Müşteri</th><th>Tür</th><th>Ödeme</th><th>Tutar</th><th>Durum</th><th>Durum değiştir</th></tr></thead><tbody>${list.map(o=>`<tr><td>#${String(o.id).slice(-6)}</td><td>${escapeHtml(o.name)}<br><small>${escapeHtml(o.phone)}</small></td><td>${escapeHtml(o.type)}</td><td>${escapeHtml(o.paymentMethod||o.payment_method||"Belirtilmedi")}</td><td>${money(o.total)}</td><td><span class="status">${escapeHtml(o.status)}</span></td><td><select data-status="${o.id}">${['Yeni','Hazırlanıyor','Yola çıktı','Teslim edildi','İptal'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select></td></tr>`).join('')}</tbody></table></div>`}function readImageCompressed(file){
+ return new Promise((resolve,reject)=>{
+  if(!file||!file.type.startsWith('image/')){reject(new Error('Lütfen bir görsel dosyası seçin.'));return}
+  const reader=new FileReader();
+  reader.onerror=()=>reject(new Error('Görsel okunamadı.'));
+  reader.onload=()=>{
+   const im=new Image();
+   im.onerror=()=>reject(new Error('Görsel açılamadı.'));
+   im.onload=()=>{
+    const maxWidth=1000,maxHeight=800;
+    const scale=Math.min(1,maxWidth/im.width,maxHeight/im.height);
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(im.width*scale));
+    canvas.height=Math.max(1,Math.round(im.height*scale));
+    const ctx=canvas.getContext('2d');
+    if(!ctx){reject(new Error('Görsel işlenemedi.'));return}
+    ctx.drawImage(im,0,0,canvas.width,canvas.height);
+    let quality=0.78,output=canvas.toDataURL('image/jpeg',quality);
+    while(output.length>700000&&quality>0.42){quality-=0.08;output=canvas.toDataURL('image/jpeg',quality)}
+    resolve(output);
+   };
+   im.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+ });
+}
+function reportDate(o){const raw=o.date||o.created_at||o.createdAt;const d=raw?new Date(raw):null;return d&&!Number.isNaN(d.getTime())?d:null}
+function renderReportResults(){
+ const start=$('#reportStart')?.value,end=$('#reportEnd')?.value,day=$('#reportDay')?.value;
+ const filtered=orders.filter(o=>{const d=reportDate(o);if(start&&(!d||d<new Date(start+'T00:00:00')))return false;if(end&&(!d||d>new Date(end+'T23:59:59')))return false;return true});
+ const nonCancelled=filtered.filter(o=>o.status!=='İptal');
+ const total=nonCancelled.reduce((s,o)=>s+(+o.total||0),0);
+ const payment=o=>String(o.paymentMethod||o.payment_method||o.payment||'').toLocaleLowerCase('tr');
+ const paySum=(keys)=>nonCancelled.filter(o=>keys.some(k=>payment(o).includes(k))).reduce((s,o)=>s+(+o.total||0),0);
+ const paymentCount=nonCancelled.filter(o=>payment(o)).length;
+ $('#reportTopKpis').innerHTML=[['Toplam Ciro',money(total),'primary-kpi'],['Nakit',money(paySum(['nakit'])),''],['Kredi Kartı',money(paySum(['kart','kredi'])),''],['Havale',money(paySum(['havale','eft'])),''],['Sanal POS',money(paySum(['sanal pos','online'])),''],['Ödeme Adedi',paymentCount,'']].map(([a,b,c])=>`<div class="report-kpi ${c}"><span>${a}</span><strong>${b}</strong></div>`).join('');
+ $('#reportRangeNote').textContent=(start||'Başlangıç yok')+' — '+(end||'Bitiş yok')+' arası · '+filtered.length+' sipariş ('+filtered.filter(o=>o.status==='İptal').length+' iptal)';
+ const selectedDay=day||new Date().toISOString().slice(0,10);
+ const daily=orders.filter(o=>{const d=reportDate(o);return d&&d.toISOString().slice(0,10)===selectedDay});
+ const dailyValid=daily.filter(o=>o.status!=='İptal');
+ const dailyTotal=dailyValid.reduce((s,o)=>s+(+o.total||0),0);
+ const dayPay=(keys)=>dailyValid.filter(o=>keys.some(k=>payment(o).includes(k))).reduce((s,o)=>s+(+o.total||0),0);
+ const closedTables=new Set(daily.filter(o=>['Teslim edildi','Kapalı'].includes(o.status)).map(o=>o.table||o.tableNo||o.masa||o.id));
+ $('#reportDayKpis').innerHTML=[['Toplam Ciro',money(dailyTotal),'💰'],['Nakit',money(dayPay(['nakit'])),'💵'],['Kart',money(dayPay(['kart','kredi','pos'])),'💳'],['Havale',money(dayPay(['havale','eft'])),'🏦'],['Kapanan Masa',closedTables.size,'▤']].map(([a,b,icon])=>`<div class="report-daily-card"><strong>${b}</strong><span>${icon} ${a}</span></div>`).join('');
+ const statusCounts={};filtered.forEach(o=>{const s=o.status||'Yeni';statusCounts[s]=(statusCounts[s]||0)+1});
+ const counts={};nonCancelled.forEach(o=>(o.items||[]).forEach(i=>{const name=i.name||i.title||'Ürün';counts[name]=(counts[name]||0)+(+i.qty||1)}));
+ const ranked=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+ const dailyMap={};filtered.forEach(o=>{const d=reportDate(o);if(!d)return;const key=d.toISOString().slice(0,10);if(!dailyMap[key])dailyMap[key]={total:0,cash:0,card:0,closed:new Set(),count:0};dailyMap[key].count++;if(o.status!=='İptal'){dailyMap[key].total+=(+o.total||0);if(payment(o).includes('nakit'))dailyMap[key].cash+=(+o.total||0);if(/kart|kredi|pos/.test(payment(o)))dailyMap[key].card+=(+o.total||0)}if(['Teslim edildi','Kapalı'].includes(o.status))dailyMap[key].closed.add(o.table||o.tableNo||o.masa||o.id)});
+ const days=Object.entries(dailyMap).sort((a,b)=>b[0].localeCompare(a[0]));
+ const dailyRows=days.map(([d,x])=>`<tr><td>${d}</td><td><b style="color:#287447">${money(x.total)}</b></td><td>${money(x.cash)}</td><td>${money(x.card)}</td><td>${x.closed.size}</td><td>${x.count}</td></tr>`).join('');
+ $('#reportResults').innerHTML=`<div class="report-table-card"><h3 class="report-table-title">🗓️ Günlük Özet</h3><div class="table-wrap"><table><thead><tr><th>TARİH</th><th>TOPLAM CİRO</th><th>NAKİT</th><th>KART</th><th>KAPANAN MASA</th><th>SİPARİŞ</th></tr></thead><tbody>${dailyRows||'<tr><td colspan="6" style="text-align:center;padding:28px">Seçilen tarih aralığında kayıt bulunamadı.</td></tr>'}</tbody></table></div></div><div class="report-table-card"><h3 class="report-table-title">📊 Duruma Göre Siparişler</h3><div class="table-wrap"><table><thead><tr><th>DURUM</th><th>SİPARİŞ ADEDİ</th></tr></thead><tbody>${Object.entries(statusCounts).map(([s,n])=>`<tr><td>${escapeHtml(s)}</td><td>${n}</td></tr>`).join('')||'<tr><td colspan="2">Kayıt yok</td></tr>'}</tbody></table></div></div><div class="report-table-card"><h3 class="report-table-title">🏆 En Çok Satılan Ürünler</h3><div class="table-wrap"><table><thead><tr><th>ÜRÜN</th><th>SATILAN ADET</th></tr></thead><tbody>${ranked.map(([n,c])=>`<tr><td>${escapeHtml(n)}</td><td>${c}</td></tr>`).join('')||'<tr><td colspan="2">Ürün satışı kaydı yok</td></tr>'}</tbody></table></div></div><div class="report-table-card"><h3 class="report-table-title">🧾 Filtrelenmiş Sipariş Kayıtları</h3>${filtered.length?ordersTable(filtered):'<div style="padding:20px">Filtreye uygun sipariş yok.</div>'}</div>`;
+ $('#exportReport')?.addEventListener('click',()=>{const rows=[['Sipariş','Tarih','Müşteri','Telefon','Ödeme','Durum','Tutar'],...filtered.map(o=>[o.id,reportDate(o)?.toLocaleString('tr-TR')||'',o.name||o.customer_name||'',o.phone||'',o.paymentMethod||o.payment_method||o.payment||'',o.status||'',o.total||0])];const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='lezzet-cepte-rapor.csv';a.click();URL.revokeObjectURL(a.href)});
+ $('#backupReport')?.addEventListener('click',()=>{const payload={exportedAt:new Date().toISOString(),orders,products,categories,campaigns,customers};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));a.download='lezzet-cepte-tum-kayitlar-yedek.json';a.click();URL.revokeObjectURL(a.href)});
+}
+function wireAdmin(){const categoryForm=$('#categoryCreateForm');if(categoryForm)categoryForm.onsubmit=e=>{e.preventDefault();const name=new FormData(categoryForm).get('categoryName').trim();if(!name){toast('Kategori adı yazın');return}const existing=getCategoryOrder();if(existing.some(c=>c.toLocaleLowerCase('tr')===name.toLocaleLowerCase('tr'))){toast('Bu kategori zaten var');return}saveCategoryOrder([...existing,name]);toast('Kategori oluşturuldu');renderAdmin();renderCats();renderProducts()};const pf=$('#productForm');if(pf){const fi=pf.elements.imageFile;fi?.addEventListener('change',async()=>{const preview=$('#productImagePreview');if(!fi.files[0]){preview.innerHTML='';return}try{const data=await readImageCompressed(fi.files[0]);preview.innerHTML=`<img src="${data}" alt="Ürün görseli önizleme" style="max-width:180px;max-height:140px;object-fit:cover;border-radius:12px">`}catch(err){preview.textContent=err.message}});pf.onsubmit=async e=>{e.preventDefault();const f=new FormData(pf);try{const image=await readImageCompressed(fi.files[0]);products.push({id:Date.now(),createdAt:Date.now(),name:f.get('name').trim(),category:f.get('category').trim(),price:+f.get('price'),description:f.get('description').trim(),image,active:true});save();renderAdmin();renderCats();renderProducts();toast('Ürün eklendi')}catch(err){toast(err.message||'Görsel yüklenemedi')}}}$('#page').querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>{const p=products.find(p=>p.id===+b.dataset.toggle);p.active=!p.active;save();renderAdmin();renderProducts();renderCats()});$('#page').querySelectorAll('[data-delprod]').forEach(b=>b.onclick=()=>{if(confirm('Bu ürünü silmek istiyor musun?')){products=products.filter(p=>p.id!==+b.dataset.delprod);save();renderAdmin();renderProducts();renderCats()}});$('#page').querySelectorAll('[data-rename-category]').forEach(b=>b.onclick=()=>{const oldName=decodeURIComponent(b.dataset.renameCategory),input=$('#'+b.dataset.input),newName=(input.value||'').trim();if(!newName){toast('Kategori adı boş olamaz');return}if(newName!==oldName&&products.some(p=>p.category.toLocaleLowerCase('tr')===newName.toLocaleLowerCase('tr'))){toast('Bu isimde bir kategori zaten var');return}if(newName===oldName){toast('Kategori adı değişmedi');return}products.forEach(p=>{if(p.category===oldName)p.category=newName});if(currentCat===oldName)currentCat=newName;save();renderAdmin();renderCats();renderProducts();toast('Kategori adı güncellendi')});$('#page').querySelectorAll('[data-move-category]').forEach(b=>b.onclick=()=>{const name=decodeURIComponent(b.dataset.moveCategory),dir=Number(b.dataset.direction),order=getCategoryOrder(),idx=order.indexOf(name),next=idx+dir;if(idx<0||next<0||next>=order.length)return;[order[idx],order[next]]=[order[next],order[idx]];saveCategoryOrder(order);renderAdmin();renderCats();renderProducts();toast('Kategori sırası güncellendi')});$('#page').querySelectorAll('[data-delete-category]').forEach(b=>b.onclick=()=>{const name=decodeURIComponent(b.dataset.deleteCategory),others=getCategoryOrder().filter(c=>c!==name);if(!confirm('“'+name+'” kategorisi silinsin mi? Bu kategorideki ürünleri başka kategoriye taşımak için Tamam, ürünleri silmek için İptal seçeneğini kullanacağız.'))return;let target='';if(others.length){target=prompt('Bu kategorideki ürünleri hangi kategoriye taşıyalım? Mevcut kategori adını yazın. Boş bırakıp Tamam derseniz ürünler silinir.',others[0]);if(target===null)return;if(target.trim()){target=target.trim();if(!others.includes(target)){toast('Geçerli bir kategori adı yazın');return}products.forEach(p=>{if(p.category===name)p.category=target})}else{products=products.filter(p=>p.category!==name)}}else{products=products.filter(p=>p.category!==name)}saveCategoryOrder(others);if(currentCat===name)currentCat='Tümü';save();renderAdmin();renderCats();renderProducts();toast('Kategori silindi')});$('#page').querySelectorAll('[data-status]').forEach(s=>s.onchange=()=>{const o=orders.find(o=>o.id===+s.dataset.status);if(o)o.status=s.value;save();renderAdmin()});const cf=$('#campaignForm');if(cf){const fi=cf.elements.imageFile;fi?.addEventListener('change',async()=>{const preview=$('#campaignImagePreview');if(!fi.files[0]){preview.innerHTML='';return}try{const data=await readImageCompressed(fi.files[0]);preview.innerHTML=`<img src="${data}" alt="Kampanya görseli önizleme" style="max-width:220px;max-height:150px;object-fit:cover;border-radius:12px">`}catch(err){preview.textContent=err.message}});cf.onsubmit=async e=>{e.preventDefault();const f=new FormData(cf);try{const image=await readImageCompressed(fi.files[0]);campaigns.unshift({title:f.get('title').trim(),message:f.get('message').trim(),image,productId:f.get('productId')||'',active:true});save();renderAdmin();renderCampaignSidebar();toast('Kampanya kaydedildi')}catch(err){toast(err.message||'Kampanya görseli yüklenemedi')}}}$('#page').querySelectorAll('[data-delcamp]').forEach(b=>b.onclick=()=>{campaigns.splice(+b.dataset.delcamp,1);save();renderAdmin();renderCampaignSidebar()});const nf=$('#notificationForm');if(nf)nf.onsubmit=e=>{e.preventDefault();const f=new FormData(nf);$('#notificationPreview').innerHTML=`<div class="panel"><span class="eyebrow">BİLDİRİM ÖNİZLEMESİ · GÖNDERİLMEDİ</span><h3>${escapeHtml(f.get('title'))}</h3><p>${escapeHtml(f.get('message'))}</p><small>Hedef: ${escapeHtml(f.get('target'))}</small></div>`;toast('Önizleme oluşturuldu; bildirim gönderilmedi')};const ex=$('#exportData');if(ex)ex.onclick=()=>{const blob=new Blob([JSON.stringify({products,orders,campaigns,customers},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lezzet-cepte-yedek.json';a.click();URL.revokeObjectURL(a.href)};const cl=$('#clearData');if(cl)cl.onclick=()=>{if(confirm('Bu tarayıcıdaki demo verilerini sıfırlamak istediğine emin misin?')){products=defaults;orders=[];campaigns=[];customers=[];cart=[];save();renderAdmin();renderProducts();renderCats();renderCartCount()}}}
+$('#search').addEventListener('input',renderProducts);$('#cartBtn').onclick=cartModal;$('#closeModal').onclick=closeModal;$('#modalBack').onclick=e=>{if(e.target===$('#modalBack'))closeModal()};$('#adminBtn').onclick=adminLogin;$('#footerAdmin').onclick=adminLogin;$('#backSite').onclick=()=>{$('#admin').classList.add('hidden');$('#customer').classList.remove('hidden');$('#siteHeader').classList.remove('hidden');document.querySelector('.footer').classList.remove('hidden')};$('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{adminPage=b.dataset.page;renderAdmin()});$('#campaignJump').onclick=()=>$('#campaigns').scrollIntoView({behavior:'smooth'});$('#promoNotify').onclick=enableNotifications;$('#notifyBtn').onclick=enableNotifications;$('#loyaltyBtn').onclick=enableNotifications;async function enableNotifications(){if(!('Notification'in window)){toast('Bu tarayıcı bildirim API’sini desteklemiyor.');return}if(!window.isSecureContext){toast('Bildirim izni için site HTTPS üzerinden açılmalı.');return}try{const p=await Notification.requestPermission();toast(p==='granted'?'Bildirim izni verildi. Gerçek kampanya gönderimi için sunucu bağlantısı gerekir.': 'Bildirim izni verilmedi.')}catch{toast('Bildirim izni alınamadı.')}}$('#historyBtn').onclick=()=>$('#historyBack').classList.add('show');$('#historyClose').onclick=()=>$('#historyBack').classList.remove('show');$('#historyForm').onsubmit=async e=>{e.preventDefault();const phone=String(new FormData(e.currentTarget).get('phone')).replace(/\D/g,'');const local=orders.filter(o=>String(o.phone).replace(/\D/g,'')===phone);let cloud=[];try{const r=await fetch('/.netlify/functions/orders?phone='+encodeURIComponent(phone));if(r.ok){const d=await r.json();cloud=Array.isArray(d)?d:(d?[d]:[])}}catch{}const all=[...local,...cloud].filter((o,i,a)=>a.findIndex(x=>String(x.id)===String(o.id))===i).sort((a,b)=>new Date(b.date||b.created_at||0)-new Date(a.date||a.created_at||0));$('#historyResult').innerHTML=all.length?all.map(o=>`<div class="panel"><div style="display:flex;justify-content:space-between;gap:10px"><b>Sipariş #${escapeHtml(String(o.id).slice(-6))}</b><span class="status">${escapeHtml(o.status||'Yeni')}</span></div><p>${new Date(o.date||o.created_at||Date.now()).toLocaleString('tr-TR')}</p><p>Ödeme: ${escapeHtml(o.paymentMethod||o.payment_method||'Belirtilmedi')} · Toplam: ${money(Number(o.total)||0)}</p><p style="font-size:12px;color:#777">${(o.items||[]).map(i=>escapeHtml(i.name||'Ürün')+' × '+(i.qty||1)).join(', ')}</p></div>`).join(''):'<div class="notice">Bu telefon numarasıyla eşleşen sipariş bulunamadı. Başka cihazlardaki siparişleri görmek için veritabanı bağlantısı kurulmuş olmalıdır.</div>'};$('#trackBtn').onclick=()=>$('#trackBack').classList.add('show');$('#trackClose').onclick=()=>$('#trackBack').classList.remove('show');$('#trackForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{const r=await fetch('/.netlify/functions/orders?id='+encodeURIComponent(f.get('id'))+'&phone='+encodeURIComponent(f.get('phone')));if(!r.ok)throw new Error();const o=await r.json();$('#trackResult').innerHTML='<div class="panel"><h3>Sipariş #'+escapeHtml(String(o.id).slice(-6))+'</h3><p>Durum: <b>'+escapeHtml(o.status)+'</b></p><p>Toplam: '+money(o.total)+'</p></div>'}catch{$('#trackResult').innerHTML='<div class="notice">Sipariş bulunamadı veya sunucu henüz yapılandırılmadı.</div>'}};$('#year').textContent=new Date().getFullYear();renderCats();renderProducts();renderCartCount();renderCampaignSidebar();
+$('#customerNav').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();$('#customerNav').querySelectorAll('a').forEach(x=>x.classList.toggle('selected',x===a));if(a.dataset.sidePage==='home'){currentCat='Tümü';$('#search').value='';renderCats();renderProducts();$('#home').scrollIntoView({behavior:'smooth'});return}if(a.dataset.sidePage==='campaigns'){$('#campaigns').scrollIntoView({behavior:'smooth'});return}if(a.dataset.sideCat){currentCat=a.dataset.sideCat;$('#search').value='';renderCats();renderProducts();$('#menu').scrollIntoView({behavior:'smooth'});}});
+})();
+</script></body></html>

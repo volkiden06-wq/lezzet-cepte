@@ -402,25 +402,26 @@ async function supabaseRequest(path,options={}){const r=await fetch(`${SUPABASE_
 async function loginAdmin(email,password){const r=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.msg||data.message||data.error_description||'E-posta veya şifre hatalı.');supabaseAccessToken=data.access_token;const check=await supabaseRequest('/rest/v1/rpc/is_admin',{method:'POST',body:'{}'});if(check!==true){supabaseAccessToken='';throw new Error('Bu hesap yönetici yetkisine sahip değil. SQL yetkilendirme adımını tamamlayın.')}return data}
 let orderSoundEnabled=false;
 let orderSoundReady=false;
-let knownOrderNumbers=new Set();
+let orderAudioContext=null;
 let orderPollStarted=false;
 function playNewOrderSound(){
  if(!orderSoundEnabled||!orderSoundReady)return;
  try{
   const Ctx=window.AudioContext||window.webkitAudioContext;
   if(!Ctx)return;
-  const ctx=new Ctx();
+  if(!orderAudioContext)orderAudioContext=new Ctx();
+  const ctx=orderAudioContext;
+  if(ctx.state==='suspended')ctx.resume();
   const now=ctx.currentTime;
-  [880,1175,1480].forEach((freq,i)=>{
+  [880,1175,1480,1175].forEach((freq,i)=>{
    const osc=ctx.createOscillator(),gain=ctx.createGain();
-   osc.type='sine';osc.frequency.value=freq;
-   gain.gain.setValueAtTime(0.0001,now+i*.19);
-   gain.gain.exponentialRampToValueAtTime(.22,now+i*.19+.025);
-   gain.gain.exponentialRampToValueAtTime(.0001,now+i*.19+.16);
+   osc.type='sine';osc.frequency.setValueAtTime(freq,now+i*.24);
+   gain.gain.setValueAtTime(.0001,now+i*.24);
+   gain.gain.exponentialRampToValueAtTime(.28,now+i*.24+.025);
+   gain.gain.exponentialRampToValueAtTime(.0001,now+i*.24+.19);
    osc.connect(gain);gain.connect(ctx.destination);
-   osc.start(now+i*.19);osc.stop(now+i*.19+.18);
+   osc.start(now+i*.24);osc.stop(now+i*.24+.2);
   });
-  setTimeout(()=>ctx.close(),1000);
  }catch(e){console.warn('Sipariş sesi çalınamadı',e)}
 }
 function startOrderPolling(){
@@ -428,8 +429,11 @@ function startOrderPolling(){
  orderPollStarted=true;
  setInterval(async()=>{
   if(!supabaseAccessToken||$('#admin')?.classList.contains('hidden'))return;
-  try{await loadCloudOrders();if(adminPage==='orders'||adminPage==='overview')renderAdmin()}catch(e){console.warn('Sipariş kontrolü başarısız',e)}
- },10000);
+  try{
+   await loadCloudOrders();
+   if(adminPage==='orders'||adminPage==='overview')renderAdmin();
+  }catch(e){console.warn('Sipariş kontrolü başarısız',e)}
+ },8000);
 }
 async function loadCloudOrders(){const previousNumbers=new Set((orders||[]).map(o=>String(o.orderNumber||o.id||'')));const rows=await supabaseRequest('/rest/v1/orders?select=*&order=created_at.desc');orders=(Array.isArray(rows)?rows:[]).map(r=>({id:r.order_number,orderNumber:r.order_number,name:r.customer_name,phone:r.customer_phone,type:r.customer_address||'Web',paymentMethod:r.payment_method,note:r.notes,items:Array.isArray(r.items)?r.items:[],total:Number(r.total)||0,status:r.status||'Yeni',date:r.created_at||r.createdAt}));save();customers=[...new Map([...customers,...orders.map(o=>({name:o.name,phone:o.phone}))].map(c=>[String(c.phone||c.name),c])).values()];save();const incoming=orders.filter(o=>!previousNumbers.has(String(o.orderNumber||o.id||'')));if(incoming.length){playNewOrderSound();if(orderSoundEnabled&&orderSoundReady)toast('🔔 Yeni sipariş alındı: '+incoming.length+' adet');}}
 async function updateCloudOrderStatus(orderNumber,status){await supabaseRequest(`/rest/v1/orders?order_number=eq.${encodeURIComponent(orderNumber)}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({status})});}
@@ -568,7 +572,7 @@ function wireOrdersPage(){
  document.querySelectorAll('[data-order-filter]').forEach(b=>b.onclick=()=>{orderManagementFilter=b.dataset.orderFilter;document.querySelectorAll('[data-order-filter]').forEach(x=>x.classList.toggle('active',x===b));update()});
  ['orderSearch','orderTableNo','orderDateFilter'].forEach(id=>$('#'+id).addEventListener(id==='orderDateFilter'?'change':'input',update));
  $('#refreshOrders').onclick=async()=>{try{await loadCloudOrders();renderAdmin();toast('Siparişler güncellendi')}catch(err){toast('Siparişler alınamadı: '+err.message)}};
- $('#toggleOrderSound').onclick=()=>{orderSoundEnabled=!orderSoundEnabled;orderSoundReady=true;const b=$('#toggleOrderSound');b.textContent=orderSoundEnabled?'🔊 Ses Açık':'🔇 Ses Kapalı';if(orderSoundEnabled){playNewOrderSound();toast('Yeni sipariş ses bildirimi açıldı. Siparişler 10 saniyede bir kontrol edilir.')}else toast('Sipariş sesi kapatıldı')};
+ $('#toggleOrderSound').onclick=async()=>{orderSoundEnabled=!orderSoundEnabled;orderSoundReady=true;const b=$('#toggleOrderSound');b.textContent=orderSoundEnabled?'🔊 Ses Açık':'🔇 Ses Kapalı';if(orderSoundEnabled){try{const Ctx=window.AudioContext||window.webkitAudioContext;if(Ctx){if(!orderAudioContext)orderAudioContext=new Ctx();await orderAudioContext.resume();}}catch(e){console.warn(e)}playNewOrderSound();toast('🔔 Ses etkin. Yeni siparişler 8 saniyede bir kontrol edilecek. Sekmeyi açık tutun.')}else toast('Sipariş sesi kapatıldı')};
  update();
 }
 function renderCustomerResults(){

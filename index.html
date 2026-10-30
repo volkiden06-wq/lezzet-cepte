@@ -400,7 +400,38 @@ let supabaseAccessToken='';
 function supabaseHeaders(token=supabaseAccessToken){return {'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':`Bearer ${token||SUPABASE_PUBLISHABLE_KEY}`,'Content-Type':'application/json'}}
 async function supabaseRequest(path,options={}){const r=await fetch(`${SUPABASE_URL}${path}`,{...options,headers:{...supabaseHeaders(),...(options.headers||{})}});if(!r.ok){let detail='';try{detail=await r.text()}catch{}throw new Error(`Supabase ${r.status}: ${detail}`)}return r.status===204?null:r.json().catch(()=>null)}
 async function loginAdmin(email,password){const r=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.msg||data.message||data.error_description||'E-posta veya şifre hatalı.');supabaseAccessToken=data.access_token;const check=await supabaseRequest('/rest/v1/rpc/is_admin',{method:'POST',body:'{}'});if(check!==true){supabaseAccessToken='';throw new Error('Bu hesap yönetici yetkisine sahip değil. SQL yetkilendirme adımını tamamlayın.')}return data}
-async function loadCloudOrders(){const rows=await supabaseRequest('/rest/v1/orders?select=*&order=created_at.desc');orders=(Array.isArray(rows)?rows:[]).map(r=>({id:r.order_number,orderNumber:r.order_number,name:r.customer_name,phone:r.customer_phone,type:r.customer_address||'Web',paymentMethod:r.payment_method,note:r.notes,items:Array.isArray(r.items)?r.items:[],total:Number(r.total)||0,status:r.status||'Yeni',date:r.created_at||r.createdAt}));save();customers=[...new Map([...customers,...orders.map(o=>({name:o.name,phone:o.phone}))].map(c=>[String(c.phone||c.name),c])).values()];save();}
+let orderSoundEnabled=false;
+let orderSoundReady=false;
+let knownOrderNumbers=new Set();
+let orderPollStarted=false;
+function playNewOrderSound(){
+ if(!orderSoundEnabled||!orderSoundReady)return;
+ try{
+  const Ctx=window.AudioContext||window.webkitAudioContext;
+  if(!Ctx)return;
+  const ctx=new Ctx();
+  const now=ctx.currentTime;
+  [880,1175,1480].forEach((freq,i)=>{
+   const osc=ctx.createOscillator(),gain=ctx.createGain();
+   osc.type='sine';osc.frequency.value=freq;
+   gain.gain.setValueAtTime(0.0001,now+i*.19);
+   gain.gain.exponentialRampToValueAtTime(.22,now+i*.19+.025);
+   gain.gain.exponentialRampToValueAtTime(.0001,now+i*.19+.16);
+   osc.connect(gain);gain.connect(ctx.destination);
+   osc.start(now+i*.19);osc.stop(now+i*.19+.18);
+  });
+  setTimeout(()=>ctx.close(),1000);
+ }catch(e){console.warn('Sipariş sesi çalınamadı',e)}
+}
+function startOrderPolling(){
+ if(orderPollStarted)return;
+ orderPollStarted=true;
+ setInterval(async()=>{
+  if(!supabaseAccessToken||$('#admin')?.classList.contains('hidden'))return;
+  try{await loadCloudOrders();if(adminPage==='orders'||adminPage==='overview')renderAdmin()}catch(e){console.warn('Sipariş kontrolü başarısız',e)}
+ },10000);
+}
+async function loadCloudOrders(){const previousNumbers=new Set((orders||[]).map(o=>String(o.orderNumber||o.id||'')));const rows=await supabaseRequest('/rest/v1/orders?select=*&order=created_at.desc');orders=(Array.isArray(rows)?rows:[]).map(r=>({id:r.order_number,orderNumber:r.order_number,name:r.customer_name,phone:r.customer_phone,type:r.customer_address||'Web',paymentMethod:r.payment_method,note:r.notes,items:Array.isArray(r.items)?r.items:[],total:Number(r.total)||0,status:r.status||'Yeni',date:r.created_at||r.createdAt}));save();customers=[...new Map([...customers,...orders.map(o=>({name:o.name,phone:o.phone}))].map(c=>[String(c.phone||c.name),c])).values()];save();const incoming=orders.filter(o=>!previousNumbers.has(String(o.orderNumber||o.id||'')));if(incoming.length){playNewOrderSound();if(orderSoundEnabled&&orderSoundReady)toast('🔔 Yeni sipariş alındı: '+incoming.length+' adet');}}
 async function updateCloudOrderStatus(orderNumber,status){await supabaseRequest(`/rest/v1/orders?order_number=eq.${encodeURIComponent(orderNumber)}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({status})});}
 
 async function submitOrderToSupabase(order){
@@ -498,7 +529,7 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
     if(submitButton){submitButton.disabled=false;submitButton.textContent=`SİPARİŞ OLUŞTUR · ${money(total())}`}
   }
 }}function changeQty(id,n){const x=cart.find(x=>x.id===id);if(x)x.qty+=n;cart=cart.filter(x=>x.qty>0);save();renderCartCount();cartModal()}
-function adminLogin(){openModal('Yönetici girişi',`<p>Yönetim paneline Supabase hesabınızla giriş yapın.</p><form id="loginForm"><div class="field"><label>E-posta</label><input name="email" type="email" value="volkiden@hotmail.com" required autocomplete="username"></div><div class="field"><label>Şifre</label><input name="password" type="password" required autocomplete="current-password" placeholder="Supabase şifreniz"></div><button class="primary" style="width:100%">GÜVENLİ GİRİŞ YAP</button></form><p style="font-size:12px;color:#777">Şifreniz bu siteye veya sohbet ekranına kaydedilmez.</p>`);$('#loginForm').onsubmit=async e=>{e.preventDefault();const form=e.currentTarget,btn=form.querySelector('button');const f=new FormData(form);btn.disabled=true;btn.textContent='GİRİŞ KONTROL EDİLİYOR…';try{await loginAdmin(String(f.get('email')).trim(),String(f.get('password')));await loadCloudOrders();closeModal();$('#customer').classList.add('hidden');$('#siteHeader').classList.add('hidden');document.querySelector('.footer').classList.add('hidden');$('#admin').classList.remove('hidden');adminPage='overview';renderAdmin();toast('Yönetici girişi başarılı')}catch(err){toast(err.message||'Giriş başarısız');btn.disabled=false;btn.textContent='GÜVENLİ GİRİŞ YAP'}}}
+function adminLogin(){openModal('Yönetici girişi',`<p>Yönetim paneline Supabase hesabınızla giriş yapın.</p><form id="loginForm"><div class="field"><label>E-posta</label><input name="email" type="email" value="volkiden@hotmail.com" required autocomplete="username"></div><div class="field"><label>Şifre</label><input name="password" type="password" required autocomplete="current-password" placeholder="Supabase şifreniz"></div><button class="primary" style="width:100%">GÜVENLİ GİRİŞ YAP</button></form><p style="font-size:12px;color:#777">Şifreniz bu siteye veya sohbet ekranına kaydedilmez.</p>`);$('#loginForm').onsubmit=async e=>{e.preventDefault();const form=e.currentTarget,btn=form.querySelector('button');const f=new FormData(form);btn.disabled=true;btn.textContent='GİRİŞ KONTROL EDİLİYOR…';try{await loginAdmin(String(f.get('email')).trim(),String(f.get('password')));await loadCloudOrders();knownOrderNumbers=new Set(orders.map(o=>String(o.orderNumber||o.id||'')));startOrderPolling();closeModal();$('#customer').classList.add('hidden');$('#siteHeader').classList.add('hidden');document.querySelector('.footer').classList.add('hidden');$('#admin').classList.remove('hidden');adminPage='overview';renderAdmin();toast('Yönetici girişi başarılı')}catch(err){toast(err.message||'Giriş başarısız');btn.disabled=false;btn.textContent='GÜVENLİ GİRİŞ YAP'}}}
 
 const titles={overview:'Genel Bakış',orders:'Siparişler',products:'Ürün & Menü',campaigns:'Kampanyalar',notifications:'Bildirim Gönder',customers:'Müşteriler',reports:'Raporlar',settings:'Ayarlar'};let orderManagementFilter='Aktifler';
 function orderWhen(o){const raw=o.date||o.created_at||o.createdAt;const d=raw?new Date(raw):null;return d&&!Number.isNaN(d.getTime())?d:null}
@@ -537,7 +568,7 @@ function wireOrdersPage(){
  document.querySelectorAll('[data-order-filter]').forEach(b=>b.onclick=()=>{orderManagementFilter=b.dataset.orderFilter;document.querySelectorAll('[data-order-filter]').forEach(x=>x.classList.toggle('active',x===b));update()});
  ['orderSearch','orderTableNo','orderDateFilter'].forEach(id=>$('#'+id).addEventListener(id==='orderDateFilter'?'change':'input',update));
  $('#refreshOrders').onclick=async()=>{try{await loadCloudOrders();renderAdmin();toast('Siparişler güncellendi')}catch(err){toast('Siparişler alınamadı: '+err.message)}};
- $('#toggleOrderSound').onclick=()=>{const b=$('#toggleOrderSound');const on=b.textContent.includes('Açık');b.textContent=on?'🔇 Ses Kapalı':'🔊 Ses Açık';toast('Ses düğmesi görünümü güncellendi; gerçek yeni sipariş ses bildirimi ayrıca bağlanmalıdır')};
+ $('#toggleOrderSound').onclick=()=>{orderSoundEnabled=!orderSoundEnabled;orderSoundReady=true;const b=$('#toggleOrderSound');b.textContent=orderSoundEnabled?'🔊 Ses Açık':'🔇 Ses Kapalı';if(orderSoundEnabled){playNewOrderSound();toast('Yeni sipariş ses bildirimi açıldı. Siparişler 10 saniyede bir kontrol edilir.')}else toast('Sipariş sesi kapatıldı')};
  update();
 }
 function renderCustomerResults(){

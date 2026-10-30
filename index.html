@@ -457,6 +457,9 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
   if(submitButton){submitButton.disabled=true;submitButton.textContent='SİPARİŞ GÖNDERİLİYOR…'}
   const orderNumber='LC-'+Date.now().toString(36).toUpperCase();
   const order={id:orderNumber,orderNumber,name:fd.get('name'),phone:fd.get('phone'),type:fd.get('type'),paymentMethod:fd.get('paymentMethod'),note:fd.get('note'),items:cart.map(x=>({...x,name:products.find(p=>p.id===x.id)?.name,price:products.find(p=>p.id===x.id)?.price})),total:total(),status:'Yeni',date:new Date().toISOString()};
+  // Sipariş gönderme tıklaması sırasında sekme açılır; böylece tarayıcı WhatsApp yönlendirmesini engellemez.
+  let whatsappTab=null;
+  try{whatsappTab=window.open('about:blank','_blank');}catch{}
   try{
     await submitOrderToSupabase(order);
     orders.unshift(order);
@@ -475,12 +478,14 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
       ...order.items.map(item => item.name + ' x' + item.qty + ' — ' + money(item.price * item.qty)),
       '',
       'TOPLAM: ' + money(order.total),
-      'Adres / Not: ' + (order.note || '-')
+      'Adres: ' + (order.note || '-')
     ];
-    const whatsappUrl = 'https://wa.me/905421511186?text=' + encodeURIComponent(whatsappLines.join('\n'));
-    openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p><p>Siparişiniz sisteme kaydedildi. İşletmeye WhatsApp üzerinden iletmek için aşağıdaki butona dokunun.</p><a class="primary" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;margin-top:16px">💬 WHATSAPP İLE İŞLETMEYE GÖNDER</a><p style="font-size:12px;color:#777;margin-top:10px">WhatsApp açıldığında mesajı göndermek için ayrıca Gönder tuşuna basmanız gerekir.</p></div>`);
+    const whatsappUrl = 'https://wa.me/905421511186?text=' + encodeURIComponent(whatsappLines.join('\\n'));
+    if(whatsappTab){try{whatsappTab.location.href=whatsappUrl;}catch{}}
+    openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p><p>Siparişiniz kaydedildi. WhatsApp işletme sohbeti açıldıysa <b>Gönder</b> tuşuna basmanız yeterlidir.</p><a class="primary" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;margin-top:16px">💬 WHATSAPP MESAJINI AÇ / TEKRAR AÇ</a><p style="font-size:12px;color:#777;margin-top:10px">Mesaj otomatik gönderilmez; son gönderim onayı sizdedir. WhatsApp açılmazsa yukarıdaki butonu kullanın.</p></div>`);
     if(!$('#admin').classList.contains('hidden'))renderAdmin();
   }catch(err){
+    if(whatsappTab){try{whatsappTab.close();}catch{}}
     console.error('Supabase order submission failed:',err);
     toast(err.message&&err.message.includes('401')?'Sipariş bağlantısı yetkilendirilmedi. Anahtar ayarını kontrol edin.':err.message&&err.message.includes('403')?'Sipariş tablosu izin vermedi. Supabase SQL kurulum adımı gerekiyor.':'Sipariş gönderilemedi. İnternet bağlantısını ve Supabase ayarlarını kontrol edin.');
     if(submitButton){submitButton.disabled=false;submitButton.textContent=`SİPARİŞ OLUŞTUR · ${money(total())}`}

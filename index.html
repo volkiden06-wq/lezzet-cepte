@@ -403,6 +403,7 @@ async function loginAdmin(email,password){const r=await fetch(`${SUPABASE_URL}/a
 let orderSoundEnabled=false;
 let orderSoundReady=false;
 let orderAudioContext=null;
+let knownOrderNumbers=new Set();
 let orderPollStarted=false;
 function playNewOrderSound(){
  if(!orderSoundEnabled||!orderSoundReady)return;

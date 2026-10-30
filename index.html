@@ -365,7 +365,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
 }
 
 </style></head><body>
-<header class="topbar" id="siteHeader"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK<span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
+<header class="topbar" id="siteHeader"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK<span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><a id="headerWhatsAppBtn" href="https://wa.me/905421511186?text=Merhaba%2C%20YEMEK%20TADINDA%20%C3%BCzerinden%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 15px;border-radius:12px;background:#16a34a;color:#fff;font-weight:900;white-space:nowrap;box-shadow:0 5px 15px #16a34a40">☏ WhatsApp</a><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
 <nav class="mobile-bottom-nav" aria-label="Mobil menü">
  <button type="button" id="mobileHome"><span>⌂</span><small>Ana Sayfa</small></button>
  <button type="button" id="mobileMenu"><span>☷</span><small>Menü</small></button>
@@ -609,5 +609,5 @@ $('#footerTrack').onclick=()=>$('#trackBack').classList.add('show');$('#closeMod
 $('#customerNav').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();$('#customerNav').querySelectorAll('a').forEach(x=>x.classList.toggle('selected',x===a));if(a.dataset.sidePage==='home'){currentCat='Tümü';$('#search').value='';renderCats();renderProducts();$('#home').scrollIntoView({behavior:'smooth'});return}if(a.dataset.sidePage==='campaigns'){$('#campaigns').scrollIntoView({behavior:'smooth'});return}if(a.dataset.sideCat){currentCat=a.dataset.sideCat;$('#search').value='';renderCats();renderProducts();$('#menu').scrollIntoView({behavior:'smooth'});}});
 })();
 </script>
-<a id="siteWhatsAppButton" href="https://wa.me/905421511186?text=Merhaba%2C%20YEMEK%20TADINDA%20%C3%BCzerinden%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" aria-label="WhatsApp ile iletişim" style="position:fixed;right:20px;bottom:22px;z-index:99999;display:flex;align-items:center;gap:9px;padding:13px 18px;border-radius:999px;background:#20c766;color:#fff;font:800 14px/1.2 Arial,sans-serif;text-decoration:none;box-shadow:0 8px 24px #0003"><span style="font-size:21px">☏</span><span>WhatsApp</span></a>
+
 </body></html>

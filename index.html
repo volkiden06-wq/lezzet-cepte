@@ -463,7 +463,22 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
     customers.push({name:order.name,phone:order.phone});
     cart=[];
     save();renderCartCount();closeModal();
-    openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p><p>Siparişiniz kaydedildi. Sipariş numaranızı saklayın.</p></div>`);
+    const whatsappLines = [
+      'YENİ WEB SİPARİŞİ',
+      'Sipariş No: #' + order.orderNumber,
+      'Müşteri: ' + order.name,
+      'Telefon: ' + order.phone,
+      'Sipariş türü: ' + order.type,
+      'Ödeme: ' + order.paymentMethod,
+      '',
+      'SİPARİŞ DETAYI:',
+      ...order.items.map(item => item.name + ' x' + item.qty + ' — ' + money(item.price * item.qty)),
+      '',
+      'TOPLAM: ' + money(order.total),
+      'Adres / Not: ' + (order.note || '-')
+    ];
+    const whatsappUrl = 'https://wa.me/905421511186?text=' + encodeURIComponent(whatsappLines.join('\n'));
+    openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p><p>Siparişiniz sisteme kaydedildi. İşletmeye WhatsApp üzerinden iletmek için aşağıdaki butona dokunun.</p><a class="primary" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;margin-top:16px">💬 WHATSAPP İLE İŞLETMEYE GÖNDER</a><p style="font-size:12px;color:#777;margin-top:10px">WhatsApp açıldığında mesajı göndermek için ayrıca Gönder tuşuna basmanız gerekir.</p></div>`);
     if(!$('#admin').classList.contains('hidden'))renderAdmin();
   }catch(err){
     console.error('Supabase order submission failed:',err);

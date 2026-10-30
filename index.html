@@ -467,18 +467,25 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
     cart=[];
     save();renderCartCount();closeModal();
     const whatsappLines = [
-      'YENİ WEB SİPARİŞİ',
-      'Sipariş No: #' + order.orderNumber,
-      'Müşteri: ' + order.name,
+      '🍽️ *YEMEK TADINDA | YENİ SİPARİŞ*',
+      '━━━━━━━━━━━━━━━━━━━━',
+      '🧾 *Sipariş No:* ' + order.orderNumber,
+      '🕒 *Tarih:* ' + new Date(order.date).toLocaleString('tr-TR'),
+      '',
+      '👤 *MÜŞTERİ BİLGİLERİ*',
+      'Ad Soyad: ' + order.name,
       'Telefon: ' + order.phone,
-      'Sipariş türü: ' + order.type,
-      'Ödeme: ' + order.paymentMethod,
+      'Teslimat: ' + order.type,
+      'Adres: ' + (order.note || '-'),
       '',
-      'SİPARİŞ DETAYI:',
-      ...order.items.map(item => item.name + ' x' + item.qty + ' — ' + money(item.price * item.qty)),
+      '🛒 *SİPARİŞ DETAYLARI*',
+      '━━━━━━━━━━━━━━━━━━━━',
+      ...order.items.map((item,index) => (index+1)+'. *'+item.name+'*' + '\\n   Adet: '+item.qty+' × '+money(item.price)+' = *'+money(item.price*item.qty)+'*'),
+      '━━━━━━━━━━━━━━━━━━━━',
+      '💳 *Ödeme:* ' + order.paymentMethod,
+      '💰 *GENEL TOPLAM: ' + money(order.total) + '*',
       '',
-      'TOPLAM: ' + money(order.total),
-      'Adres: ' + (order.note || '-')
+      '📌 *Lütfen siparişi onaylayıp hazırlığa başlayın.*'
     ];
     const whatsappUrl = 'https://wa.me/905421511186?text=' + encodeURIComponent(whatsappLines.join('\\n'));
     if(whatsappTab){try{whatsappTab.location.href=whatsappUrl;}catch{}}

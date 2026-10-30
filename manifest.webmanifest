@@ -1,0 +1,16 @@
+{
+  "id": "/",
+  "name": "YEMEK TADINDA",
+  "short_name": "YEMEK TADINDA",
+  "description": "Pide, lahmacun ve kebap sipariş uygulaması",
+  "lang": "tr-TR",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fffaf5",
+  "theme_color": "#df1824",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/app-icon.svg", "sizes": "192x192 512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

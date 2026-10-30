@@ -480,14 +480,14 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
       '',
       '🛒 *SİPARİŞ DETAYLARI*',
       '━━━━━━━━━━━━━━━━━━━━',
-      ...order.items.map((item,index) => (index+1)+'. *'+item.name+'*' + '\\n   Adet: '+item.qty+' × '+money(item.price)+' = *'+money(item.price*item.qty)+'*'),
+      ...order.items.map((item,index) => (index+1)+'. *'+item.name+'*' + '\n   Adet: '+item.qty+' × '+money(item.price)+' = *'+money(item.price*item.qty)+'*'),
       '━━━━━━━━━━━━━━━━━━━━',
       '💳 *Ödeme:* ' + order.paymentMethod,
       '💰 *GENEL TOPLAM: ' + money(order.total) + '*',
       '',
       '📌 *Lütfen siparişi onaylayıp hazırlığa başlayın.*'
     ];
-    const whatsappUrl = 'https://wa.me/905421511186?text=' + encodeURIComponent(whatsappLines.join('\\n'));
+    const whatsappUrl = 'https://wa.me/905421511186?text=' + encodeURIComponent(whatsappLines.join('\n'));
     if(whatsappTab){try{whatsappTab.location.href=whatsappUrl;}catch{}}
     openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p><p>Siparişiniz kaydedildi. WhatsApp işletme sohbeti açıldıysa <b>Gönder</b> tuşuna basmanız yeterlidir.</p><a class="primary" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;margin-top:16px">💬 WHATSAPP MESAJINI AÇ / TEKRAR AÇ</a><p style="font-size:12px;color:#777;margin-top:10px">Mesaj otomatik gönderilmez; son gönderim onayı sizdedir. WhatsApp açılmazsa yukarıdaki butonu kullanın.</p></div>`);
     if(!$('#admin').classList.contains('hidden'))renderAdmin();

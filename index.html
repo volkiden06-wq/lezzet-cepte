@@ -608,6 +608,7 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
 function adminLogin(){openModal('Yönetici girişi',`<p>Yönetim paneline Supabase hesabınızla giriş yapın.</p><form id="loginForm"><div class="field"><label>E-posta</label><input name="email" type="email" value="" required autocomplete="username" placeholder="Yönetici e-posta adresi"></div><div class="field"><label>Şifre</label><input name="password" type="password" required autocomplete="current-password" placeholder="Supabase şifreniz"></div><button class="primary" style="width:100%">GÜVENLİ GİRİŞ YAP</button></form><p style="font-size:12px;color:#777">Şifreniz bu siteye veya sohbet ekranına kaydedilmez.</p>`);$('#loginForm').onsubmit=async e=>{e.preventDefault();enableOrderSoundAfterLoginClick();const form=e.currentTarget,btn=form.querySelector('button');const f=new FormData(form);btn.disabled=true;btn.textContent='GİRİŞ KONTROL EDİLİYOR…';try{await loginAdmin(String(f.get('email')).trim(),String(f.get('password')));await loadCloudOrders();knownOrderNumbers=new Set(orders.map(o=>String(o.orderNumber||o.id||'')));startOrderPolling();closeModal();$('#customer').classList.add('hidden');$('#siteHeader').classList.add('hidden');document.querySelector('.footer').classList.add('hidden');$('#admin').classList.remove('hidden');adminPage='overview';renderAdmin();toast('Yönetici girişi başarılı')}catch(err){toast(err.message||'Giriş başarısız');btn.disabled=false;btn.textContent='GÜVENLİ GİRİŞ YAP'}}}
 
 const titles={overview:'Genel Bakış',orders:'Siparişler',products:'Ürün & Menü',campaigns:'Kampanyalar',notifications:'Bildirim Gönder',customers:'Müşteriler',reports:'Raporlar',settings:'Ayarlar'};let orderManagementFilter='Tümü';
+function timeAgo(d){const seconds=Math.max(0,Math.floor((Date.now()-d.getTime())/1000));if(seconds<60)return seconds+' sn önce';const minutes=Math.floor(seconds/60);if(minutes<60)return minutes+' dk önce';const hours=Math.floor(minutes/60);if(hours<24)return hours+' sa önce';const days=Math.floor(hours/24);return days+' gün önce'}
 function orderWhen(o){const raw=o.date||o.created_at||o.createdAt;const d=raw?new Date(raw):null;return d&&!Number.isNaN(d.getTime())?d:null}
 function orderStatus(o){const raw=String(o.status||'Yeni').trim();const key=raw.toLocaleLowerCase('tr');const known={'yeni':'Yeni','yeni sipariş':'Yeni','bekliyor':'Bekliyor','beklemede':'Bekliyor','hazırlanıyor':'Hazırlanıyor','hazirlaniyor':'Hazırlanıyor','yola çıktı':'Yola çıktı','yola cikti':'Yola çıktı','teslim edildi':'Teslim edildi','iptal':'İptal','kapalı':'Kapalı','kapali':'Kapalı'};return known[key]||raw||'Yeni'}
 function orderManagementTable(list){
@@ -616,35 +617,53 @@ function orderManagementTable(list){
 }
 function wireOrdersPage(){
  if(adminPage!=='orders')return;
- const statuses=['Yeni','Bekliyor','Hazırlanıyor','Yola çıktı','Teslim edildi','İptal','Kapalı'];
- const activeStatuses=['Yeni','Bekliyor','Hazırlanıyor','Yola çıktı'];
  const update=()=>{
-  const q=($('#orderSearch').value||'').toLocaleLowerCase('tr');
-  const tableNo=($('#orderTableNo').value||'').toLocaleLowerCase('tr');
-  const day=$('#orderDateFilter').value;
+  const q=($('#orderSearch')?.value||'').toLocaleLowerCase('tr');
+  const day=$('#orderDateFilter')?.value||'';
   const filtered=orders.filter(o=>{
    const st=orderStatus(o),d=orderWhen(o);
-   if(orderManagementFilter==='Aktifler'&&!activeStatuses.includes(st))return false;
+   if(orderManagementFilter==='Aktifler'&&!['Yeni','Bekliyor','Hazırlanıyor','Yola çıktı'].includes(st))return false;
    if(orderManagementFilter==='Bekliyor'&&!['Yeni','Bekliyor'].includes(st))return false;
    if(orderManagementFilter==='Kapalı'&&st!=='Kapalı')return false;
    if(!['Aktifler','Bekliyor','Tümü'].includes(orderManagementFilter)&&st!==orderManagementFilter)return false;
    if(day&&(!d||d.toISOString().slice(0,10)!==day))return false;
-   if(tableNo&&!String(o.table||o.tableNo||o.masa||'').toLocaleLowerCase('tr').includes(tableNo))return false;
-   const blob=[o.name,o.customer_name,o.phone,o.table,o.tableNo,o.masa,o.type,...(o.items||[]).map(i=>i.name||i.title)].join(' ').toLocaleLowerCase('tr');
-   if(q&&!blob.includes(q))return false;
-   return true;
+   const blob=[o.orderNumber,o.order_number,o.name,o.customer_name,o.phone,o.customer_phone,o.type,o.customer_address,...(o.items||[]).map(i=>i.name||i.title)].join(' ').toLocaleLowerCase('tr');
+   return !q||blob.includes(q);
   });
-  const count=(predicate)=>orders.filter(predicate).length;
-  const defs=[['Sipariş',orders.length,'#173b5c'],['Bekliyor',count(o=>['Yeni','Bekliyor'].includes(orderStatus(o)),'#f59e0b'),'#f59e0b'],['Hazırlanıyor',count(o=>orderStatus(o)==='Hazırlanıyor'),'#3b82f6'],['Teslim',count(o=>orderStatus(o)==='Teslim edildi'),'#22c55e'],['İptal',count(o=>orderStatus(o)==='İptal'),'#ef4444'],['Kapalı',count(o=>orderStatus(o)==='Kapalı'),'#94a3b8']];
-  $('#orderCounts').innerHTML=defs.map(([label,n,color])=>`<span class="order-count"><i class="dot" style="background:${color}"></i>${label}<b>${n}</b></span>`).join('');
+  const count=fn=>orders.filter(fn).length;
+  const revenue=orders.filter(o=>orderStatus(o)!=='İptal').reduce((sum,o)=>sum+(Number(o.total)||0),0);
+  const defs=[
+   ['📦','Toplam',orders.length,'#24344d'],
+   ['⏳','Bekliyor',count(o=>['Yeni','Bekliyor'].includes(orderStatus(o))),'#f59e0b'],
+   ['👨‍🍳','Hazırlanıyor',count(o=>orderStatus(o)==='Hazırlanıyor'),'#3b82f6'],
+   ['✅','Teslim',count(o=>orderStatus(o)==='Teslim edildi'),'#16803d'],
+   ['❌','İptal',count(o=>orderStatus(o)==='İptal'),'#ef4444'],
+   ['🔒','Kapalı',count(o=>orderStatus(o)==='Kapalı'),'#94a3b8'],
+   ['💰','Toplam Ciro',money(revenue),'#d6a43b']
+  ];
+  $('#orderCounts').innerHTML=defs.map(([icon,label,value,color],i)=>'<div class="order-summary-card '+(i===6?'revenue':'')+'" style="--card-accent:'+color+'"><span class="summary-icon">'+icon+'</span><strong>'+value+'</strong><span>'+label+'</span></div>').join('');
   $('#ordersCardTitle').textContent=orderManagementFilter==='Aktifler'?'Aktif Siparişler':orderManagementFilter==='Tümü'?'Tüm Siparişler':orderManagementFilter+' Siparişler';
+  const visible=$('#ordersVisibleCount');if(visible)visible.textContent=filtered.length+' kayıt';
   $('#ordersTableHost').innerHTML=orderManagementTable(filtered);
-  $('#ordersTableHost').querySelectorAll('[data-status]').forEach(sel=>sel.onchange=async()=>{const o=orders.find(x=>String(x.id)===String(sel.dataset.status));if(!o)return;const previous=o.status;sel.disabled=true;try{await updateCloudOrderStatus(o.orderNumber||o.id,sel.value);o.status=sel.value;save();update();toast('Sipariş durumu veritabanına kaydedildi')}catch(err){sel.value=previous;toast('Durum kaydedilemedi: '+(err.message||'Bağlantıyı kontrol edin'))}finally{sel.disabled=false}});
+  document.querySelectorAll('[data-order-filter]').forEach(btn=>btn.classList.toggle('active',btn.dataset.orderFilter===orderManagementFilter));
+  $('#ordersTableHost').querySelectorAll('[data-status]').forEach(sel=>sel.onchange=async()=>{
+   const o=orders.find(x=>String(x.id)===String(sel.dataset.status));if(!o)return;
+   const previous=o.status;sel.disabled=true;
+   try{await updateCloudOrderStatus(o.orderNumber||o.id,sel.value);o.status=sel.value;save();update();toast('Sipariş durumu kaydedildi')}
+   catch(err){sel.value=previous;toast('Durum kaydedilemedi: '+(err.message||'Bağlantıyı kontrol edin'))}
+   finally{sel.disabled=false}
+  });
+  $('#ordersTableHost').querySelectorAll('[data-cancel-order]').forEach(btn=>btn.onclick=async()=>{
+   const o=orders.find(x=>String(x.id)===String(btn.dataset.cancelOrder));if(!o)return;
+   btn.disabled=true;
+   try{await updateCloudOrderStatus(o.orderNumber||o.id,'İptal');o.status='İptal';save();update();toast('Sipariş iptal edildi')}
+   catch(err){btn.disabled=false;toast('Sipariş iptal edilemedi: '+(err.message||''))}
+  });
  };
- document.querySelectorAll('[data-order-filter]').forEach(b=>b.onclick=()=>{orderManagementFilter=b.dataset.orderFilter;document.querySelectorAll('[data-order-filter]').forEach(x=>x.classList.toggle('active',x===b));update()});
- ['orderSearch','orderTableNo','orderDateFilter'].forEach(id=>$('#'+id).addEventListener(id==='orderDateFilter'?'change':'input',update));
- $('#refreshOrders').onclick=async()=>{try{await loadCloudOrders();renderAdmin();toast('Siparişler güncellendi')}catch(err){toast('Siparişler alınamadı: '+err.message)}};
- $('#toggleOrderSound').textContent='🔔 Otomatik ses aktif';$('#toggleOrderSound').disabled=true;$('#toggleOrderSound').style.opacity='.8';
+ document.querySelectorAll('[data-order-filter]').forEach(btn=>btn.onclick=()=>{orderManagementFilter=btn.dataset.orderFilter;update()});
+ ['orderSearch','orderDateFilter'].forEach(id=>{const el=$('#'+id);if(el)el.addEventListener(id==='orderDateFilter'?'change':'input',update)});
+ $('#refreshOrders').onclick=async()=>{try{await loadCloudOrders();update();toast('Siparişler güncellendi')}catch(err){toast('Siparişler alınamadı: '+err.message)}};
+ const sound=$('#toggleOrderSound');if(sound){sound.textContent='🔔 Otomatik ses aktif';}
  update();
 }
 function renderCustomerResults(){

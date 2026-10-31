@@ -459,67 +459,107 @@ let orderSoundReady=false;
 let orderAudioContext=null;
 let knownOrderNumbers=new Set();
 let orderPollStarted=false;
-function enableOrderSoundAfterLoginClick(){
- orderSoundEnabled=true;
- orderSoundReady=true;
+let orderSoundPlaying=false;
+
+function prepareOrderAudio(){
  try{
   const Ctx=window.AudioContext||window.webkitAudioContext;
-  if(Ctx){
-   if(!orderAudioContext)orderAudioContext=new Ctx();
-   const resumePromise=orderAudioContext.resume();
-   if(resumePromise&&resumePromise.catch)resumePromise.catch(e=>console.warn('Ses izni beklemede',e));
-  }
- }catch(e){console.warn('Ses başlatılamadı',e)}
+  if(!Ctx)return false;
+  if(!orderAudioContext)orderAudioContext=new Ctx();
+  if(orderAudioContext.state==='suspended')orderAudioContext.resume().catch(e=>console.warn('Ses izni beklemede',e));
+  orderSoundEnabled=true;
+  orderSoundReady=true;
+  return true;
+ }catch(e){console.warn('Ses başlatılamadı',e);return false}
+}
+function enableOrderSoundAfterLoginClick(){
+ prepareOrderAudio();
 }
 async function playNewOrderSound(force=false){
  if(!force&&(!orderSoundEnabled||!orderSoundReady))return;
+ if(orderSoundPlaying)return;
+ orderSoundPlaying=true;
  try{
   const Ctx=window.AudioContext||window.webkitAudioContext;
   if(!Ctx)return;
   if(!orderAudioContext)orderAudioContext=new Ctx();
   const ctx=orderAudioContext;
   if(ctx.state==='suspended')await ctx.resume();
+  if(ctx.state!=='running')return;
   const now=ctx.currentTime;
+  const master=ctx.createGain();
+  master.gain.setValueAtTime(.72,now);
   const compressor=ctx.createDynamicsCompressor();
-  compressor.threshold.setValueAtTime(-18,now);
-  compressor.knee.setValueAtTime(18,now);
-  compressor.ratio.setValueAtTime(8,now);
-  compressor.attack.setValueAtTime(.003,now);
-  compressor.release.setValueAtTime(.22,now);
-  const master=ctx.createGain();master.gain.setValueAtTime(.95,now);
+  compressor.threshold.setValueAtTime(-20,now);
+  compressor.knee.setValueAtTime(16,now);
+  compressor.ratio.setValueAtTime(6,now);
+  compressor.attack.setValueAtTime(.004,now);
+  compressor.release.setValueAtTime(.18,now);
   master.connect(compressor);compressor.connect(ctx.destination);
-  const pattern=[880,1174,1396,1174,1568,1396,1174,988,1318,1568,1396,1174,880,1174,1396,1568];
-  pattern.forEach((freq,i)=>{
-   const start=now+i*.375;
-   const osc=ctx.createOscillator(),gain=ctx.createGain();
-   osc.type='sawtooth';osc.frequency.setValueAtTime(freq,start);
+  // 20 temiz, melodik nota: toplam süre yaklaşık 5 saniye.
+  const melody=[659.25,783.99,987.77,783.99,880,1046.5,1174.66,1046.5,987.77,880,783.99,659.25,783.99,987.77,1174.66,1318.51,1174.66,1046.5,987.77,1318.51];
+  melody.forEach((freq,i)=>{
+   const start=now+i*.25;
+   const osc=ctx.createOscillator();
+   const gain=ctx.createGain();
+   osc.type='sine';
+   osc.frequency.setValueAtTime(freq,start);
    gain.gain.setValueAtTime(.0001,start);
-   gain.gain.exponentialRampToValueAtTime(.48,start+.018);
-   gain.gain.setValueAtTime(.48,start+.23);
-   gain.gain.exponentialRampToValueAtTime(.0001,start+.34);
+   gain.gain.exponentialRampToValueAtTime(.34,start+.025);
+   gain.gain.setValueAtTime(.25,start+.13);
+   gain.gain.exponentialRampToValueAtTime(.0001,start+.245);
    osc.connect(gain);gain.connect(master);
-   osc.start(start);osc.stop(start+.36);
-   const sub=ctx.createOscillator(),subGain=ctx.createGain();
-   sub.type='triangle';sub.frequency.setValueAtTime(freq/2,start);
-   subGain.gain.setValueAtTime(.0001,start);
-   subGain.gain.exponentialRampToValueAtTime(.18,start+.02);
-   subGain.gain.exponentialRampToValueAtTime(.0001,start+.32);
-   sub.connect(subGain);subGain.connect(master);sub.start(start);sub.stop(start+.34);
+   osc.start(start);osc.stop(start+.25);
+   const harmonic=ctx.createOscillator();
+   const harmonicGain=ctx.createGain();
+   harmonic.type='triangle';
+   harmonic.frequency.setValueAtTime(freq*2,start);
+   harmonicGain.gain.setValueAtTime(.0001,start);
+   harmonicGain.gain.exponentialRampToValueAtTime(.055,start+.025);
+   harmonicGain.gain.exponentialRampToValueAtTime(.0001,start+.20);
+   harmonic.connect(harmonicGain);harmonicGain.connect(master);
+   harmonic.start(start);harmonic.stop(start+.21);
   });
- }catch(e){console.warn('Sipariş sesi çalınamadı',e)}
+  window.setTimeout(()=>{orderSoundPlaying=false},5200);
+ }catch(e){
+  orderSoundPlaying=false;
+  console.warn('Sipariş sesi çalınamadı',e);
+ }
 }
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden&&orderSoundEnabled&&orderAudioContext&&orderAudioContext.state==='suspended'){
+  orderAudioContext.resume().catch(e=>console.warn('Ses yeniden başlatılamadı',e));
+ }
+});
+window.addEventListener('focus',()=>{
+ if(orderSoundEnabled&&orderAudioContext&&orderAudioContext.state==='suspended'){
+  orderAudioContext.resume().catch(e=>console.warn('Ses yeniden başlatılamadı',e));
+ }
+});
 function startOrderPolling(){
  if(orderPollStarted)return;
  orderPollStarted=true;
- setInterval(async()=>{
+ window.setInterval(async()=>{
   if(!supabaseAccessToken||$('#admin')?.classList.contains('hidden'))return;
   try{
    await loadCloudOrders();
    if(adminPage==='orders'||adminPage==='overview')renderAdmin();
   }catch(e){console.warn('Sipariş kontrolü başarısız',e)}
- },8000);
+ },5000);
 }
-async function loadCloudOrders(){const previousNumbers=new Set((orders||[]).map(o=>String(o.orderNumber||o.id||'')));const rows=await supabaseRequest('/rest/v1/orders?select=*&order=created_at.desc');orders=(Array.isArray(rows)?rows:[]).map(r=>({id:r.order_number,orderNumber:r.order_number,name:r.customer_name,phone:r.customer_phone,type:r.customer_address||'Web',paymentMethod:r.payment_method,note:r.notes,items:Array.isArray(r.items)?r.items:[],total:Number(r.total)||0,status:r.status||'Yeni',date:r.created_at||r.createdAt}));save();customers=[...new Map([...customers,...orders.map(o=>({name:o.name,phone:o.phone}))].map(c=>[String(c.phone||c.name),c])).values()];save();const incoming=orders.filter(o=>!previousNumbers.has(String(o.orderNumber||o.id||'')));if(incoming.length){playNewOrderSound();if(orderSoundEnabled&&orderSoundReady)toast('🔔 Yeni sipariş alındı: '+incoming.length+' adet');}}
+async function loadCloudOrders(){
+ const previousNumbers=new Set((orders||[]).map(o=>String(o.orderNumber||o.id||'')));
+ const rows=await supabaseRequest('/rest/v1/orders?select=*&order=created_at.desc');
+ orders=(Array.isArray(rows)?rows:[]).map(r=>({id:r.order_number,orderNumber:r.order_number,name:r.customer_name,phone:r.customer_phone,type:r.customer_address||'Web',paymentMethod:r.payment_method,note:r.notes,items:Array.isArray(r.items)?r.items:[],total:Number(r.total)||0,status:r.status||'Yeni',date:r.created_at||r.createdAt}));
+ save();
+ customers=[...new Map([...customers,...orders.map(o=>({name:o.name,phone:o.phone}))].map(c=>[String(c.phone||c.name),c])).values()];
+ save();
+ const incoming=orders.filter(o=>!previousNumbers.has(String(o.orderNumber||o.id||'')));
+ if(incoming.length){
+  await playNewOrderSound();
+  if(orderSoundEnabled&&orderSoundReady)toast('🔔 Yeni sipariş alındı: '+incoming.length+' adet');
+ }
+}
 async function updateCloudOrderStatus(orderNumber,status){await supabaseRequest(`/rest/v1/orders?order_number=eq.${encodeURIComponent(orderNumber)}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({status})});}
 
 async function submitOrderToSupabase(order){

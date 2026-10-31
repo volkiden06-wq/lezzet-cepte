@@ -451,6 +451,87 @@ let products=load('lc_products',defaults),cart=load('lc_cart',[]),orders=load('l
 const SUPABASE_URL='https://jlpqdjhxdpmighnpebkj.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_0jwHKXSBerbH6swoXYCRog_j3g8j5z6';
 let supabaseAccessToken='';
+let catalogReady=false;
+let catalogSyncTimer=null;
+let catalogSyncBusy=false;
+let catalogSyncAgain=false;
+function catalogCategories(){return getCategoryOrder()}
+function compressCatalogImage(src){
+ return new Promise(resolve=>{
+  if(typeof src!=='string'||!src.startsWith('data:image/')){resolve(src);return}
+  const image=new Image();
+  image.onload=()=>{
+   try{
+    const maxW=420,maxH=340,scale=Math.min(1,maxW/image.width,maxH/image.height);
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(image.width*scale));
+    canvas.height=Math.max(1,Math.round(image.height*scale));
+    canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
+    resolve(canvas.toDataURL('image/jpeg',0.56));
+   }catch(e){resolve(src)}
+  };
+  image.onerror=()=>resolve(src);
+  image.src=src;
+ });
+}
+async function prepareCatalogPayload(){
+ const compact=[];
+ for(const p of products){
+  compact.push({...p,image:await compressCatalogImage(p.image)});
+ }
+ return {id:1,products:compact,categories:catalogCategories(),updated_at:new Date().toISOString()};
+}
+async function readSharedCatalog(useAdminToken=false){
+ const headers={'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':'Bearer '+(useAdminToken&&supabaseAccessToken?supabaseAccessToken:SUPABASE_PUBLISHABLE_KEY)};
+ const response=await fetch(SUPABASE_URL+'/rest/v1/site_catalog?id=eq.1&select=products,categories', {headers});
+ if(!response.ok){let detail='';try{detail=await response.text()}catch{}throw new Error('Ortak menü okunamadı: '+response.status+' '+detail)}
+ const rows=await response.json();
+ return Array.isArray(rows)&&rows.length?rows[0]:null;
+}
+async function applySharedCatalog(row){
+ if(!row)return false;
+ if(Array.isArray(row.products))products=row.products;
+ if(Array.isArray(row.categories))localStorage.setItem('lc_category_order',JSON.stringify(row.categories));
+ localStorage.setItem('lc_products',JSON.stringify(products));
+ catalogReady=true;
+ return true;
+}
+async function syncCatalogToCloud(){
+ if(!supabaseAccessToken||!catalogReady)return;
+ if(catalogSyncBusy){catalogSyncAgain=true;return}
+ catalogSyncBusy=true;
+ try{
+  do{
+   catalogSyncAgain=false;
+   const payload=await prepareCatalogPayload();
+   const response=await fetch(SUPABASE_URL+'/rest/v1/site_catalog?on_conflict=id',{
+    method:'POST',
+    headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':'Bearer '+supabaseAccessToken,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify(payload)
+   });
+   if(!response.ok){let detail='';try{detail=await response.text()}catch{}throw new Error('Menü eşitlenemedi: '+response.status+' '+detail)}
+  }while(catalogSyncAgain);
+ }catch(err){console.error(err);toast(err.message||'Ürünler ortak veritabanına kaydedilemedi.')}
+ finally{catalogSyncBusy=false}
+}
+function scheduleCatalogSync(){
+ if(!supabaseAccessToken||!catalogReady)return;
+ clearTimeout(catalogSyncTimer);
+ catalogSyncTimer=setTimeout(()=>syncCatalogToCloud(),650);
+}
+async function initializeAdminCatalog(){
+ const row=await readSharedCatalog(true);
+ if(row){await applySharedCatalog(row);return}
+ // İlk kurulum: yalnızca mevcut yönetici cihazındaki kayıtları aktar.
+ catalogReady=true;
+ await syncCatalogToCloud();
+}
+async function loadPublicCatalog(){
+ try{
+  const row=await readSharedCatalog(false);
+  if(row)await applySharedCatalog(row);
+ }catch(err){console.warn('Ortak menü yüklenemedi; bu cihazdaki kayıtlar korunuyor.',err)}
+}
 function supabaseHeaders(token=supabaseAccessToken){return {'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':`Bearer ${token||SUPABASE_PUBLISHABLE_KEY}`,'Content-Type':'application/json'}}
 async function supabaseRequest(path,options={}){const r=await fetch(`${SUPABASE_URL}${path}`,{...options,headers:{...supabaseHeaders(),...(options.headers||{})}});if(!r.ok){let detail='';try{detail=await r.text()}catch{}throw new Error(`Supabase ${r.status}: ${detail}`)}return r.status===204?null:r.json().catch(()=>null)}
 async function loginAdmin(email,password){const r=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.msg||data.message||data.error_description||'E-posta veya şifre hatalı.');supabaseAccessToken=data.access_token;try{sessionStorage.setItem('lc_admin_access_token',data.access_token);sessionStorage.setItem('lc_admin_refresh_token',data.refresh_token||'')}catch(e){}const check=await supabaseRequest('/rest/v1/rpc/is_admin',{method:'POST',body:'{}'});if(check!==true){supabaseAccessToken='';throw new Error('Bu hesap yönetici yetkisine sahip değil. SQL yetkilendirme adımını tamamlayın.')}return data}
@@ -590,7 +671,7 @@ async function submitOrderToSupabase(order){
     throw new Error(`Sipariş kaydedilemedi (${response.status}). ${detail}`);
   }
 }
-function load(k,d){try{const x=localStorage.getItem(k);return x?JSON.parse(x):d}catch{return d}}function save(){[['lc_products',products],['lc_cart',cart],['lc_orders',orders],['lc_campaigns',campaigns],['lc_customers',customers]].forEach(([k,v])=>localStorage.setItem(k,JSON.stringify(v)))}function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2800)}
+function load(k,d){try{const x=localStorage.getItem(k);return x?JSON.parse(x):d}catch{return d}}function save(){[['lc_products',products],['lc_cart',cart],['lc_orders',orders],['lc_campaigns',campaigns],['lc_customers',customers]].forEach(([k,v])=>localStorage.setItem(k,JSON.stringify(v)));scheduleCatalogSync()}function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2800)}
 function renderCampaignSidebar(){
  const host=$('#campaignList');if(!host)return;
  const active=(campaigns||[]).filter(c=>c.active!==false);
@@ -603,7 +684,7 @@ function getCategoryOrder(){
  const saved=Array.isArray(stored)?stored.map(c=>String(c||'').trim()).filter(Boolean):[];
  return [...new Set([...saved,...productCategories])];
 }
-function saveCategoryOrder(order){localStorage.setItem('lc_category_order',JSON.stringify(order))}
+function saveCategoryOrder(order){localStorage.setItem('lc_category_order',JSON.stringify(order));scheduleCatalogSync()}
 function renderCustomerNavCategories(){const host=$('#customerCategoryLinks');if(!host)return;const icons=['🍲','🥖','🍕','🍢','🌯','🍖','🍰','🥤','🍽️'];host.innerHTML=getCategoryOrder().map((c,i)=>`<a href="#menu" data-side-cat="${escapeHtml(c)}">${icons[i%icons.length]} <span>${escapeHtml(c)}</span></a>`).join('')}
 function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories').innerHTML=cats.map(c=>`<button class="cat ${currentCat===c?'active':''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('');$('#categories').querySelectorAll('button').forEach(b=>b.onclick=()=>{currentCat=b.dataset.cat;renderCats();renderProducts()});renderCustomerNavCategories()}function renderProducts(){const q=$('#search').value.toLocaleLowerCase('tr');const list=[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).filter(p=>p.active&&(currentCat==='Tümü'||p.category===currentCat)&&(`${p.name} ${p.category} ${p.description}`).toLocaleLowerCase('tr').includes(q));$('#products').innerHTML=list.length?list.map(p=>`<article class="product"><img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.style.background='#eee';this.removeAttribute('src')"><div class="product-body"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description)}</p><div class="product-bottom"><span class="price">${money(p.price)}</span><button class="add" data-add="${p.id}" aria-label="Sepete ekle">+</button></div></div></article>`).join(''):'<p>Aramana uygun ürün bulunamadı.</p>';$('#products').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(+b.dataset.add))}function add(id){const p=products.find(x=>x.id===id);if(!p)return;const row=cart.find(x=>x.id===id);if(row)row.qty++;else cart.push({id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show')}function total(){return cart.reduce((s,x)=>s+(products.find(p=>p.id===x.id)?.price||0)*x.qty,0)}function cartModal(){const rows=cart.map(x=>{const p=products.find(p=>p.id===x.id);return p?`<div class="cart-row"><div><b>${escapeHtml(p.name)}</b><div class="price">${money(p.price*x.qty)}</div></div><div class="qty"><button data-minus="${p.id}">−</button><b>${x.qty}</b><button data-plus="${p.id}">+</button><button data-remove="${p.id}" aria-label="Sil">×</button></div></div>`:''}).join('');openModal('Sepetim',`${rows||'<p>Sepetin henüz boş. Menüden ürün ekleyebilirsin.</p>'}${rows?`<div class="total"><span>Toplam</span><span>${money(total())}</span></div><form id="checkout"><div class="field"><label>Ad soyad</label><input name="name" required placeholder="Adınız soyadınız"></div><div class="field"><label>Telefon</label><input name="phone" required type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></div><div class="field"><label>Sipariş türü</label><select name="type"><option>Adrese teslim</option><option>Gel-al</option></select></div><div class="field"><label>Ödeme yöntemi</label><select name="paymentMethod" required><option value="Kapıda Nakit">KAPIDA NAKİT</option><option value="Kapıda Kredi Kartı">KAPIDA KREDİ KARTI</option></select></div><div class="field"><label>Teslimat adresi <span style="color:#e11d2e">*</span></label><textarea name="note" rows="3" required minlength="10" autocomplete="street-address" placeholder="Mahalle, cadde, sokak, bina ve daire numarası"></textarea></div><button class="primary" style="width:100%">SİPARİŞ OLUŞTUR · ${money(total())}</button><p style="color:#777;font-size:12px">Siparişiniz güvenli bağlantı üzerinden işletme sistemine gönderilir.</p></form>`:''}`);$('#modalBody').querySelectorAll('[data-plus]').forEach(b=>b.onclick=()=>changeQty(+b.dataset.plus,1));$('#modalBody').querySelectorAll('[data-minus]').forEach(b=>b.onclick=()=>changeQty(+b.dataset.minus,-1));$('#modalBody').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{cart=cart.filter(x=>x.id!==+b.dataset.remove);save();renderCartCount();cartModal()});const f=$('#checkout');if(f)f.onsubmit=async e=>{
   e.preventDefault();
@@ -663,7 +744,7 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
     if(submitButton){submitButton.disabled=false;submitButton.textContent=`SİPARİŞ OLUŞTUR · ${money(total())}`}
   }
 }}function changeQty(id,n){const x=cart.find(x=>x.id===id);if(x)x.qty+=n;cart=cart.filter(x=>x.qty>0);save();renderCartCount();cartModal()}
-function adminLogin(){openModal('Yönetici girişi',`<p>Yönetim paneline Supabase hesabınızla giriş yapın.</p><form id="loginForm"><div class="field"><label>E-posta</label><input name="email" type="email" value="" required autocomplete="username" placeholder="Yönetici e-posta adresi"></div><div class="field"><label>Şifre</label><input name="password" type="password" required autocomplete="current-password" placeholder="Supabase şifreniz"></div><button class="primary" style="width:100%">GÜVENLİ GİRİŞ YAP</button></form><p style="font-size:12px;color:#777">Şifreniz bu siteye veya sohbet ekranına kaydedilmez.</p>`);$('#loginForm').onsubmit=async e=>{e.preventDefault();enableOrderSoundAfterLoginClick();const form=e.currentTarget,btn=form.querySelector('button');const f=new FormData(form);btn.disabled=true;btn.textContent='GİRİŞ KONTROL EDİLİYOR…';try{await loginAdmin(String(f.get('email')).trim(),String(f.get('password')));await loadCloudOrders();knownOrderNumbers=new Set(orders.map(o=>String(o.orderNumber||o.id||'')));startOrderPolling();closeModal();$('#customer').classList.add('hidden');$('#siteHeader').classList.add('hidden');document.querySelector('.footer').classList.add('hidden');$('#admin').classList.remove('hidden');adminPage='overview';renderAdmin();toast('Yönetici girişi başarılı')}catch(err){toast(err.message||'Giriş başarısız');btn.disabled=false;btn.textContent='GÜVENLİ GİRİŞ YAP'}}}
+function adminLogin(){openModal('Yönetici girişi',`<p>Yönetim paneline Supabase hesabınızla giriş yapın.</p><form id="loginForm"><div class="field"><label>E-posta</label><input name="email" type="email" value="" required autocomplete="username" placeholder="Yönetici e-posta adresi"></div><div class="field"><label>Şifre</label><input name="password" type="password" required autocomplete="current-password" placeholder="Supabase şifreniz"></div><button class="primary" style="width:100%">GÜVENLİ GİRİŞ YAP</button></form><p style="font-size:12px;color:#777">Şifreniz bu siteye veya sohbet ekranına kaydedilmez.</p>`);$('#loginForm').onsubmit=async e=>{e.preventDefault();enableOrderSoundAfterLoginClick();const form=e.currentTarget,btn=form.querySelector('button');const f=new FormData(form);btn.disabled=true;btn.textContent='GİRİŞ KONTROL EDİLİYOR…';try{await loginAdmin(String(f.get('email')).trim(),String(f.get('password')));await initializeAdminCatalog();renderCats();renderProducts();await loadCloudOrders();knownOrderNumbers=new Set(orders.map(o=>String(o.orderNumber||o.id||'')));startOrderPolling();closeModal();$('#customer').classList.add('hidden');$('#siteHeader').classList.add('hidden');document.querySelector('.footer').classList.add('hidden');$('#admin').classList.remove('hidden');adminPage='overview';renderAdmin();toast('Yönetici girişi başarılı')}catch(err){toast(err.message||'Giriş başarısız');btn.disabled=false;btn.textContent='GÜVENLİ GİRİŞ YAP'}}}
 
 const titles={overview:'Genel Bakış',orders:'Siparişler',products:'Ürün & Menü',campaigns:'Kampanyalar',notifications:'Bildirim Gönder',customers:'Müşteriler',reports:'Raporlar',settings:'Ayarlar'};let orderManagementFilter='Tümü';
 function timeAgo(d){const seconds=Math.max(0,Math.floor((Date.now()-d.getTime())/1000));if(seconds<60)return seconds+' sn önce';const minutes=Math.floor(seconds/60);if(minutes<60)return minutes+' dk önce';const hours=Math.floor(minutes/60);if(hours<24)return hours+' sa önce';const days=Math.floor(hours/24);return days+' gün önce'}
@@ -860,6 +941,7 @@ $('#promoNotify').onclick=enableNotifications;$('#notifyBtn').onclick=enableNoti
  supabaseAccessToken=token;
  try{
   await supabaseRequest('/rest/v1/rpc/is_admin',{method:'POST',body:'{}'});
+  await initializeAdminCatalog();
   await loadCloudOrders();
   knownOrderNumbers=new Set(orders.map(o=>String(o.orderNumber||o.id||'')));
   $('#customer').classList.add('hidden');
@@ -905,7 +987,8 @@ if('serviceWorker' in navigator && location.protocol==='https:'){
  window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(err=>console.warn('Uygulama çevrimdışı bileşeni kaydedilemedi',err)));
 }
 updateInstallButton();
-$('#year').textContent=new Date().getFullYear();renderCats();renderProducts();renderCartCount();renderCampaignSidebar();
+$('#year').textContent=new Date().getFullYear();renderCartCount();renderCampaignSidebar();
+loadPublicCatalog().finally(()=>{renderCats();renderProducts()});
 $('#customerNav').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();$('#customerNav').querySelectorAll('a').forEach(x=>x.classList.toggle('selected',x===a));if(a.dataset.sidePage==='home'){currentCat='Tümü';$('#search').value='';renderCats();renderProducts();$('#home').scrollIntoView({behavior:'smooth'});return}if(a.dataset.sidePage==='campaigns'){$('#campaigns').scrollIntoView({behavior:'smooth'});return}if(a.dataset.sideCat){currentCat=a.dataset.sideCat;$('#search').value='';renderCats();renderProducts();$('#menu').scrollIntoView({behavior:'smooth'});}});
 })();
 </script>

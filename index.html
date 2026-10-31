@@ -603,8 +603,8 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
       '------------------------------',
       ...order.items.map((item,index) =>
         (index+1) + ') ' + item.name +
-        '\\n   ' + item.qty + ' adet x ' + money(item.price) +
-        '\\n   Ara toplam: ' + money(item.price * item.qty)
+        '\n   ' + item.qty + ' adet x ' + money(item.price) +
+        '\n   Ara toplam: ' + money(item.price * item.qty)
       ),
       '------------------------------',
       'Ödeme türü : ' + order.paymentMethod,

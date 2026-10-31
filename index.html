@@ -844,10 +844,10 @@ async function enableNotifications(){
   await navigator.serviceWorker.ready;
   let subscription=await registration.pushManager.getSubscription();
   if(!subscription)subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(PUSH_VAPID_PUBLIC_KEY)});
-  const response=await fetch(SUPABASE_URL+'/rest/v1/push_subscriptions?on_conflict=endpoint',{
+  const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/save_push_subscription',{
    method:'POST',
-   headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':'Bearer '+SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-   body:JSON.stringify({endpoint:subscription.endpoint,subscription:subscription.toJSON(),user_agent:navigator.userAgent})
+   headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':'Bearer '+SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},
+   body:JSON.stringify({p_endpoint:subscription.endpoint,p_subscription:subscription.toJSON(),p_user_agent:navigator.userAgent})
   });
   if(!response.ok)throw new Error(await response.text());
   toast('Bildirimler açıldı. Yeni kampanyalardan haberdar olacaksın.');

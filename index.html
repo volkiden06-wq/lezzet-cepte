@@ -423,6 +423,28 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
 .order-cancel-btn{margin-top:5px;border:1px solid #ffc6ce;background:#fff0f2;color:#e11d48;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:800}
 @media(max-width:1200px){.order-summary-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.order-control-row{align-items:flex-start;flex-direction:column}.order-control-row>input{width:100%;flex-basis:auto}.order-filter-group{flex-wrap:wrap}}
 @media(max-width:650px){.order-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.order-summary-card{min-height:88px}.order-search-row{align-items:stretch;flex-direction:column}.order-sound-state{text-align:center}}
+
+/* Ana sayfa görsel slaytı */
+.hero-slider{height:300px!important;position:relative;isolation:isolate;background:#170d0a;overflow:hidden;border-radius:20px;box-shadow:0 16px 38px #30140f24}
+.hero-slide{position:absolute;inset:0;opacity:0;visibility:hidden;transform:scale(1.035);transition:opacity .8s ease,transform 5.8s ease,visibility .8s}
+.hero-slide.is-active{opacity:1;visibility:visible;transform:scale(1)}
+.hero-slide img{width:100%;height:100%;display:block;object-fit:cover;object-position:center 52%;filter:saturate(1.12) contrast(1.04)}
+.hero-slide-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,8,7,.91) 0%,rgba(20,10,7,.72) 36%,rgba(20,10,7,.12) 76%),linear-gradient(0deg,rgba(15,7,5,.25),transparent 45%)}
+.hero-slide-copy{position:absolute;left:clamp(22px,4vw,54px);top:50%;transform:translateY(-50%);color:white;max-width:58%;text-shadow:0 2px 15px #0008}
+.hero-slide-copy small{display:block;color:#ffb45b;font-size:10px;font-weight:900;letter-spacing:2px;margin-bottom:13px}
+.hero-slide-copy strong{display:block;font-size:clamp(25px,3.2vw,43px);line-height:1.05;letter-spacing:-1.4px}
+.hero-slide-copy em{font-style:normal;color:#ff4a20}
+.hero-slide-copy span{display:inline-block;margin-top:16px;font-size:12px;font-weight:750;color:#fff2e8}
+.hero-brand{position:absolute;right:22px;top:18px;color:#fff;font-size:12px;font-weight:950;letter-spacing:1px;text-shadow:0 2px 9px #000}
+.hero-brand span{color:#ff4a20}
+.hero-arrow{position:absolute;z-index:3;top:50%;transform:translateY(-50%);width:36px;height:42px;border:1px solid #ffffff65;border-radius:12px;background:#160b09a8;color:white;font-size:28px;line-height:1;cursor:pointer;backdrop-filter:blur(8px);transition:background .2s}
+.hero-arrow:hover{background:#ef3e17}.hero-arrow.prev{left:12px}.hero-arrow.next{right:12px}
+.hero-dots{position:absolute;z-index:3;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:7px;padding:7px 10px;border-radius:20px;background:#160b0980;backdrop-filter:blur(8px)}
+.hero-dots button{width:8px;height:8px;border:0;border-radius:50%;padding:0;background:#ffffffa8;cursor:pointer;transition:all .25s}
+.hero-dots button.active{width:23px;border-radius:8px;background:#ff421b}
+@media(max-width:900px){.hero-slider{height:260px!important}.hero-slide-copy{max-width:75%;left:25px}.hero-slide-copy strong{font-size:clamp(24px,5vw,36px)}.hero-brand{font-size:10px;right:14px;top:13px}}
+@media(max-width:520px){.hero-slider{height:220px!important;border-radius:15px}.hero-slide-copy{left:18px;max-width:82%}.hero-slide-copy small{font-size:8px;letter-spacing:1.2px;margin-bottom:9px}.hero-slide-copy strong{font-size:25px}.hero-slide-copy span{font-size:10px;margin-top:10px}.hero-arrow{width:29px;height:34px;font-size:23px}.hero-arrow.prev{left:7px}.hero-arrow.next{right:7px}.hero-dots{bottom:9px}.hero-brand{display:none}}
+
 </style></head><body>
 <header class="topbar" id="siteHeader"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK<span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><a id="headerWhatsAppBtn" href="https://wa.me/905421511186?text=Merhaba%2C%20YEMEK%20TADINDA%20%C3%BCzerinden%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 15px;border-radius:12px;background:#16a34a;color:#fff;font-weight:900;white-space:nowrap;box-shadow:0 5px 15px #16a34a40">☏ WhatsApp</a><button class="ghost" id="installAppBtn" type="button" style="border-color:#16a34a;color:#12813f;font-weight:900">⬇ Uygulamayı Yükle</button><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
 <nav class="mobile-bottom-nav" aria-label="Mobil menü">
@@ -440,7 +462,14 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
  </nav>
  <div class="side-contact"><b>🛵 Hızlı Teslimat</b><span>Gebze ve çevresi</span><a href="tel:05421511186">☎ 0542 151 11 86</a><small>Sipariş Hattı</small></div>
 </aside>
-<section class="hero wrap" id="home"><div><span class="eyebrow">SICAK · TAZE · TAM LEZZET</span><h1>Lezzet şimdi<br><em>bir tık uzağında.</em></h1><p>En sevdiğin pide, çıtır lahmacun ve ateşten kebaplar. Menünü seç, siparişini kolayca oluştur.</p><div class="hero-actions"><a class="primary" href="#menu">MENÜYÜ KEŞFET →</a><button class="ghost" id="campaignJump">🎁 Günün kampanyası</button></div><div class="trust"><span>✓ Taze hazırlanır</span><span>✓ Kolay sipariş</span><span>✓ Gel-al seçeneği</span></div></div><div class="hero-photo"><img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85" alt="Izgara yemekler" onerror="this.style.display='none'"><div class="photo-label">ATEŞTEN SOFRANA<span>Pide · Lahmacun · Kebap</span></div></div></section>
+<section class="hero wrap" id="home"><div><span class="eyebrow">SICAK · TAZE · TAM LEZZET</span><h1>Lezzet şimdi<br><em>bir tık uzağında.</em></h1><p>En sevdiğin pide, çıtır lahmacun ve ateşten kebaplar. Menünü seç, siparişini kolayca oluştur.</p><div class="hero-actions"><a class="primary" href="#menu">MENÜYÜ KEŞFET →</a><button class="ghost" id="campaignJump">🎁 Günün kampanyası</button></div><div class="trust"><span>✓ Taze hazırlanır</span><span>✓ Kolay sipariş</span><span>✓ Gel-al seçeneği</span></div></div><div class="hero-photo hero-slider" id="heroSlider" aria-label="YEMEK TADINDA öne çıkan lezzetler">
+ <div class="hero-slide is-active"><img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1600&q=88" alt="Ateşten kebap ve ızgara lezzetleri"><div class="hero-slide-shade"></div><div class="hero-slide-copy"><small>YEMEK TADINDA · PİDE · LAHMACUN · KEBAP</small><strong>Usta lezzetler<br><em>tek tık kapında!</em></strong><span>🔥 Özenle hazırlanır · Hızlı teslimat</span></div></div>
+ <div class="hero-slide"><img src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1600&q=88" alt="Sıcak ve lezzetli çorba çeşitleri"><div class="hero-slide-shade"></div><div class="hero-slide-copy"><small>GÜNÜN SICAK LEZZETİ</small><strong>Çorba çeşitleriyle<br><em>içini ısıt!</em></strong><span>🥣 Her gün taze ve sıcak</span></div></div>
+ <div class="hero-slide"><img src="https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?auto=format&fit=crop&w=1600&q=88" alt="Fırından çıkan sıcak pide ve pizza lezzetleri"><div class="hero-slide-shade"></div><div class="hero-slide-copy"><small>USTA ELİNDEN FIRINA</small><strong>Taş fırından<br><em>sıcak pideler!</em></strong><span>🫓 Bol malzeme, doyumsuz lezzet</span></div></div>
+ <div class="hero-slide"><img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1600&q=88" alt="Lahmacun ve geleneksel lezzetler"><div class="hero-slide-shade"></div><div class="hero-slide-copy"><small>PAYLAŞMAYA DEĞER LEZZET</small><strong>Lahmacun<br><em>kampanyaları!</em></strong><span>🎁 Kampanyaları keşfet</span></div></div>
+ <div class="hero-slide"><img src="https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=1600&q=88" alt="Közde tavuk şiş ve ızgara çeşitleri"><div class="hero-slide-shade"></div><div class="hero-slide-copy"><small>KÖZÜNDE PİŞEN LEZZET</small><strong>Izgara lezzetleri<br><em>şimdi sipariş ver!</em></strong><span>🍢 Sıcacık, taptaze, tam kıvamında</span></div></div>
+ <button class="hero-arrow prev" type="button" aria-label="Önceki görsel">‹</button><button class="hero-arrow next" type="button" aria-label="Sonraki görsel">›</button><div class="hero-dots" aria-label="Slayt seçimi"><button class="active" aria-label="1. görsel"></button><button aria-label="2. görsel"></button><button aria-label="3. görsel"></button><button aria-label="4. görsel"></button><button aria-label="5. görsel"></button></div><div class="hero-brand">YEMEK<span>TADINDA</span></div>
+ </div></section>
 <aside class="campaign-sidebar" id="campaigns"><div class="campaign-side-head"><div><span>📣</span><b>KAMPANYALAR</b></div><button id="promoNotify" class="campaign-all">Bildirimler</button></div><div id="campaignList" class="campaign-list"></div><div class="campaign-help">🎁 Yeni fırsatları kaçırma!</div></aside>
 <section class="wrap section" id="menu"><div class="section-head"><div><span class="eyebrow">SENİN İÇİN HAZIRLANDI</span><h2>Menüyü keşfet</h2></div><label class="search">⌕ <input id="search" placeholder="Ürün veya kategori ara..."></label></div><div class="cats" id="categories"></div><div class="products" id="products"></div></section>
 <section class="wrap loyalty"><div><span class="eyebrow">LEZZETİN KAZANDIRDIĞI</span><h2>Kampanyaları ilk sen öğren.</h2><p>Bildirimlere izin vererek yeni fırsatlardan haberdar ol.</p></div><button class="primary" id="loyaltyBtn">BİLDİRİMLERİ AÇ</button></section>
@@ -966,7 +995,23 @@ $('#mobileMenu').onclick=()=>$('#menu').scrollIntoView({behavior:'smooth'});
 $('#mobileCart').onclick=cartModal;
 $('#mobileOrders').onclick=()=>$('#historyBack').classList.add('show');
 $('#footerHistory').onclick=()=>$('#historyBack').classList.add('show');
-$('#footerTrack').onclick=()=>$('#trackBack').classList.add('show');$('#closeModal').onclick=closeModal;$('#modalBack').onclick=e=>{if(e.target===$('#modalBack'))closeModal()};$('#adminBtn').onclick=adminLogin;$('#footerAdmin').onclick=adminLogin;$('#backSite').onclick=()=>{supabaseAccessToken='';try{sessionStorage.removeItem('lc_admin_access_token');sessionStorage.removeItem('lc_admin_refresh_token')}catch(e){}$('#admin').classList.add('hidden');$('#customer').classList.remove('hidden');$('#siteHeader').classList.remove('hidden');document.querySelector('.footer').classList.remove('hidden')};$('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{adminPage=b.dataset.page;renderAdmin()});$('#campaignJump').onclick=()=>$('#campaigns').scrollIntoView({behavior:'smooth'});
+$('#footerTrack').onclick=()=>$('#trackBack').classList.add('show');$('#closeModal').onclick=closeModal;$('#modalBack').onclick=e=>{if(e.target===$('#modalBack'))closeModal()};$('#adminBtn').onclick=adminLogin;$('#footerAdmin').onclick=adminLogin;$('#backSite').onclick=()=>{supabaseAccessToken='';try{sessionStorage.removeItem('lc_admin_access_token');sessionStorage.removeItem('lc_admin_refresh_token')}catch(e){}$('#admin').classList.add('hidden');$('#customer').classList.remove('hidden');$('#siteHeader').classList.remove('hidden');document.querySelector('.footer').classList.remove('hidden')};$('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{adminPage=b.dataset.page;renderAdmin()});
+/* Ana sayfa öne çıkan lezzetler slaytı */
+(()=>{
+ const root=document.getElementById('heroSlider');if(!root)return;
+ const slides=[...root.querySelectorAll('.hero-slide')],dots=[...root.querySelectorAll('.hero-dots button')];
+ let current=0,timer=null;
+ const show=(n)=>{current=(n+slides.length)%slides.length;slides.forEach((el,i)=>el.classList.toggle('is-active',i===current));dots.forEach((el,i)=>el.classList.toggle('active',i===current));};
+ const start=()=>{clearInterval(timer);timer=setInterval(()=>show(current+1),5500)};
+ root.querySelector('.prev').addEventListener('click',()=>{show(current-1);start()});
+ root.querySelector('.next').addEventListener('click',()=>{show(current+1);start()});
+ dots.forEach((dot,i)=>dot.addEventListener('click',()=>{show(i);start()}));
+ root.addEventListener('mouseenter',()=>clearInterval(timer));root.addEventListener('mouseleave',start);
+ document.addEventListener('visibilitychange',()=>document.hidden?clearInterval(timer):start());
+ start();
+})();
+
+$('#campaignJump').onclick=()=>$('#campaigns').scrollIntoView({behavior:'smooth'});
 const PUSH_VAPID_PUBLIC_KEY='BF7dWsTJOm5kgbt_YctfUu845jDoEGUhmG0wlneuo4GH16DEO-khTBfzTvr1ZIxzukwHIiJNqJi7oOfopbe1PDA';
 function urlBase64ToUint8Array(value){const padding='='.repeat((4-value.length%4)%4);const base64=(value+padding).replace(/-/g,'+').replace(/_/g,'/');const raw=atob(base64);return Uint8Array.from([...raw].map(ch=>ch.charCodeAt(0)))}
 async function enableNotifications(){

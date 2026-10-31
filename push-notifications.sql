@@ -40,3 +40,27 @@ $$;
 revoke all on function public.save_push_subscription(text,jsonb,text) from public;
 grant execute on function public.save_push_subscription(text,jsonb,text) to anon, authenticated;
 notify pgrst, 'reload schema';
+
+-- Bildirim görselleri için ayrı, herkese açık okuma bucket'ı.
+insert into storage.buckets (id, name, public)
+values ('push-notification-images', 'push-notification-images', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "Push notification images public read" on storage.objects;
+create policy "Push notification images public read"
+on storage.objects for select
+to public
+using (bucket_id = 'push-notification-images');
+
+drop policy if exists "Push notification images admin upload" on storage.objects;
+create policy "Push notification images admin upload"
+on storage.objects for insert
+to authenticated
+with check (bucket_id = 'push-notification-images' and public.is_admin());
+
+drop policy if exists "Push notification images admin update" on storage.objects;
+create policy "Push notification images admin update"
+on storage.objects for update
+to authenticated
+using (bucket_id = 'push-notification-images' and public.is_admin())
+with check (bucket_id = 'push-notification-images' and public.is_admin());

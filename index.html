@@ -586,25 +586,31 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
     cart=[];
     save();renderCartCount();closeModal();
     const whatsappLines = [
-      '🍽️ *YEMEK TADINDA | YENİ SİPARİŞ*',
-      '━━━━━━━━━━━━━━━━━━━━',
-      '🧾 *Sipariş No:* ' + order.orderNumber,
-      '🕒 *Tarih:* ' + new Date(order.date).toLocaleString('tr-TR'),
+      'YEMEK TADINDA',
+      'YENİ SİPARİŞ',
+      '------------------------------',
+      'Sipariş No : ' + order.orderNumber,
+      'Tarih      : ' + new Date(order.date).toLocaleString('tr-TR'),
       '',
-      '👤 *MÜŞTERİ BİLGİLERİ*',
-      'Ad Soyad: ' + order.name,
-      'Telefon: ' + order.phone,
-      'Teslimat: ' + order.type,
-      'Adres: ' + (order.note || '-'),
+      'MÜŞTERİ BİLGİLERİ',
+      '------------------------------',
+      'Ad Soyad   : ' + order.name,
+      'Telefon    : ' + order.phone,
+      'Teslimat   : ' + order.type,
+      'Adres/Not  : ' + (order.note || 'Belirtilmedi'),
       '',
-      '🛒 *SİPARİŞ DETAYLARI*',
-      '━━━━━━━━━━━━━━━━━━━━',
-      ...order.items.map((item,index) => (index+1)+'. *'+item.name+'*' + '\n   Adet: '+item.qty+' × '+money(item.price)+' = *'+money(item.price*item.qty)+'*'),
-      '━━━━━━━━━━━━━━━━━━━━',
-      '💳 *Ödeme:* ' + order.paymentMethod,
-      '💰 *GENEL TOPLAM: ' + money(order.total) + '*',
-      '',
-      '📌 *Lütfen siparişi onaylayıp hazırlığa başlayın.*'
+      'SİPARİŞ KALEMLERİ',
+      '------------------------------',
+      ...order.items.map((item,index) =>
+        (index+1) + ') ' + item.name +
+        '\\n   ' + item.qty + ' adet x ' + money(item.price) +
+        '\\n   Ara toplam: ' + money(item.price * item.qty)
+      ),
+      '------------------------------',
+      'Ödeme türü : ' + order.paymentMethod,
+      'GENEL TOPLAM: ' + money(order.total),
+      '------------------------------',
+      'Siparişin onaylanmasını rica ederiz.'
     ];
     const whatsappUrl = 'https://wa.me/905421511186?text=' + encodeURIComponent(whatsappLines.join('\n'));
     if(whatsappTab){try{whatsappTab.location.href=whatsappUrl;}catch{}}

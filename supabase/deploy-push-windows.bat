@@ -30,8 +30,8 @@ if errorlevel 1 (
 )
 
 echo.
-echo send-order-notification fonksiyonu dagitiliyor...
-supabase functions deploy send-order-notification --project-ref jlpqdjhxdpmighnpebkj --no-verify-jwt
+echo rapid-service fonksiyonu dagitiliyor...
+supabase functions deploy rapid-service --project-ref jlpqdjhxdpmighnpebkj --no-verify-jwt
 if errorlevel 1 (
   echo HATA: Fonksiyon dagitilamadi. Yukaridaki hata mesajini kontrol edin.
   pause

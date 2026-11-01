@@ -147,7 +147,7 @@ BEGIN
   END IF;
 
   PERFORM net.http_post(
-    url := 'https://jlpqdjhxdpmighnpebkj.supabase.co/functions/v1/send-order-notification',
+    url := 'https://jlpqdjhxdpmighnpebkj.supabase.co/functions/v1/rapid-service',
     headers := pg_catalog.jsonb_build_object(
       'Content-Type', 'application/json',
       'x-order-hook-secret', hook_secret

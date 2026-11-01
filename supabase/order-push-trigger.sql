@@ -97,33 +97,21 @@ GRANT EXECUTE ON FUNCTION public.save_admin_push_subscription(text, jsonb, text)
 
 -- Secret'ı yalnızca ilk kurulumda oluşturur. Aynı isimde farklı bir secret varsa
 -- sessizce değiştirmez; yanlış değerle bildirim gitmesini engeller.
-DO $vault_secret$
-DECLARE
-  desired_secret text := 'REPLACE_WITH_SECRET_IN_SUPABASE_ONLY';
-  existing_secret text;
+-- ORDER_PUSH_HOOK_SECRET Function Secrets ile daha once Vault'a esitlendi.
+-- Gizli anahtar SQL dosyasina tekrar yazilmaz; yalnizca varligi dogrulanir.
+DO $vault_secret_check$
 BEGIN
-  IF desired_secret LIKE 'REPLACE_WITH_SECRET%' THEN
-    RAISE EXCEPTION 'SQL içindeki REPLACE_WITH_SECRET_IN_SUPABASE_ONLY alanını ORDER_PUSH_HOOK_SECRET değeriyle değiştirin.';
-  END IF;
-
-  SELECT decrypted_secret
-    INTO existing_secret
-  FROM vault.decrypted_secrets
-  WHERE name = 'order_push_hook_secret'
-  ORDER BY created_at DESC
-  LIMIT 1;
-
-  IF existing_secret IS NULL THEN
-    PERFORM vault.create_secret(
-      desired_secret,
-      'order_push_hook_secret',
-      'Private key used by LEZZET CEPTE new-order push trigger'
-    );
-  ELSIF existing_secret <> desired_secret THEN
-    RAISE EXCEPTION 'Vault içinde order_push_hook_secret zaten var ancak değer farklı. Supabase Vault bölümünden mevcut secretı aynı değerle güncelleyin veya doğru secretı kullanın.';
+  IF NOT EXISTS (
+    SELECT 1
+    FROM vault.decrypted_secrets
+    WHERE name = 'order_push_hook_secret'
+      AND decrypted_secret IS NOT NULL
+      AND decrypted_secret <> ''
+  ) THEN
+    RAISE EXCEPTION 'Vault icinde order_push_hook_secret bulunamadi. Once Function Secrets degerini Vault ile esitleyin.';
   END IF;
 END;
-$vault_secret$;
+$vault_secret_check$;
 
 CREATE OR REPLACE FUNCTION public.notify_new_order_push()
 RETURNS trigger

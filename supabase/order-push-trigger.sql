@@ -3,7 +3,7 @@
 -- Run once in Supabase SQL Editor after enabling pg_net and Vault.
 
 select vault.create_secret(
-  'kj_lzKzA5B557gdwqYERlq93dV18fxMjNDgifIXgOQukCVbg',
+  'REPLACE_WITH_PRIVATE_ORDER_PUSH_HOOK_SECRET',
   'order_push_hook_secret',
   'Private secret used only by the new-order push trigger'
 );

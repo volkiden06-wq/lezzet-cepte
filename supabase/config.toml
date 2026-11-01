@@ -1,3 +1,7 @@
+[functions.rapid-service]
+# Postgres pg_net calls without a user JWT; this handler verifies x-order-hook-secret.
+verify_jwt = false
+
 [functions.send-order-notification]
-# pg_net calls this function without a user JWT; the handler checks x-order-hook-secret.
+# Kept for compatibility with the original source function.
 verify_jwt = false

@@ -38,6 +38,10 @@ SQL; `public.admin_push_subscriptions` adlı ayrı, istemciye kapalı tabloyu ve
 
 Kampanya/duyuru bildirimi gönderme alanı ise müşterilerin normal kampanya aboneliklerini kullanmaya devam eder.
 
-## 5. Kurulumu doğrulama\n\nSupabase SQL Editor'de `supabase/verify-push-setup.sql` dosyasını çalıştırın. Bu sorgu salt-okunurdur; ürün, kategori veya sipariş kayıtlarını değiştirmez. `orders_table_exists`, `customer_push_table_exists`, `admin_push_table_exists`, `admin_subscription_rpc_exists`, `pg_net_enabled`, `vault_available`, `order_number_column_exists`, `customer_name_column_exists`, `total_column_exists` ve `order_push_trigger_enabled` sonuçlarının tamamı `true` olmalıdır.\n\n## 6. Hata kontrolü
+## 5. Kurulumu doğrulama 
+ 
+Supabase SQL Editor'de `supabase/verify-push-setup.sql` dosyasını çalıştırın. Bu sorgu salt-okunurdur; ürün, kategori veya sipariş kayıtlarını değiştirmez. `orders_table_exists`, `customer_push_table_exists`, `admin_push_table_exists`, `admin_subscription_rpc_exists`, `pg_net_enabled`, `vault_available`, `order_number_column_exists`, `customer_name_column_exists`, `total_column_exists` ve `order_push_trigger_enabled` sonuçlarının tamamı `true` olmalıdır. 
+ 
+## 6. Hata kontrolü
 
 Bildirim gelmezse Supabase → Edge Functions → `rapid-service` → Logs bölümünü kontrol edin. `pg_net` çağrılarının yanıtı `net._http_response` tablosundan incelenebilir. Siparişin veritabanına kaydedilmesi, push'ın cihaza teslim edildiğini tek başına kanıtlamaz.

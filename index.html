@@ -515,17 +515,30 @@ function createSiteVisitorId(){
  const hex=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
  return hex.slice(0,8)+'-'+hex.slice(8,12)+'-'+hex.slice(12,16)+'-'+hex.slice(16,20)+'-'+hex.slice(20);
 }
+function siteVisitorDateKey(){
+ const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Europe/Istanbul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+ const value=type=>parts.find(part=>part.type===type)?.value||'';
+ return value('year')+'-'+value('month')+'-'+value('day');
+}
 async function recordPublicSiteVisit(){
  try{
   if(supabaseAccessToken)return;
-  let visitorId=localStorage.getItem(SITE_VISITOR_ID_KEY);
-  if(!visitorId){visitorId=createSiteVisitorId();localStorage.setItem(SITE_VISITOR_ID_KEY,visitorId);}
+  const today=siteVisitorDateKey();
+  let record=null;
+  try{record=JSON.parse(localStorage.getItem(SITE_VISITOR_ID_KEY)||'null')}catch(e){}
+  if(!record||record.date!==today||!record.id){
+   record={date:today,id:createSiteVisitorId(),sent:false};
+   localStorage.setItem(SITE_VISITOR_ID_KEY,JSON.stringify(record));
+  }
+  if(record.sent)return;
   const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/record_site_visit',{
    method:'POST',
    headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':'Bearer '+SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},
-   body:JSON.stringify({p_visitor_id:visitorId})
+   body:JSON.stringify({p_visitor_id:record.id})
   });
   if(!response.ok)throw new Error('Ziyaret kaydı gönderilemedi: '+response.status);
+  record.sent=true;
+  localStorage.setItem(SITE_VISITOR_ID_KEY,JSON.stringify(record));
  }catch(err){console.warn('Web sitesi ziyaret kaydı alınamadı:',err);}
 }
 function visitorDateLabel(value){

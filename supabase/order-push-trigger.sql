@@ -1,60 +1,130 @@
--- YEMEK TADINDA: every new order sends a Web Push alert.
--- Run once in Supabase SQL Editor. Requires pg_net and Vault extensions.
--- Replace the placeholder below with the SAME ORDER_PUSH_HOOK_SECRET
--- saved in Supabase Edge Function Secrets.
+-- LEZZET CEPTE / YEMEK TADINDA: yeni sipariş Web Push tetikleyicisi.
+-- Ön koşullar:
+-- 1) public.orders tablosunda order_number, customer_name ve total kolonları olmalı.
+-- 2) push-notifications.sql daha önce çalıştırılmış olmalı (push_subscriptions tablosu).
+-- 3) Supabase Database > Extensions bölümünde pg_net ve Vault etkin olmalı.
+-- 4) Edge Function send-order-notification deploy edilmeli ve JWT verification kapalı olmalı.
+--
+-- Aşağıdaki tek placeholder'ı Supabase Function Secrets içindeki
+-- ORDER_PUSH_HOOK_SECRET ile BİREBİR aynı değerle değiştirin.
+-- Gizli değeri GitHub'a, site koduna veya sohbet mesajına eklemeyin.
 
-select vault.create_secret(
-  'REPLACE_WITH_SECRET_IN_SUPABASE_ONLY',
-  'order_push_hook_secret',
-  'Private key used by YEMEK TADINDA new-order push trigger'
-);
+DO $precheck$
+DECLARE
+  missing_columns text[];
+BEGIN
+  IF to_regclass('public.orders') IS NULL THEN
+    RAISE EXCEPTION 'public.orders tablosu bulunamadı.';
+  END IF;
 
-create or replace function public.notify_new_order_push()
-returns trigger
-language plpgsql
-security definer
-set search_path = public, net, vault
-as $$
-declare
+  IF to_regclass('public.push_subscriptions') IS NULL THEN
+    RAISE EXCEPTION 'public.push_subscriptions bulunamadı. Önce push-notifications.sql dosyasını çalıştırın.';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'net') THEN
+    RAISE EXCEPTION 'pg_net etkin değil. Database > Extensions bölümünden pg_net etkinleştirin.';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'vault') THEN
+    RAISE EXCEPTION 'Vault etkin değil. Database > Extensions bölümünden Vault etkinleştirin.';
+  END IF;
+
+  SELECT array_agg(required.column_name)
+    INTO missing_columns
+  FROM (VALUES ('order_number'), ('customer_name'), ('total')) AS required(column_name)
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns c
+    WHERE c.table_schema = 'public'
+      AND c.table_name = 'orders'
+      AND c.column_name = required.column_name
+  );
+
+  IF cardinality(missing_columns) > 0 THEN
+    RAISE EXCEPTION 'public.orders tablosunda gerekli kolonlar eksik: %', array_to_string(missing_columns, ', ');
+  END IF;
+END;
+$precheck$;
+
+-- Secret'ı yalnızca ilk kurulumda oluşturur. Aynı isimde farklı bir secret varsa
+-- sessizce değiştirmez; yanlış değerle bildirim gitmesini engeller.
+DO $vault_secret$
+DECLARE
+  desired_secret text := 'REPLACE_WITH_SECRET_IN_SUPABASE_ONLY';
+  existing_secret text;
+BEGIN
+  IF desired_secret LIKE 'REPLACE_WITH_SECRET%' THEN
+    RAISE EXCEPTION 'SQL içindeki REPLACE_WITH_SECRET_IN_SUPABASE_ONLY alanını ORDER_PUSH_HOOK_SECRET değeriyle değiştirin.';
+  END IF;
+
+  SELECT decrypted_secret
+    INTO existing_secret
+  FROM vault.decrypted_secrets
+  WHERE name = 'order_push_hook_secret'
+  ORDER BY created_at DESC
+  LIMIT 1;
+
+  IF existing_secret IS NULL THEN
+    PERFORM vault.create_secret(
+      desired_secret,
+      'order_push_hook_secret',
+      'Private key used by LEZZET CEPTE new-order push trigger'
+    );
+  ELSIF existing_secret <> desired_secret THEN
+    RAISE EXCEPTION 'Vault içinde order_push_hook_secret zaten var ancak değer farklı. Supabase Vault bölümünden mevcut secretı aynı değerle güncelleyin veya doğru secretı kullanın.';
+  END IF;
+END;
+$vault_secret$;
+
+CREATE OR REPLACE FUNCTION public.notify_new_order_push()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+DECLARE
   hook_secret text;
-begin
-  select decrypted_secret into hook_secret
-  from vault.decrypted_secrets
-  where name = 'order_push_hook_secret'
-  order by created_at desc
-  limit 1;
+BEGIN
+  SELECT ds.decrypted_secret
+    INTO hook_secret
+  FROM vault.decrypted_secrets AS ds
+  WHERE ds.name = 'order_push_hook_secret'
+  ORDER BY ds.created_at DESC
+  LIMIT 1;
 
-  if hook_secret is null or hook_secret = '' then
-    raise warning 'order_push_hook_secret missing; push skipped';
-    return new;
-  end if;
+  IF hook_secret IS NULL OR hook_secret = '' THEN
+    RAISE WARNING 'order_push_hook_secret missing; push skipped';
+    RETURN NEW;
+  END IF;
 
-  perform net.http_post(
+  PERFORM net.http_post(
     url := 'https://jlpqdjhxdpmighnpebkj.supabase.co/functions/v1/send-order-notification',
-    headers := jsonb_build_object(
+    headers := pg_catalog.jsonb_build_object(
       'Content-Type', 'application/json',
       'x-order-hook-secret', hook_secret
     ),
-    body := jsonb_build_object(
+    body := pg_catalog.jsonb_build_object(
       'type', 'order',
-      'record', jsonb_build_object(
-        'order_number', new.order_number,
-        'customer_name', new.customer_name,
-        'total', new.total
+      'record', pg_catalog.jsonb_build_object(
+        'order_number', NEW.order_number,
+        'customer_name', NEW.customer_name,
+        'total', NEW.total
       )
     ),
     timeout_milliseconds := 10000
   );
-  return new;
-end;
-$$;
 
-drop trigger if exists trg_notify_new_order_push on public.orders;
-create trigger trg_notify_new_order_push
-after insert on public.orders
-for each row
-execute function public.notify_new_order_push();
+  RETURN NEW;
+END;
+$function$;
 
-select trigger_name, event_manipulation, event_object_table
-from information_schema.triggers
-where trigger_name = 'trg_notify_new_order_push';
+DROP TRIGGER IF EXISTS trg_notify_new_order_push ON public.orders;
+CREATE TRIGGER trg_notify_new_order_push
+AFTER INSERT ON public.orders
+FOR EACH ROW
+EXECUTE FUNCTION public.notify_new_order_push();
+
+-- Kurulum doğrulaması: bu sorgunun 1 satır döndürmesi gerekir.
+SELECT trigger_name, event_manipulation, event_object_table
+FROM information_schema.triggers
+WHERE trigger_name = 'trg_notify_new_order_push';

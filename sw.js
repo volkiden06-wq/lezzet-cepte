@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yemek-tadinda-shell-v5';
+const CACHE_NAME = 'yemek-tadinda-shell-v6';
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/app-icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -17,6 +17,8 @@ self.addEventListener('push', event => {
     image: data.image || undefined,
     tag: data.tag || (data.orderNumber ? 'yemek-tadinda-order-' + data.orderNumber : 'yemek-tadinda-campaign'),
     renotify: true,
+    vibrate: [300, 150, 300, 150, 600],
+    requireInteraction: true,
     data: { url: data.url || '/', orderNumber: data.orderNumber || null }
   };
   event.waitUntil(self.registration.showNotification(title, options));

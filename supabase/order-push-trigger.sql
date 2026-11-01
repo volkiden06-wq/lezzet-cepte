@@ -1,10 +1,7 @@
--- YEMEK TADINDA: otomatik yeni sipariş Web Push bildirimi
--- Mevcut sipariş/ürün kayıtlarını silmez veya değiştirmez.
--- Bu scripti Supabase SQL Editor'de bir kez çalıştırın.
 
--- Supabase Vault'a Edge Function ile ortak gizli tetikleyici anahtarını kaydet.
-select vault.create_secret('YOUR_PRIVATE_ORDER_PUSH_HOOK_SECRET', 'order_push_hook_secret', 'Yalnızca orders INSERT tetikleyicisinin kullandığı gizli anahtar');
-
+-- YEMEK TADINDA: notify every new order using pg_net + Vault.
+-- Requires: pg_net and supabase_vault extensions enabled.
+-- Does not alter or delete order/catalog data.
 create or replace function public.notify_new_order_push()
 returns trigger
 language plpgsql
@@ -14,15 +11,14 @@ as $$
 declare
   hook_secret text;
 begin
-  select decrypted_secret
-    into hook_secret
-    from vault.decrypted_secrets
-   where name = 'order_push_hook_secret'
-   order by created_at desc
-   limit 1;
+  select decrypted_secret into hook_secret
+  from vault.decrypted_secrets
+  where name = 'order_push_hook_secret'
+  order by created_at desc
+  limit 1;
 
   if hook_secret is null or hook_secret = '' then
-    raise warning 'YEMEK TADINDA push hook secret bulunamadı';
+    raise warning 'order_push_hook_secret missing; push skipped';
     return new;
   end if;
 
@@ -37,6 +33,7 @@ begin
       'record', jsonb_build_object(
         'order_number', new.order_number,
         'customer_name', new.customer_name,
+        'customer_phone', new.customer_phone,
         'total', new.total
       )
     ),
@@ -52,7 +49,6 @@ after insert on public.orders
 for each row
 execute function public.notify_new_order_push();
 
--- Kontrol: trigger kuruldu mu?
 select trigger_name, event_manipulation, event_object_table
 from information_schema.triggers
 where trigger_name = 'trg_notify_new_order_push';

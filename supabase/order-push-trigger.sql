@@ -3,7 +3,7 @@
 -- Bu scripti Supabase SQL Editor'de bir kez çalıştırın.
 
 -- Supabase Vault'a Edge Function ile ortak gizli tetikleyici anahtarını kaydet.
-select vault.create_secret('066eF4WyT-GtIikPpLW_9wUegENobyWVQexkUkTV4Ek', 'order_push_hook_secret', 'Yalnızca orders INSERT tetikleyicisinin kullandığı gizli anahtar');
+select vault.create_secret('YOUR_PRIVATE_ORDER_PUSH_HOOK_SECRET', 'order_push_hook_secret', 'Yalnızca orders INSERT tetikleyicisinin kullandığı gizli anahtar');
 
 create or replace function public.notify_new_order_push()
 returns trigger

@@ -1,7 +1,13 @@
+-- YEMEK TADINDA: new-order push trigger
+-- Existing orders, products and catalog data are not changed.
+-- Run once in Supabase SQL Editor after enabling pg_net and Vault.
 
--- YEMEK TADINDA: notify every new order using pg_net + Vault.
--- Requires: pg_net and supabase_vault extensions enabled.
--- Does not alter or delete order/catalog data.
+select vault.create_secret(
+  'kj_lzKzA5B557gdwqYERlq93dV18fxMjNDgifIXgOQukCVbg',
+  'order_push_hook_secret',
+  'Private secret used only by the new-order push trigger'
+);
+
 create or replace function public.notify_new_order_push()
 returns trigger
 language plpgsql

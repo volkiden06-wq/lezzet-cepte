@@ -1,0 +1,3 @@
+[functions.send-order-notification]
+# pg_net calls this function without a user JWT; the handler checks x-order-hook-secret.
+verify_jwt = false

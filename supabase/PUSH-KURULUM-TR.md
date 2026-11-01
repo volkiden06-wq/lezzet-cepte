@@ -24,7 +24,7 @@ supabase login
 supabase functions deploy send-order-notification --project-ref jlpqdjhxdpmighnpebkj --no-verify-jwt
 ```
 
-Windows'ta hazırlanan ZIP içindeki `deploy-windows.bat` dosyası aynı işlemi yürütür.
+Windows'ta GitHub deposunun ZIP'ini indirip açtıktan sonra `supabase/deploy-push-windows.bat` dosyasını çift tıklayarak aynı dağıtımı yapabilirsiniz. Supabase CLI'nin kurulu olması gerekir.
 
 ## 3. SQL kurulumu
 
@@ -45,6 +45,6 @@ SQL; `public.admin_push_subscriptions` adlı ayrı, istemciye kapalı tabloyu ve
 
 Kampanya/duyuru bildirimi gönderme alanı ise müşterilerin normal kampanya aboneliklerini kullanmaya devam eder.
 
-## 5. Hata kontrolü
+## 5. Kurulumu doğrulama\n\nSupabase SQL Editor'de `supabase/verify-push-setup.sql` dosyasını çalıştırın. Bu sorgu salt-okunurdur; ürün, kategori veya sipariş kayıtlarını değiştirmez. `orders_table_exists`, `customer_push_table_exists`, `admin_push_table_exists`, `admin_subscription_rpc_exists`, `pg_net_enabled`, `vault_available`, `order_number_column_exists`, `customer_name_column_exists`, `total_column_exists` ve `order_push_trigger_enabled` sonuçlarının tamamı `true` olmalıdır.\n\n## 6. Hata kontrolü
 
 Bildirim gelmezse Supabase → Edge Functions → `send-order-notification` → Logs bölümünü kontrol edin. `pg_net` çağrılarının yanıtı `net._http_response` tablosundan incelenebilir. Siparişin veritabanına kaydedilmesi, push'ın cihaza teslim edildiğini tek başına kanıtlamaz.

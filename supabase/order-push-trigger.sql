@@ -3,7 +3,7 @@
 -- 1) public.orders tablosunda order_number, customer_name ve total kolonları olmalı.
 -- 2) push-notifications.sql daha önce çalıştırılmış olmalı (push_subscriptions tablosu).
 -- 3) Supabase Database > Extensions bölümünde pg_net ve Vault etkin olmalı.
--- 4) Edge Function send-order-notification deploy edilmeli ve JWT verification kapalı olmalı.
+-- 4) Edge Function rapid-service deploy edilmeli ve JWT verification kapalı olmalı.
 --
 -- Aşağıdaki tek placeholder'ı Supabase Function Secrets içindeki
 -- ORDER_PUSH_HOOK_SECRET ile BİREBİR aynı değerle değiştirin.

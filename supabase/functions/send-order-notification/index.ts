@@ -56,7 +56,7 @@ Deno.serve(async (req: Request) => {
       new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 0 }).format(total) + " TL";
 
     const db = await fetch(
-      supabaseUrl + "/rest/v1/push_subscriptions?select=id,subscription",
+      supabaseUrl + "/rest/v1/admin_push_subscriptions?select=id,subscription",
       { headers: { apikey: serviceRoleKey!, Authorization: "Bearer " + serviceRoleKey } },
     );
     if (!db.ok) throw new Error("Abonelikler okunamadı: " + await db.text());
@@ -95,7 +95,7 @@ Deno.serve(async (req: Request) => {
 
     if (expired.length) {
       await fetch(
-        supabaseUrl + "/rest/v1/push_subscriptions?id=in.(" + expired.join(",") + ")",
+        supabaseUrl + "/rest/v1/admin_push_subscriptions?id=in.(" + expired.join(",") + ")",
         {
           method: "DELETE",
           headers: { apikey: serviceRoleKey!, Authorization: "Bearer " + serviceRoleKey },

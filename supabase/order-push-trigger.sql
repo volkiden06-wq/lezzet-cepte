@@ -1,11 +1,12 @@
--- YEMEK TADINDA: new-order push trigger
--- Existing orders, products and catalog data are not changed.
--- Run once in Supabase SQL Editor after enabling pg_net and Vault.
+-- YEMEK TADINDA: every new order sends a Web Push alert.
+-- Run once in Supabase SQL Editor. Requires pg_net and Vault extensions.
+-- Replace the placeholder below with the SAME ORDER_PUSH_HOOK_SECRET
+-- saved in Supabase Edge Function Secrets.
 
 select vault.create_secret(
-  'REPLACE_WITH_PRIVATE_ORDER_PUSH_HOOK_SECRET',
+  'REPLACE_WITH_SECRET_IN_SUPABASE_ONLY',
   'order_push_hook_secret',
-  'Private secret used only by the new-order push trigger'
+  'Private key used by YEMEK TADINDA new-order push trigger'
 );
 
 create or replace function public.notify_new_order_push()
@@ -29,7 +30,7 @@ begin
   end if;
 
   perform net.http_post(
-    url := 'https://jlpqdjhxdpmighnpebkj.supabase.co/functions/v1/send-notification',
+    url := 'https://jlpqdjhxdpmighnpebkj.supabase.co/functions/v1/send-order-notification',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'x-order-hook-secret', hook_secret
@@ -39,7 +40,6 @@ begin
       'record', jsonb_build_object(
         'order_number', new.order_number,
         'customer_name', new.customer_name,
-        'customer_phone', new.customer_phone,
         'total', new.total
       )
     ),

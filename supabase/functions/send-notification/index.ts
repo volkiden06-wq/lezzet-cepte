@@ -33,7 +33,7 @@ Deno.serve(async (req: Request) => {
   const vapidSubject = Deno.env.get("VAPID_SUBJECT");
   const orderHookSecret = Deno.env.get("ORDER_PUSH_HOOK_SECRET");
 
-  if (![supabaseUrl, anonKey, serviceRoleKey, vapidPublicKey, vapidPrivateKey, vapidSubject, orderHookSecret].every(Boolean)) {
+  if (![supabaseUrl, anonKey, serviceRoleKey, vapidPublicKey, vapidPrivateKey, vapidSubject].every(Boolean)) {
     return json(503, { error: "Bildirim sunucusu ayarları eksik. Function Secrets bölümünü kontrol edin." });
   }
 
@@ -46,6 +46,7 @@ Deno.serve(async (req: Request) => {
     let tag = "yemek-tadinda-campaign";
 
     if (input?.type === "order") {
+      if (!orderHookSecret) return json(503, { error: "Sipariş bildirimi için ORDER_PUSH_HOOK_SECRET ayarı eksik." });
       const suppliedSecret = req.headers.get("x-order-hook-secret") || "";
       if (!constantTimeEqual(suppliedSecret, orderHookSecret!)) {
         return json(401, { error: "Sipariş bildirimi doğrulanamadı." });
@@ -88,6 +89,15 @@ Deno.serve(async (req: Request) => {
     );
     if (!rowsResponse.ok) throw new Error("Bildirim abonelikleri okunamadı: " + await rowsResponse.text());
     const rows = await rowsResponse.json();
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return json(200, {
+        success: false,
+        sent: 0,
+        failed: 0,
+        total: 0,
+        message: "Henüz kampanya bildirimi aboneliği olan cihaz yok. Müşterilerin kendi cihazlarından Bildirimler düğmesine basıp izin vermesi gerekir.",
+      });
+    }
 
     webpush.setVapidDetails(vapidSubject!, vapidPublicKey!, vapidPrivateKey!);
     let sent = 0;

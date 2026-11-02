@@ -498,6 +498,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
 <footer class="footer"><div class="wrap footer-inner"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK <span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="footer-links"><button type="button" id="footerHistory">Siparişlerim</button><button type="button" id="footerTrack">Sipariş Takip</button><button type="button" id="footerInstallApp" class="footer-install-button">📲 UYGULAMAMIZI İNDİR</button></div><span>© <span id="year"></span> YEMEK TADINDA | CHINAR CATERING KURULUŞUDUR</span><button class="ghost" id="footerAdmin">🔒 Yönetici Girişi</button></div></footer>
 <section class="admin hidden" id="admin"><aside class="sidebar"><a class="brand" href="#"><span class="brand-mark">YT</span><span>YEMEK <span class="red">TADINDA</span><small>YÖNETİM PANELİ</small></span></a><nav class="nav" id="nav"><button class="active" data-page="overview">▦ Genel Bakış</button><button data-page="orders">▤ Siparişler</button><button data-page="products">▧ Ürün & Menü</button><button data-page="campaigns">◇ Kampanyalar</button><button data-page="notifications">♧ Bildirim Gönder</button><button data-page="customers">♙ Müşteriler</button><button data-page="reports">▥ Raporlar</button><button data-page="settings">⚙ Ayarlar</button></nav><button class="ghost" id="backSite">← Güvenli çıkış / Siteye dön</button></aside><div class="admin-main"><div class="admin-head"><div><span class="eyebrow">İŞLETME YÖNETİMİ</span><h1 id="pageTitle">Genel Bakış</h1></div><span id="adminDate"></span></div><div id="page"></div></div></section>
 <div class="modal-back" id="modalBack"><section class="modal"><div class="modal-head"><h2 id="modalTitle">Sepetim</h2><button class="close" id="closeModal">×</button></div><div id="modalBody"></div></section></div><div class="modal-back" id="historyBack"><section class="modal"><div class="modal-head"><h2>Geçmiş Siparişlerim</h2><button class="close" id="historyClose">×</button></div><p style="color:#777;font-size:13px">Sipariş verirken kullandığınız telefon numarasını girin.</p><form id="historyForm"><div class="field"><label>Telefon numarası</label><input name="phone" type="tel" required placeholder="05xx xxx xx xx"></div><button class="primary" style="width:100%">SİPARİŞLERİMİ GÖSTER</button></form><div id="historyResult"></div></section></div><div class="modal-back" id="trackBack"><section class="modal"><div class="modal-head"><h2>Sipariş Takip</h2><button class="close" id="trackClose">×</button></div><form id="trackForm"><div class="field"><label>Sipariş numarası</label><input name="id" required></div><div class="field"><label>Telefon</label><input name="phone" type="tel" required></div><button class="primary" style="width:100%">SORGULA</button></form><div id="trackResult"></div><p class="notice">Sipariş numarası ve telefon numarasıyla güncel sipariş durumunu sorgulayabilirsin.</p></section></div><div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js"></script>
 <script>
 (()=>{'use strict';const $=s=>document.querySelector(s);const money=n=>new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:0}).format(n);const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const img=(id)=>`https://images.unsplash.com/${id}?auto=format&fit=crop&w=700&q=80`;
 const defaults=[['ÇORBALAR','Mercimek Çorbası',100,'Geleneksel, sıcak ve doyurucu mercimek çorbası.'],['ÇORBALAR','Ezogelin Çorbası',100,'Nane ve baharatlarla hazırlanan geleneksel ezogelin.'],['ÇORBALAR','Yayla Çorbası',100,'Yoğurt ve nane ile hazırlanan hafif yayla çorbası.'],['ÇORBALAR','Tavuk Suyu Çorbası',160,'Tavuk suyuyla hazırlanan sıcak ve besleyici çorba.'],['ÇORBALAR','Kelle Paça',300,'Geleneksel usulde hazırlanan kelle paça çorbası.'],['ÇORBALAR','Ayak Paça',280,'Özenle hazırlanan geleneksel ayak paça.'],['ÇORBALAR','İşkembe Çorbası',250,'Sarımsak ve limonla servis edilen işkembe çorbası.'],['ÇORBALAR','Tuzlama',250,'Bol lezzetli geleneksel tuzlama çorbası.'],['ÇORBALAR','Damar',280,'Geleneksel usulde hazırlanan damar çorbası.'],['ÇORBALAR','Beyran',350,'Acı ve baharat dengesiyle hazırlanan beyran.'],['ÇORBALAR','Şırdan',300,'Geleneksel usulde hazırlanan şırdan.'],['ÇORBALAR','Özel Çorba',120,'Günün özel çorbası.'],['ÇORBALAR','Kemik Suyu',120,'Uzun süre kaynatılmış kemik suyuyla hazırlanan çorba.'],['ÇORBALAR','Atom',360,'Acılı ve yoğun lezzetli özel çorba.']].map((x,i)=>({id:i+1,category:x[0],name:x[1],price:x[2],description:x[3],image:img('photo-1547592166-23ac45744acd'),active:true}));
@@ -642,6 +643,10 @@ async function refreshAdminAccessToken(){
  const data=await response.json();
  if(!data.access_token)return false;
  supabaseAccessToken=data.access_token;
+ if(orderRealtimeClient&&orderRealtimeClient.realtime){
+  Promise.resolve(orderRealtimeClient.realtime.setAuth(supabaseAccessToken))
+   .catch(error=>console.warn('Canlı sipariş bağlantısının tokenı yenilenemedi:',error));
+ }
  try{
   sessionStorage.setItem('lc_admin_access_token',data.access_token);
   sessionStorage.setItem('lc_admin_refresh_token',data.refresh_token||refreshToken);
@@ -702,6 +707,12 @@ let knownOrderNumbers=new Set();
 let orderBaselineReady=false;
 let orderPollStarted=false;
 let orderPollInFlight=false;
+let orderRealtimeClient=null;
+let ordersRealtimeChannel=null;
+let ordersRealtimeConnected=false;
+let orderPollingTimer=null;
+let lastOrderFallbackSync=0;
+let realtimeOrderRefreshTimer=null;
 let orderSoundPlaying=false;
 const alertedOrderNumbers=new Set();
 function prepareOrderAudio(){
@@ -738,24 +749,105 @@ if('serviceWorker'in navigator){
 $('#admin')?.addEventListener('pointerdown',()=>prepareOrderAudio(),{once:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&orderSoundEnabled&&orderAudioContext&&orderAudioContext.state==='suspended')orderAudioContext.resume().catch(e=>console.warn('Ses yeniden başlatılamadı',e))});
 window.addEventListener('focus',()=>{if(orderSoundEnabled&&orderAudioContext&&orderAudioContext.state==='suspended')orderAudioContext.resume().catch(e=>console.warn('Ses yeniden başlatılamadı',e))});
-function startOrderPolling(){
- if(orderPollStarted)return;orderPollStarted=true;
- window.setInterval(async()=>{
-  if(!supabaseAccessToken||$('#admin')?.classList.contains('hidden')||orderPollInFlight)return;
-  orderPollInFlight=true;
-  try{await loadCloudOrders();if(adminPage==='orders'||adminPage==='overview')renderAdmin()}
-  catch(e){console.warn('Sipariş kontrolü başarısız',e)}
-  finally{orderPollInFlight=false}
- },5000);
+function mapCloudOrderRow(r){
+ return {id:r.order_number,orderNumber:r.order_number,name:r.customer_name,phone:r.customer_phone,
+  type:r.customer_address||'Web',paymentMethod:r.payment_method,note:r.notes,
+  items:Array.isArray(r.items)?r.items:[],total:Number(r.total)||0,status:r.status||'Yeni',
+  date:r.created_at||r.createdAt};
+}
+function saveOrderCachesOnly(){
+ try{
+  localStorage.setItem('lc_orders',JSON.stringify(orders));
+  localStorage.setItem('lc_customers',JSON.stringify(customers));
+ }catch(error){console.warn('Sipariş önbelleği kaydedilemedi:',error)}
 }
 async function loadCloudOrders({notifyNew=true}={}){
  const rows=await supabaseRequest('/rest/v1/orders?select=*&order=created_at.desc');
- const latest=(Array.isArray(rows)?rows:[]).map(r=>({id:r.order_number,orderNumber:r.order_number,name:r.customer_name,phone:r.customer_phone,type:r.customer_address||'Web',paymentMethod:r.payment_method,note:r.notes,items:Array.isArray(r.items)?r.items:[],total:Number(r.total)||0,status:r.status||'Yeni',date:r.created_at||r.createdAt}));
+ const latest=(Array.isArray(rows)?rows:[]).map(mapCloudOrderRow);
  const incoming=orderBaselineReady?latest.filter(o=>!knownOrderNumbers.has(String(o.orderNumber||o.id||''))):[];
- orders=latest;knownOrderNumbers=new Set(latest.map(o=>String(o.orderNumber||o.id||'')));orderBaselineReady=true;
- save();customers=[...new Map([...customers,...orders.map(o=>({name:o.name,phone:o.phone}))].map(c=>[String(c.phone||c.name),c])).values()];save();
+ orders=latest;
+ knownOrderNumbers=new Set(latest.map(o=>String(o.orderNumber||o.id||'')));
+ orderBaselineReady=true;
+ customers=[...new Map([...customers,...orders.map(o=>({name:o.name,phone:o.phone}))].map(c=>[String(c.phone||c.name),c])).values()];
+ saveOrderCachesOnly();
+ lastOrderFallbackSync=Date.now();
  if(notifyNew&&incoming.length)incoming.forEach(o=>alertAdminForNewOrder(o.orderNumber||o.id));
  return incoming;
+}
+function queueRealtimeOrdersRefresh(){
+ if(realtimeOrderRefreshTimer)clearTimeout(realtimeOrderRefreshTimer);
+ realtimeOrderRefreshTimer=window.setTimeout(async()=>{
+  realtimeOrderRefreshTimer=null;
+  try{
+   await loadCloudOrders();
+   if(adminPage==='orders'||adminPage==='overview')renderAdmin();
+  }catch(error){console.warn('Canlı sipariş sonrası liste yenilenemedi:',error)}
+ },180);
+}
+async function stopOrdersRealtime(){
+ ordersRealtimeConnected=false;
+ const channel=ordersRealtimeChannel;
+ ordersRealtimeChannel=null;
+ if(channel&&orderRealtimeClient){
+  try{await orderRealtimeClient.removeChannel(channel)}catch(error){console.warn('Canlı sipariş bağlantısı kapatılamadı:',error)}
+ }
+}
+async function startOrdersRealtime(){
+ if(!supabaseAccessToken)return false;
+ if(!window.supabase||typeof window.supabase.createClient!=='function'){
+  ordersRealtimeConnected=false;
+  console.warn('Supabase canlı bildirim kütüphanesi yüklenemedi; yedek sipariş kontrolü kullanılacak.');
+  return false;
+ }
+ try{
+  if(!orderRealtimeClient){
+   orderRealtimeClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+    auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false},
+    realtime:{params:{eventsPerSecond:8}}
+   });
+  }
+  await orderRealtimeClient.realtime.setAuth(supabaseAccessToken);
+  await stopOrdersRealtime();
+  const channel=orderRealtimeClient.channel('yemek-tadinda-admin-orders')
+   .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},payload=>{
+    if(payload?.new?.order_number)queueRealtimeOrdersRefresh();
+   })
+   .on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders'},payload=>{
+    if(payload?.new?.order_number)queueRealtimeOrdersRefresh();
+   });
+  ordersRealtimeChannel=channel;
+  channel.subscribe((status,error)=>{
+   if(status==='SUBSCRIBED'){
+    ordersRealtimeConnected=true;
+    lastOrderFallbackSync=Date.now();
+    console.info('YEMEK TADINDA: canlı sipariş bağlantısı aktif.');
+   }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+    ordersRealtimeConnected=false;
+    lastOrderFallbackSync=0;
+    console.warn('Canlı sipariş bağlantısı kesildi; yedek kontrol devrede.',status,error||'');
+   }
+  });
+  return true;
+ }catch(error){
+  ordersRealtimeConnected=false;
+  lastOrderFallbackSync=0;
+  console.warn('Canlı sipariş bağlantısı kurulamadı; yedek kontrol devrede:',error);
+  return false;
+ }
+}
+function startOrderPolling(){
+ if(orderPollingTimer)return;
+ orderPollingTimer=window.setInterval(async()=>{
+  if(!supabaseAccessToken||$('#admin')?.classList.contains('hidden')||orderPollInFlight)return;
+  const fallbackInterval=ordersRealtimeConnected?60000:4000;
+  if(Date.now()-lastOrderFallbackSync<fallbackInterval)return;
+  orderPollInFlight=true;
+  try{
+   await loadCloudOrders();
+   if(adminPage==='orders'||adminPage==='overview')renderAdmin();
+  }catch(error){console.warn('Yedek sipariş kontrolü başarısız:',error)}
+  finally{orderPollInFlight=false}
+ },1000);
 }
 async function updateCloudOrderStatus(orderNumber,status){await supabaseRequest(`/rest/v1/orders?order_number=eq.${encodeURIComponent(orderNumber)}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({status})});}
 
@@ -860,7 +952,47 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
     if(submitButton){submitButton.disabled=false;submitButton.textContent=`SİPARİŞ OLUŞTUR · ${money(total())}`}
   }
 }}function changeQty(id,n){const x=cart.find(x=>x.id===id);if(x)x.qty+=n;cart=cart.filter(x=>x.qty>0);save();renderCartCount();cartModal()}
-function adminLogin(){openModal('Yönetici girişi',`<p>Yönetim paneline Supabase hesabınızla giriş yapın.</p><form id="loginForm"><div class="field"><label>E-posta</label><input name="email" type="email" value="" required autocomplete="username" placeholder="Yönetici e-posta adresi"></div><div class="field"><label>Şifre</label><input name="password" type="password" required autocomplete="current-password" placeholder="Supabase şifreniz"></div><button class="primary" style="width:100%">GÜVENLİ GİRİŞ YAP</button></form><p style="font-size:12px;color:#777">Şifreniz bu siteye veya sohbet ekranına kaydedilmez.</p>`);$('#loginForm').onsubmit=async e=>{e.preventDefault();enableOrderSoundAfterLoginClick();const form=e.currentTarget,btn=form.querySelector('button');const f=new FormData(form);btn.disabled=true;btn.textContent='GİRİŞ KONTROL EDİLİYOR…';try{await loginAdmin(String(f.get('email')).trim(),String(f.get('password')));await initializeAdminCatalog();renderCats();renderProducts();await loadCloudOrders({notifyNew:false});startOrderPolling();closeModal();$('#customer').classList.add('hidden');$('#siteHeader').classList.add('hidden');document.querySelector('.footer').classList.add('hidden');$('#admin').classList.remove('hidden');adminPage='overview';renderAdmin();toast('Yönetici girişi başarılı')}catch(err){toast(err.message||'Giriş başarısız');btn.disabled=false;btn.textContent='GÜVENLİ GİRİŞ YAP'}}}
+function adminLogin(){
+ openModal('Yönetici girişi',`<p>Yönetim paneline Supabase hesabınızla giriş yapın.</p>
+ <form id="loginForm">
+  <div class="field"><label>E-posta</label><input name="email" type="email" value="" required autocomplete="username" placeholder="Yönetici e-posta adresi"></div>
+  <div class="field"><label>Şifre</label><input name="password" type="password" required autocomplete="current-password" placeholder="Supabase şifreniz"></div>
+  <button class="primary" style="width:100%">GÜVENLİ GİRİŞ YAP</button>
+ </form>
+ <p style="font-size:12px;color:#777">Şifreniz bu siteye veya sohbet ekranına kaydedilmez.</p>`);
+ $('#loginForm').onsubmit=async e=>{
+  e.preventDefault();
+  enableOrderSoundAfterLoginClick();
+  let permissionPromise=Promise.resolve(('Notification'in window)?Notification.permission:'unsupported');
+  if('Notification'in window&&Notification.permission==='default'){
+   try{permissionPromise=Notification.requestPermission()}catch(error){permissionPromise=Promise.resolve('denied')}
+  }
+  const form=e.currentTarget,btn=form.querySelector('button'),f=new FormData(form);
+  btn.disabled=true;btn.textContent='GİRİŞ KONTROL EDİLİYOR…';
+  try{
+   await loginAdmin(String(f.get('email')).trim(),String(f.get('password')));
+   const permission=await permissionPromise;
+   await initializeAdminCatalog();renderCats();renderProducts();
+   await loadCloudOrders({notifyNew:false});
+   $('#customer').classList.add('hidden');$('#siteHeader').classList.add('hidden');
+   document.querySelector('.footer').classList.add('hidden');$('#admin').classList.remove('hidden');
+   adminPage='overview';renderAdmin();
+   startOrderPolling();startOrdersRealtime();
+   if(permission==='granted'){
+    const registered=await restoreAdminOrderNotifications();
+    if(!registered)console.warn('Bu cihazın sipariş bildirim kaydı tamamlanamadı; Bildirim Gönder sayfasından yeniden açabilirsiniz.');
+   }else if(permission==='denied'){
+    toast('Yönetici girişi başarılı. Sipariş bildirimleri için tarayıcı bildirim iznini açın.');
+   }else{
+    toast('Yönetici girişi başarılı. Bildirim izni verilmediği için cihaz kaydı yapılmadı.');
+   }
+   closeModal();
+   if(permission==='granted')toast('Yönetici girişi başarılı. Bu cihazın sipariş bildirimleri hazır.');
+  }catch(error){
+   toast(error.message||'Giriş başarısız');btn.disabled=false;btn.textContent='GÜVENLİ GİRİŞ YAP';
+  }
+ };
+}
 
 const titles={overview:'Genel Bakış',orders:'Siparişler',products:'Ürün & Menü',campaigns:'Kampanyalar',notifications:'Bildirim Gönder',customers:'Müşteriler',reports:'Raporlar',settings:'Ayarlar'};let orderManagementFilter='Tümü';
 function timeAgo(d){const seconds=Math.max(0,Math.floor((Date.now()-d.getTime())/1000));if(seconds<60)return seconds+' sn önce';const minutes=Math.floor(seconds/60);if(minutes<60)return minutes+' dk önce';const hours=Math.floor(minutes/60);if(hours<24)return hours+' sa önce';const days=Math.floor(hours/24);return days+' gün önce'}
@@ -1048,7 +1180,7 @@ $('#mobileMenu').onclick=()=>$('#menu').scrollIntoView({behavior:'smooth'});
 $('#mobileCart').onclick=cartModal;
 $('#mobileOrders').onclick=()=>$('#historyBack').classList.add('show');
 $('#footerHistory').onclick=()=>$('#historyBack').classList.add('show');
-$('#footerTrack').onclick=()=>$('#trackBack').classList.add('show');$('#closeModal').onclick=closeModal;$('#modalBack').onclick=e=>{if(e.target===$('#modalBack'))closeModal()};$('#adminBtn').onclick=adminLogin;$('#footerAdmin').onclick=adminLogin;$('#backSite').onclick=()=>{supabaseAccessToken='';try{sessionStorage.removeItem('lc_admin_access_token');sessionStorage.removeItem('lc_admin_refresh_token')}catch(e){}$('#admin').classList.add('hidden');$('#customer').classList.remove('hidden');$('#siteHeader').classList.remove('hidden');document.querySelector('.footer').classList.remove('hidden')};$('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{adminPage=b.dataset.page;renderAdmin()});
+$('#footerTrack').onclick=()=>$('#trackBack').classList.add('show');$('#closeModal').onclick=closeModal;$('#modalBack').onclick=e=>{if(e.target===$('#modalBack'))closeModal()};$('#adminBtn').onclick=adminLogin;$('#footerAdmin').onclick=adminLogin;$('#backSite').onclick=()=>{stopOrdersRealtime();supabaseAccessToken='';try{sessionStorage.removeItem('lc_admin_access_token');sessionStorage.removeItem('lc_admin_refresh_token')}catch(e){}$('#admin').classList.add('hidden');$('#customer').classList.remove('hidden');$('#siteHeader').classList.remove('hidden');document.querySelector('.footer').classList.remove('hidden')};$('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{adminPage=b.dataset.page;renderAdmin()});
 /* Ana sayfa öne çıkan lezzetler slaytı */
 (()=>{
  const root=document.getElementById('heroSlider');if(!root)return;
@@ -1093,10 +1225,22 @@ async function enableNotifications(){
  }catch(err){console.error('Bildirim aboneliği kurulamadı:',err);toast('Bildirim kaydedilemedi: '+(err.message||'Bağlantıyı kontrol edin.'))}
 }
 
-async function persistAdminOrderPushSubscription(subscription){
- const payload=JSON.stringify({p_endpoint:subscription.endpoint,p_subscription:subscription.toJSON(),p_user_agent:navigator.userAgent});
- let response=await fetch(SUPABASE_URL+'/rest/v1/rpc/save_admin_push_subscription',{method:'POST',headers:{...supabaseHeaders(),'Content-Type':'application/json'},body:payload});
- if(response.status===401&&await refreshAdminAccessToken())response=await fetch(SUPABASE_URL+'/rest/v1/rpc/save_admin_push_subscription',{method:'POST',headers:{...supabaseHeaders(),'Content-Type':'application/json'},body:payload});
+async function persistAdminOrderPushSubscription(subscription,previousEndpoint=null){
+ const payload=JSON.stringify({
+  p_previous_endpoint:previousEndpoint,
+  p_endpoint:subscription.endpoint,
+  p_subscription:subscription.toJSON(),
+  p_user_agent:navigator.userAgent
+ });
+ const rpc=previousEndpoint?'replace_admin_push_subscription':'save_admin_push_subscription';
+ let response=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+rpc,{
+  method:'POST',headers:{...supabaseHeaders(),'Content-Type':'application/json'},body:payload
+ });
+ if(response.status===401&&await refreshAdminAccessToken()){
+  response=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+rpc,{
+   method:'POST',headers:{...supabaseHeaders(),'Content-Type':'application/json'},body:payload
+  });
+ }
  if(!response.ok)throw new Error(await response.text());
 }
 async function getAdminOrderPushDeviceCount(){
@@ -1115,17 +1259,30 @@ async function enableAdminOrderNotifications(){
  const readyRegistration=await navigator.serviceWorker.ready;
  const applicationServerKey=urlBase64ToUint8Array(PUSH_VAPID_PUBLIC_KEY);
  const oldSubscription=await readyRegistration.pushManager.getSubscription();
+ const previousEndpoint=oldSubscription?.endpoint||null;
  if(oldSubscription){
-  // The push provider may have expired this endpoint already; always continue with a fresh subscription.
-  await oldSubscription.unsubscribe().catch(error=>console.warn('Eski bildirim kaydı kapatılamadı, yeni kayıt deneniyor:',error));
+  await oldSubscription.unsubscribe().catch(error=>console.warn('Eski bildirim aboneliği kapatılamadı; yenisi deneniyor:',error));
   const remaining=await readyRegistration.pushManager.getSubscription();
-  if(remaining)throw new Error('Eski bildirim kaydı tarayıcıdan kaldırılamadı. Bu cihazın site bildirim iznini kontrol edin.');
+  if(remaining)throw new Error('Eski bildirim kaydı kaldırılamadı. Bu cihazın tarayıcı bildirim ayarını kontrol edin.');
  }
  const subscription=await readyRegistration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey});
- await persistAdminOrderPushSubscription(subscription);
+ await persistAdminOrderPushSubscription(subscription,previousEndpoint);
+ return true;
 }
-
-
+async function restoreAdminOrderNotifications(){
+ if(!supabaseAccessToken||!('Notification'in window)||Notification.permission!=='granted')return false;
+ try{
+  const registration=await navigator.serviceWorker.ready;
+  const subscription=await registration.pushManager.getSubscription();
+  const savedCount=await getAdminOrderPushDeviceCount();
+  if(!subscription||savedCount===0)return await enableAdminOrderNotifications();
+  await persistAdminOrderPushSubscription(subscription);
+  return true;
+ }catch(error){
+  console.warn('Yönetici bildirim kaydı otomatik yenilenemedi:',error);
+  return false;
+ }
+}
 $('#promoNotify').onclick=enableNotifications;$('#notifyBtn').onclick=enableNotifications;$('#loyaltyBtn').onclick=enableNotifications;async function restoreAdminSession(){
  let token='';
  try{token=sessionStorage.getItem('lc_admin_access_token')||''}catch(e){}
@@ -1146,6 +1303,8 @@ $('#promoNotify').onclick=enableNotifications;$('#notifyBtn').onclick=enableNoti
   adminPage='overview';
   renderAdmin();
   startOrderPolling();
+  startOrdersRealtime();
+  restoreAdminOrderNotifications();
   toast('Yönetim oturumu geri yüklendi');
  }catch(err){
   supabaseAccessToken='';

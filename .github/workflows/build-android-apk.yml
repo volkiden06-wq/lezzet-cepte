@@ -82,7 +82,7 @@ jobs:
           set -euo pipefail
           APK="android-app/app/build/outputs/apk/release/app-release.apk"
           test -s "$APK"
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
 
           FINGERPRINT="$(keytool -list -v \
             -keystore "$ANDROID_KEYSTORE_PATH" \

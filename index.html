@@ -1272,11 +1272,9 @@ async function enableAdminOrderNotifications(){
 async function restoreAdminOrderNotifications(){
  if(!supabaseAccessToken||!('Notification'in window)||Notification.permission!=='granted')return false;
  try{
-  const registration=await navigator.serviceWorker.ready;
-  const subscription=await registration.pushManager.getSubscription();
-  const savedCount=await getAdminOrderPushDeviceCount();
-  if(!subscription||savedCount===0)return await enableAdminOrderNotifications();
-  await persistAdminOrderPushSubscription(subscription);
+  // Renew the endpoint on every authenticated admin session. Browser caches can keep
+  // endpoints that the push provider has already expired; a fresh endpoint avoids 404/410.
+  await enableAdminOrderNotifications();
   return true;
  }catch(error){
   console.warn('Yönetici bildirim kaydı otomatik yenilenemedi:',error);

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">YEMEK TADINDA</string>
+    <string name="provider_authority">com.yemektadinda.app.fileprovider</string>
+</resources>

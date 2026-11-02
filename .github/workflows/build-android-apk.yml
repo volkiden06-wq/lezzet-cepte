@@ -1,12 +1,6 @@
 name: Build YEMEK TADINDA Android APK
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "android-app/**"
-      - ".github/workflows/build-android-apk.yml"
   workflow_dispatch:
 
 permissions:

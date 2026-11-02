@@ -1024,7 +1024,7 @@ if(f)f.onsubmit=async e=>{
      try{sessionStorage.removeItem('lc_pending_loyalty_use')}catch{}
      checkoutLoyaltyState=null;
     }else if(checkoutLoyaltyState){
-     checkoutLoyaltyState.pointsBalance=order.pointsBalance||checkoutLoyaltyState.pointsBalance;
+     checkoutLoyaltyState.pointsBalance=Number(order.pointsBalance)||0;
      savePendingLoyaltyUse(checkoutLoyaltyState);
     }
     orders.unshift(order);

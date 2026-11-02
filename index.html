@@ -713,7 +713,7 @@ async function playNewOrderSound(force=false){
  if(!force&&(!orderSoundEnabled||!orderSoundReady))return;
  if(orderSoundPlaying)return;orderSoundPlaying=true;
  try{
-  const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;if(!orderAudioContext)orderAudioContext=new Ctx();
+  const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){orderSoundPlaying=false;return;}if(!orderAudioContext)orderAudioContext=new Ctx();
   const ctx=orderAudioContext;if(ctx.state==='suspended')await ctx.resume();if(ctx.state!=='running'){orderSoundPlaying=false;return;}
   const now=ctx.currentTime,master=ctx.createGain(),compressor=ctx.createDynamicsCompressor();master.gain.setValueAtTime(.72,now);
   compressor.threshold.setValueAtTime(-20,now);compressor.knee.setValueAtTime(16,now);compressor.ratio.setValueAtTime(6,now);compressor.attack.setValueAtTime(.004,now);compressor.release.setValueAtTime(.18,now);
@@ -1101,7 +1101,7 @@ async function persistAdminOrderPushSubscription(subscription){
 }
 async function resumeExistingAdminOrderNotifications(){
  if(!supabaseAccessToken||!('serviceWorker'in navigator)||!('PushManager'in window)||!('Notification'in window)||Notification.permission!=='granted')return false;
- try{await navigator.serviceWorker.ready;const registration=await navigator.serviceWorker.getRegistration('/');const subscription=registration?await registration.pushManager.getSubscription():null;if(!subscription)return false;await persistAdminOrderPushSubscription(subscription);return true}
+ try{await navigator.serviceWorker.ready;const registration=await navigator.serviceWorker.ready;const subscription=await registration.pushManager.getSubscription();if(!subscription)return false;await persistAdminOrderPushSubscription(subscription);return true}
  catch(error){console.warn('Mevcut yönetici bildirim aboneliği yenilenemedi',error);return false}
 }
 async function enableAdminOrderNotifications(){
@@ -1128,9 +1128,7 @@ $('#promoNotify').onclick=enableNotifications;$('#notifyBtn').onclick=enableNoti
   }
   if(!checkResponse.ok||await checkResponse.json()!==true)throw new Error('Yönetici oturumu doğrulanamadı.');
   await initializeAdminCatalog();
-  await initializeAdminCatalog();
-  await loadCloudOrders();
-  knownOrderNumbers=new Set(orders.map(o=>String(o.orderNumber||o.id||'')));
+  await loadCloudOrders({notifyNew:false});
   $('#customer').classList.add('hidden');
   $('#siteHeader').classList.add('hidden');
   document.querySelector('.footer').classList.add('hidden');

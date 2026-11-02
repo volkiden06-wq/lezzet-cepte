@@ -61,6 +61,15 @@ Deno.serve(async (req: Request) => {
     );
     if (!db.ok) throw new Error("Abonelikler okunamadı: " + await db.text());
     const subscriptions = await db.json();
+    if (!Array.isArray(subscriptions) || subscriptions.length === 0) {
+      return reply(200, {
+        success: false,
+        sent: 0,
+        failed: 0,
+        total: 0,
+        message: "No administrator devices are registered for new-order alerts.",
+      });
+    }
 
     webpush.setVapidDetails(vapidSubject!, vapidPublicKey!, vapidPrivateKey!);
     let sent = 0;
@@ -103,7 +112,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    return reply(200, { success: failed === 0, sent, failed, total: subscriptions.length });
+    return reply(200, { success: failed === 0 && sent > 0, sent, failed, total: subscriptions.length });
   } catch (error) {
     console.error("send-order-notification:", error);
     return reply(500, { error: (error as Error).message || "Push delivery failed." });

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yemek-tadinda-shell-v13';
+const CACHE_NAME = 'yemek-tadinda-shell-v14';
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/app-icon.svg', '/favicon-32.png', '/app-icon-192.png', '/app-icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -8,21 +8,36 @@ self.addEventListener('activate', event => {
 });
 self.addEventListener('push', event => {
   let data = {};
-  try { data = event.data ? event.data.json() : {}; } catch (_) { data = { body: event.data ? event.data.text() : '' }; }
+  try { data = event.data ? event.data.json() : {}; }
+  catch (_) { data = { body: event.data ? event.data.text() : '' }; }
   const title = data.title || 'YEMEK TADINDA';
+  const orderNumber = data.orderNumber ? String(data.orderNumber) : null;
   const options = {
     body: data.body || 'Yeni bir duyurumuz var.',
-    icon: '/app-icon.svg',
-    badge: '/app-icon.svg',
+    icon: '/app-icon-192.png',
+    badge: '/favicon-32.png',
     image: data.image || undefined,
-    tag: data.tag || (data.orderNumber ? 'yemek-tadinda-order-' + data.orderNumber : 'yemek-tadinda-campaign'),
+    tag: data.tag || (orderNumber ? 'yemek-tadinda-order-' + orderNumber : 'yemek-tadinda-campaign'),
     renotify: true,
     silent: false,
     vibrate: [300, 150, 300, 150, 600],
     requireInteraction: true,
-    data: { url: data.url || '/', orderNumber: data.orderNumber || null }
+    data: { url: data.url || '/', orderNumber }
   };
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil((async () => {
+    try { await self.registration.showNotification(title, options); }
+    catch (error) {
+      console.error('Primary notification display failed:', error);
+      await self.registration.showNotification(title, {
+        body: options.body, tag: options.tag, renotify: true, silent: false,
+        vibrate: options.vibrate, requireInteraction: true, data: options.data
+      });
+    }
+    if (orderNumber) {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const client of windows) client.postMessage({ type: 'YEMEK_TADINDA_NEW_ORDER', orderNumber, title, body: options.body });
+    }
+  })());
 });
 self.addEventListener('notificationclick', event => {
   event.notification.close();

@@ -1,5 +1,5 @@
-const CACHE_NAME = 'yemek-tadinda-shell-v12';
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/app-icon.svg'];
+const CACHE_NAME = 'yemek-tadinda-shell-v13';
+const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/app-icon.svg', '/favicon-32.png', '/app-icon-192.png', '/app-icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });
@@ -49,7 +49,7 @@ self.addEventListener('fetch', event => {
     }).catch(() => caches.match('/index.html').then(response => response || caches.match('/'))));
     return;
   }
-  if (['/manifest.webmanifest', '/app-icon.svg'].includes(url.pathname)) {
+  if (['/manifest.webmanifest', '/app-icon.svg', '/favicon-32.png', '/app-icon-192.png', '/app-icon-512.png'].includes(url.pathname)) {
     event.respondWith(caches.match(request).then(cached => cached || fetch(request)));
   }
 });

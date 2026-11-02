@@ -1,7 +1,14 @@
 const CACHE_NAME = 'yemek-tadinda-shell-v14';
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/app-icon.svg', '/favicon-32.png', '/app-icon-192.png', '/app-icon-512.png'];
+const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/app-icon.svg'];
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll(APP_SHELL);
+    // Optional PNG shortcuts must never block service-worker installation.
+    await Promise.all(['/favicon-32.png', '/app-icon-192.png', '/app-icon-512.png']
+      .map(path => cache.add(path).catch(error => console.warn('Optional app icon not cached:', path, error))));
+    await self.skipWaiting();
+  })());
 });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));
@@ -14,8 +21,8 @@ self.addEventListener('push', event => {
   const orderNumber = data.orderNumber ? String(data.orderNumber) : null;
   const options = {
     body: data.body || 'Yeni bir duyurumuz var.',
-    icon: '/app-icon-192.png',
-    badge: '/favicon-32.png',
+    icon: '/app-icon.svg',
+    badge: '/app-icon.svg',
     image: data.image || undefined,
     tag: data.tag || (orderNumber ? 'yemek-tadinda-order-' + orderNumber : 'yemek-tadinda-campaign'),
     renotify: true,

@@ -528,6 +528,11 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
 .reset-danger-action{background:#b42332!important;color:#fff!important}
 @media(max-width:520px){.reset-confirm-summary{grid-template-columns:1fr}.reset-modal-actions{flex-direction:column}}
 
+
+.order-archive-btn{display:block;margin-top:5px;border:1px solid #f5c4cb;background:#fff4f5;color:#a91d2e;border-radius:7px;padding:6px 10px;font-size:11px;font-weight:850;cursor:pointer}
+.order-archive-btn:hover{background:#ffe5e8}
+.order-archive-btn:disabled{opacity:.55;cursor:wait}
+
 </style></head><body>
 <header class="topbar" id="siteHeader"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK<span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><a id="headerWhatsAppBtn" href="https://wa.me/905421511186?text=Merhaba%2C%20YEMEK%20TADINDA%20%C3%BCzerinden%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 15px;border-radius:12px;background:#16a34a;color:#fff;font-weight:900;white-space:nowrap;box-shadow:0 5px 15px #16a34a40">☏ WhatsApp</a><button class="ghost" id="installAppBtn" type="button" style="border-color:#16a34a;color:#12813f;font-weight:900">⬇ Uygulamayı Yükle</button><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
 <nav class="mobile-bottom-nav" aria-label="Mobil menü">
@@ -823,7 +828,7 @@ function saveOrderCachesOnly(){
  }catch(error){console.warn('Sipariş önbelleği kaydedilemedi:',error)}
 }
 async function loadCloudOrders({notifyNew=true}={}){
- const rows=await supabaseRequest('/rest/v1/orders?select=*&order=created_at.desc');
+ const rows=await supabaseRequest('/rest/v1/orders?select=*&status=neq.'+encodeURIComponent('Arşivlendi')+'&order=created_at.desc');
  const latest=(Array.isArray(rows)?rows:[]).map(mapCloudOrderRow);
  const incoming=orderBaselineReady?latest.filter(o=>!knownOrderNumbers.has(String(o.orderNumber||o.id||''))):[];
  orders=latest;
@@ -1143,7 +1148,7 @@ function orderWhen(o){const raw=o.date||o.created_at||o.createdAt;const d=raw?ne
 function orderStatus(o){const raw=String(o.status||'Yeni').trim();const key=raw.toLocaleLowerCase('tr');const known={'yeni':'Yeni','yeni sipariş':'Yeni','bekliyor':'Bekliyor','beklemede':'Bekliyor','hazırlanıyor':'Hazırlanıyor','hazirlaniyor':'Hazırlanıyor','yola çıktı':'Yola çıktı','yola cikti':'Yola çıktı','teslim edildi':'Teslim edildi','iptal':'İptal','kapalı':'Kapalı','kapali':'Kapalı'};return known[key]||raw||'Yeni'}
 function orderManagementTable(list){
  if(!list.length)return '<div class="order-empty"><div class="empty-icon">📦</div><b>Sipariş bulunamadı</b><p>Seçilen filtrelere uygun sipariş bulunamadı.</p></div>';
- return `<div class="table-wrap order-table-wrap"><table class="order-detail-table"><thead><tr><th>SİPARİŞ</th><th>👤 MÜŞTERİ</th><th>ÜRÜNLER</th><th>TOPLAM</th><th>DURUM</th><th>TARİH / SAAT</th></tr></thead><tbody>${list.map(o=>{const d=orderWhen(o),status=orderStatus(o),phone=String(o.phone||o.customer_phone||'').replace(/\\D/g,''),orderNo=String(o.orderNumber||o.order_number||o.id||'').slice(-6).toUpperCase(),items=(o.items||[]).map(i=>`${escapeHtml(i.qty||1)}× ${escapeHtml(i.name||i.title||'Ürün')} (${money(Number(i.price)||0)})`).join(' | '),kind=o.type||o.order_type||o.delivery_type||'Web Siparişi',customer=escapeHtml(o.name||o.customer_name||'Müşteri');return `<tr><td><b class="order-type-label">🛍 ${escapeHtml(kind)}</b><small class="order-number-label">#${escapeHtml(orderNo)} · ${d?timeAgo(d):''}</small></td><td><b>${customer}</b><small class="order-phone">${escapeHtml(o.phone||o.customer_phone||'—')}</small>${phone.length>=10?`<a class="order-whatsapp" href="https://wa.me/${phone.startsWith('0')?'90'+phone.slice(1):phone}" target="_blank" rel="noopener noreferrer">☏ WhatsApp</a>`:''}</td><td class="order-items-cell">${items||'—'}<small>${escapeHtml(o.paymentMethod||o.payment_method||o.payment||'')}</small></td><td><b class="order-total">${money(+o.total||0)}</b>${Number(o.discount_amount||o.discountAmount)>0?'<small style="display:block;color:#92702a">⭐ Puan indirimi −'+money(Number(o.discount_amount||o.discountAmount))+'</small>':''}</td><td><select class="order-status-select" data-status="${escapeHtml(String(o.id))}">${['Yeni','Bekliyor','Hazırlanıyor','Yola çıktı','Teslim edildi','İptal','Kapalı'].map(x=>`<option value="${x}" ${status===x?'selected':''}>${x==='Teslim edildi'?'✅ Teslim':x==='Yeni'?'🆕 Yeni':x==='Hazırlanıyor'?'👨‍🍳 Hazırlanıyor':x==='İptal'?'❌ İptal':x==='Kapalı'?'🔒 Kapalı':x}</option>`).join('')}</select><button class="order-cancel-btn" data-cancel-order="${escapeHtml(String(o.id))}">✕ İptal</button></td><td>${d?d.toLocaleString('tr-TR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'}</td></tr>`}).join('')}</tbody></table></div>`;
+ return `<div class="table-wrap order-table-wrap"><table class="order-detail-table"><thead><tr><th>SİPARİŞ</th><th>👤 MÜŞTERİ</th><th>ÜRÜNLER</th><th>TOPLAM</th><th>DURUM</th><th>TARİH / SAAT</th></tr></thead><tbody>${list.map(o=>{const d=orderWhen(o),status=orderStatus(o),phone=String(o.phone||o.customer_phone||'').replace(/\\D/g,''),orderNo=String(o.orderNumber||o.order_number||o.id||'').slice(-6).toUpperCase(),items=(o.items||[]).map(i=>`${escapeHtml(i.qty||1)}× ${escapeHtml(i.name||i.title||'Ürün')} (${money(Number(i.price)||0)})`).join(' | '),kind=o.type||o.order_type||o.delivery_type||'Web Siparişi',customer=escapeHtml(o.name||o.customer_name||'Müşteri');return `<tr><td><b class="order-type-label">🛍 ${escapeHtml(kind)}</b><small class="order-number-label">#${escapeHtml(orderNo)} · ${d?timeAgo(d):''}</small></td><td><b>${customer}</b><small class="order-phone">${escapeHtml(o.phone||o.customer_phone||'—')}</small>${phone.length>=10?`<a class="order-whatsapp" href="https://wa.me/${phone.startsWith('0')?'90'+phone.slice(1):phone}" target="_blank" rel="noopener noreferrer">☏ WhatsApp</a>`:''}</td><td class="order-items-cell">${items||'—'}<small>${escapeHtml(o.paymentMethod||o.payment_method||o.payment||'')}</small></td><td><b class="order-total">${money(+o.total||0)}</b>${Number(o.discount_amount||o.discountAmount)>0?'<small style="display:block;color:#92702a">⭐ Puan indirimi −'+money(Number(o.discount_amount||o.discountAmount))+'</small>':''}</td><td><select class="order-status-select" data-status="${escapeHtml(String(o.id))}">${['Yeni','Bekliyor','Hazırlanıyor','Yola çıktı','Teslim edildi','İptal','Kapalı'].map(x=>`<option value="${x}" ${status===x?'selected':''}>${x==='Teslim edildi'?'✅ Teslim':x==='Yeni'?'🆕 Yeni':x==='Hazırlanıyor'?'👨‍🍳 Hazırlanıyor':x==='İptal'?'❌ İptal':x==='Kapalı'?'🔒 Kapalı':x}</option>`).join('')}</select><button class="order-cancel-btn" data-cancel-order="${escapeHtml(String(o.id))}">✕ İptal</button><button class="order-archive-btn" data-archive-order="${escapeHtml(String(o.id))}" type="button">🗑️ Sil</button></td><td>${d?d.toLocaleString('tr-TR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'}</td></tr>`}).join('')}</tbody></table></div>`;
 }
 function wireOrdersPage(){
  if(adminPage!=='orders')return;
@@ -1188,6 +1193,29 @@ function wireOrdersPage(){
    btn.disabled=true;
    try{await updateCloudOrderStatus(o.orderNumber||o.id,'İptal');o.status='İptal';save();update();toast('Sipariş iptal edildi')}
    catch(err){btn.disabled=false;toast('Sipariş iptal edilemedi: '+(err.message||''))}
+  });
+  $('#ordersTableHost').querySelectorAll('[data-archive-order]').forEach(btn=>btn.onclick=()=>{
+   const o=orders.find(x=>String(x.id)===String(btn.dataset.archiveOrder));if(!o)return;
+   openModal('Siparişi Arşivle',
+    '<div class="reset-warning"><b>'+escapeHtml(o.name||o.customer_name||'Müşteri')+'</b> adlı müşterinin #'+escapeHtml(String(o.orderNumber||o.order_number||o.id))+' numaralı siparişi aktif listeden kaldırılacak.</div>'+
+    '<p style="font-size:13px;color:#475569;line-height:1.55">Sipariş arşivlenir; müşteri sipariş geçmişi ve sadakat puanı doğrulaması korunur. Bu sipariş aktif ciro raporlarından çıkarılır.</p>'+
+    '<div class="reset-modal-actions"><button class="ghost" id="cancelSingleOrderArchive" type="button">VAZGEÇ</button><button class="primary reset-danger-action" id="confirmSingleOrderArchive" type="button">🗑️ SİL / ARŞİVLE</button></div>'
+   );
+   $('#cancelSingleOrderArchive').onclick=closeModal;
+   $('#confirmSingleOrderArchive').onclick=async()=>{
+    const confirmButton=$('#confirmSingleOrderArchive');
+    confirmButton.disabled=true;confirmButton.textContent='ARŞİVLENİYOR…';
+    try{
+     await supabaseRequest('/rest/v1/orders?id=eq.'+encodeURIComponent(String(o.id)),{
+      method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({status:'Arşivlendi'})
+     });
+     await loadCloudOrders({notifyNew:false});
+     closeModal();update();toast('Sipariş arşive alındı; aktif listeden ve raporlardan kaldırıldı.');
+    }catch(error){
+     confirmButton.disabled=false;confirmButton.textContent='🗑️ SİL / ARŞİVLE';
+     toast('Sipariş arşivlenemedi: '+(error.message||'Bağlantıyı kontrol edin.'));
+    }
+   };
   });
  };
  document.querySelectorAll('[data-order-filter]').forEach(btn=>btn.onclick=()=>{orderManagementFilter=btn.dataset.orderFilter;update()});
@@ -1342,10 +1370,17 @@ async function executeReportHistoryReset(button){
  button.textContent='SIFIRLAMA YAPILIYOR…';
  try{
   downloadReportResetBackup();
-  const result=await supabaseRequest('/rest/v1/rpc/admin_reset_order_history',{
-   method:'POST',
-   body:'{}'
-  });
+  const ids=orders.map(order=>Number(order.id)).filter(id=>Number.isSafeInteger(id)&&id>0);
+  let archivedCount=0;
+  for(let offset=0;offset<ids.length;offset+=100){
+   const batch=ids.slice(offset,offset+100);
+   await supabaseRequest('/rest/v1/orders?id=in.('+batch.join(',')+')',{
+    method:'PATCH',
+    headers:{'Prefer':'return=minimal'},
+    body:JSON.stringify({status:'Arşivlendi'})
+   });
+   archivedCount+=batch.length;
+  }
   orders=[];
   knownOrderNumbers=new Set();
   orderBaselineReady=true;
@@ -1359,8 +1394,7 @@ async function executeReportHistoryReset(button){
   }
   closeModal();
   renderAdmin();
-  const count=Number(result?.archived_orders)||0;
-  toast('Geçmiş sıfırlandı. '+count+' sipariş arşivlendi. Ürünler, kampanyalar, müşteriler, puanlar ve bildirimler korundu.');
+  toast('Geçmiş sıfırlandı. '+archivedCount+' sipariş arşive alındı. Ürünler, kampanyalar, müşteriler, puanlar ve bildirimler korundu.');
  }catch(error){
   button.disabled=false;
   button.textContent='🗑️ GEÇMİŞİ SIFIRLA';
@@ -1391,7 +1425,7 @@ function openReportResetModal(){
    const orderCount=orders.length;
    const revenue=orders.filter(order=>order.status!=='İptal').reduce((sum,order)=>sum+(Number(order.total)||0),0);
    openModal('Son Onay: Geçmişi Sıfırla',
-    '<div class="reset-warning"><b>Son kez onaylayın.</b> '+orderCount+' sipariş aktif geçmişten kaldırılacak; rapor cirosu '+money(revenue)+' olarak sıfırlanacak. İşlem geri alınamaz şekilde aktif listeden kaldırır, ancak kayıtlar arşivde saklanır.</div>'+
+    '<div class="reset-warning"><b>Son kez onaylayın.</b> '+orderCount+' sipariş arşivlenecek; aktif sipariş listesinden ve ciro raporlarından kaldırılacak. Kayıtlar müşteri sipariş geçmişi ve puan doğrulaması için korunacak.</div>'+
     '<div class="reset-confirm-summary"><div><small>Arşivlenecek sipariş</small><strong>'+orderCount.toLocaleString('tr-TR')+'</strong></div><div><small>Sıfırlanacak rapor cirosu</small><strong>'+money(revenue)+'</strong></div></div>'+
     '<p style="font-size:13px;color:#475569;line-height:1.55">Ürünler, kategoriler, kampanyalar, müşteri kayıtları, kazanılmış puan bakiyeleri ve puan hareketleri ile müşteri/yönetici bildirim abonelikleri korunur.</p>'+
     '<div class="reset-modal-actions"><button class="ghost" type="button" id="cancelFinalReportReset">VAZGEÇ</button><button class="primary reset-danger-action" type="button" id="confirmReportReset">🗑️ GEÇMİŞİ SIFIRLA</button></div>'

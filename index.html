@@ -344,6 +344,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
  .footer .brand small{color:#d2bdb2}
  .footer-links{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
  .footer-links button{color:#f7d9ce;border:1px solid #ffffff24;border-radius:20px;padding:8px 13px}
+ .footer-links button.footer-install-button{background:linear-gradient(135deg,#ff3434,#d90020);color:#fff;border-color:transparent;font-weight:900;padding:9px 15px;box-shadow:0 5px 15px #ed102433}
  #footerAdmin{display:block!important;width:min(100%,320px);background:#211c1b;color:#fff;border:1px solid #ffffff55;border-radius:30px;padding:13px 20px;font-weight:850}
  .mobile-bottom-nav{position:fixed;z-index:15;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:7px 5px calc(7px + env(safe-area-inset-bottom));background:#fffdfb;border-top:1px solid #eee0d6;box-shadow:0 -5px 20px #2d160d12}
  .mobile-bottom-nav button{position:relative;border:0;background:transparent;color:#777;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 2px;min-height:48px}
@@ -494,7 +495,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
 <section class="wrap section" id="menu"><div class="section-head"><div><span class="eyebrow">SENİN İÇİN HAZIRLANDI</span><h2>Menüyü keşfet</h2></div><label class="search">⌕ <input id="search" placeholder="Ürün veya kategori ara..."></label></div><div class="cats" id="categories"></div><div class="products" id="products"></div></section>
 <section class="wrap loyalty"><div><span class="eyebrow">LEZZETİN KAZANDIRDIĞI</span><h2>Kampanyaları ilk sen öğren.</h2><p>Bildirimlere izin vererek yeni fırsatlardan haberdar ol.</p></div><button class="primary" id="loyaltyBtn">BİLDİRİMLERİ AÇ</button></section>
 <section class="wrap features"><div class="feature"><span>🔥</span><b>Özenle hazırlanır</b><p>Menüden ürününü seç, siparişini kolayca oluştur.</p></div><div class="feature"><span>🛍️</span><b>Kolay sipariş</b><p>Sepetini düzenle, teslimat veya gel-al tercihini belirt.</p></div><div class="feature"><span>🔔</span><b>Kampanya fırsatları</b><p>Bildirim izni verdiğinde desteklenen cihazlarda duyuruları al.</p></div></section></main>
-<footer class="footer"><div class="wrap footer-inner"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK <span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="footer-links"><button type="button" id="footerHistory">Siparişlerim</button><button type="button" id="footerTrack">Sipariş Takip</button></div><span>© <span id="year"></span> YEMEK TADINDA | CHINAR CATERING KURULUŞUDUR</span><button class="ghost" id="footerAdmin">🔒 Yönetici Girişi</button></div></footer>
+<footer class="footer"><div class="wrap footer-inner"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK <span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="footer-links"><button type="button" id="footerHistory">Siparişlerim</button><button type="button" id="footerTrack">Sipariş Takip</button><button type="button" id="footerInstallApp" class="footer-install-button">📲 UYGULAMA YÜKLE</button></div><span>© <span id="year"></span> YEMEK TADINDA | CHINAR CATERING KURULUŞUDUR</span><button class="ghost" id="footerAdmin">🔒 Yönetici Girişi</button></div></footer>
 <section class="admin hidden" id="admin"><aside class="sidebar"><a class="brand" href="#"><span class="brand-mark">YT</span><span>YEMEK <span class="red">TADINDA</span><small>YÖNETİM PANELİ</small></span></a><nav class="nav" id="nav"><button class="active" data-page="overview">▦ Genel Bakış</button><button data-page="orders">▤ Siparişler</button><button data-page="products">▧ Ürün & Menü</button><button data-page="campaigns">◇ Kampanyalar</button><button data-page="notifications">♧ Bildirim Gönder</button><button data-page="customers">♙ Müşteriler</button><button data-page="reports">▥ Raporlar</button><button data-page="settings">⚙ Ayarlar</button></nav><button class="ghost" id="backSite">← Güvenli çıkış / Siteye dön</button></aside><div class="admin-main"><div class="admin-head"><div><span class="eyebrow">İŞLETME YÖNETİMİ</span><h1 id="pageTitle">Genel Bakış</h1></div><span id="adminDate"></span></div><div id="page"></div></div></section>
 <div class="modal-back" id="modalBack"><section class="modal"><div class="modal-head"><h2 id="modalTitle">Sepetim</h2><button class="close" id="closeModal">×</button></div><div id="modalBody"></div></section></div><div class="modal-back" id="historyBack"><section class="modal"><div class="modal-head"><h2>Geçmiş Siparişlerim</h2><button class="close" id="historyClose">×</button></div><p style="color:#777;font-size:13px">Sipariş verirken kullandığınız telefon numarasını girin.</p><form id="historyForm"><div class="field"><label>Telefon numarası</label><input name="phone" type="tel" required placeholder="05xx xxx xx xx"></div><button class="primary" style="width:100%">SİPARİŞLERİMİ GÖSTER</button></form><div id="historyResult"></div></section></div><div class="modal-back" id="trackBack"><section class="modal"><div class="modal-head"><h2>Sipariş Takip</h2><button class="close" id="trackClose">×</button></div><form id="trackForm"><div class="field"><label>Sipariş numarası</label><input name="id" required></div><div class="field"><label>Telefon</label><input name="phone" type="tel" required></div><button class="primary" style="width:100%">SORGULA</button></form><div id="trackResult"></div><p class="notice">Sipariş numarası ve telefon numarasıyla güncel sipariş durumunu sorgulayabilirsin.</p></section></div><div class="toast" id="toast"></div>
 <script>
@@ -1193,28 +1194,45 @@ $('#promoNotify').onclick=enableNotifications;$('#notifyBtn').onclick=enableNoti
 $('#historyBtn').onclick=()=>$('#historyBack').classList.add('show');
 restoreAdminSession();$('#historyClose').onclick=()=>$('#historyBack').classList.remove('show');$('#historyForm').onsubmit=async e=>{e.preventDefault();const phone=String(new FormData(e.currentTarget).get('phone')).replace(/\D/g,'');$('#historyResult').innerHTML='<p>Siparişler aranıyor…</p>';try{const rows=await supabaseRequest('/rest/v1/rpc/lookup_orders_by_phone',{method:'POST',body:JSON.stringify({p_phone:phone})});const all=(Array.isArray(rows)?rows:[]);$('#historyResult').innerHTML=all.length?all.map(o=>`<div class="panel"><div style="display:flex;justify-content:space-between;gap:10px"><b>Sipariş #${escapeHtml(String(o.order_number||'').slice(-6))}</b><span class="status">${escapeHtml(o.status||'Yeni')}</span></div><p>${new Date(o.created_at||Date.now()).toLocaleString('tr-TR')}</p><p>Ödeme: ${escapeHtml(o.payment_method||'Belirtilmedi')} · Toplam: ${money(Number(o.total)||0)}</p><p style="font-size:12px;color:#777">${(o.items||[]).map(i=>escapeHtml(i.name||'Ürün')+' × '+(i.qty||1)).join(', ')}</p></div>`).join(''):'<div class="notice">Bu telefon numarasıyla eşleşen sipariş bulunamadı.</div>'}catch(err){$('#historyResult').innerHTML='<div class="notice">Siparişler şu anda alınamadı. Lütfen daha sonra tekrar deneyin.</div>'}};$('#trackBtn').onclick=()=>$('#trackBack').classList.add('show');$('#trackClose').onclick=()=>$('#trackBack').classList.remove('show');$('#trackForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),orderNo=String(f.get('id')||'').trim().replace(/^#+/,'').replace(/\s+/g,'').toUpperCase(),phone=String(f.get('phone')||'').replace(/\D/g,'');$('#trackResult').innerHTML='<p>Sipariş aranıyor…</p>';try{if(!orderNo||phone.length<10)throw new Error('input');const rows=await supabaseRequest('/rest/v1/rpc/lookup_order',{method:'POST',body:JSON.stringify({p_order_number:orderNo,p_phone:phone})});const o=Array.isArray(rows)?rows[0]:null;if(!o){$('#trackResult').innerHTML='<div class="notice">Bu sipariş numarası ve telefonla eşleşen kayıt bulunamadı. Numaranın tamamını (LC-...) veya yönetici listesindeki son 6 karakteri deneyin.</div>';return}$('#trackResult').innerHTML='<div class="panel"><h3>Sipariş #'+escapeHtml(String(o.order_number).slice(-6))+'</h3><p>Durum: <b>'+escapeHtml(o.status||'Yeni')+'</b></p><p>Toplam: '+money(Number(o.total)||0)+'</p><p>'+new Date(o.created_at||Date.now()).toLocaleString('tr-TR')+'</p></div>'}catch(err){console.error('Sipariş takip hatası:',err);$('#trackResult').innerHTML='<div class="notice">'+(err.message==='input'?'Lütfen sipariş numarasını ve 10 haneli telefon numarasını kontrol edin.':'Sipariş sorgulanamadı. Supabase takip SQL kurulumunun uygulandığını kontrol edin.')+'</div>'}};let deferredInstallPrompt=null;
 const installAppButton=$('#installAppBtn');
+const footerInstallAppButton=$('#footerInstallApp');
+const installButtons=[installAppButton,footerInstallAppButton].filter(Boolean);
 function isIosDevice(){return /iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream}
 function isStandaloneApp(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
 function updateInstallButton(){
- if(!installAppButton)return;
- if(isStandaloneApp()){installAppButton.textContent='✓ Uygulama Yüklü';installAppButton.disabled=true;installAppButton.style.opacity='.7';}
- else if(deferredInstallPrompt){installAppButton.textContent='⬇ Uygulamayı Yükle';installAppButton.disabled=false;}
- else if(isIosDevice()){installAppButton.textContent='＋ Ana Ekrana Ekle';installAppButton.disabled=false;}
- else {installAppButton.textContent='⬇ Uygulamayı Yükle';installAppButton.disabled=false;}
+ installButtons.forEach(button=>{
+  if(isStandaloneApp()){
+   button.textContent='✓ UYGULAMA YÜKLÜ';
+   button.disabled=true;
+   button.style.opacity='.7';
+  }else{
+   button.textContent='📲 UYGULAMA YÜKLE';
+   button.disabled=false;
+   button.style.opacity='1';
+  }
+ });
+}
+async function handleAppInstallClick(){
+ if(isStandaloneApp()){toast('YEMEK TADINDA uygulaması zaten yüklü.');return}
+ if(deferredInstallPrompt){
+  try{
+   await deferredInstallPrompt.prompt();
+   const choice=await deferredInstallPrompt.userChoice;
+   if(choice?.outcome==='accepted')toast('YEMEK TADINDA uygulaması yükleniyor.');
+   else toast('Uygulama yükleme isteği iptal edildi.');
+  }catch(error){console.warn('Uygulama yükleme penceresi açılamadı:',error);toast('Uygulama yükleme ekranı açılamadı. Tarayıcı menüsünü kontrol edin.')}
+  deferredInstallPrompt=null;
+  updateInstallButton();
+  return;
+ }
+ if(isIosDevice()){
+  toast("iPhone'da Safari paylaşım düğmesine basın, ardından Ana Ekrana Ekle seçeneğini seçin.");
+  return;
+ }
+ toast('Tarayıcı menüsünü açın ve "Uygulamayı yükle" veya "Ana ekrana ekle" seçeneğini seçin.');
 }
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;updateInstallButton()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;updateInstallButton();toast('YEMEK TADINDA uygulaması yüklendi')});
-installAppButton?.addEventListener('click',async()=>{
- if(isStandaloneApp()){toast('Uygulama zaten yüklü');return}
- if(deferredInstallPrompt){
-  deferredInstallPrompt.prompt();
-  const choice=await deferredInstallPrompt.userChoice;
-  if(choice?.outcome==='accepted')toast('Uygulama yükleniyor');
-  deferredInstallPrompt=null;updateInstallButton();return;
- }
- if(isIosDevice()){toast("Safari'de Paylaş düğmesine basın, ardından Ana Ekrana Ekle'yi seçin.");return}
- toast('Chrome menüsünü açın ve Uygulamayı yükle veya Ana ekrana ekle seçeneğini seçin.');
-});
+installButtons.forEach(button=>button.addEventListener('click',handleAppInstallClick));
 if('serviceWorker' in navigator && location.protocol==='https:'){
  window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(err=>console.warn('Uygulama çevrimdışı bileşeni kaydedilemedi',err)));
 }

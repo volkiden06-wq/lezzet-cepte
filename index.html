@@ -1087,7 +1087,7 @@ if(f)f.onsubmit=async e=>{
     ];
     const whatsappUrl = 'https://wa.me/905421511186?text=' + encodeURIComponent(whatsappLines.join('\n'));
     if(whatsappTab){try{whatsappTab.location.href=whatsappUrl;}catch{}}
-    openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p>${order.pointsRedeemed?'<p>⭐ Sadakat indirimi: <b>'+money(order.discountAmount)+'</b> ('+order.pointsRedeemed+' puan kullanıldı). Kalan puan: <b>'+order.pointsBalance+'</b></p>':''}<p>Ödenecek tutar: <b>${money(order.total)}</b></p><p>Siparişiniz kaydedildi. WhatsApp işletme sohbeti açıldıysa <b>Gönder</b> tuşuna basmanız yeterlidir.</p><a class="primary" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;margin-top:16px">💬 WHATSAPP MESAJINI AÇ / TEKRAR AÇ</a><p style="font-size:12px;color:#777;margin-top:10px">Mesaj otomatik gönderilmez; son gönderim onayı sizdedir. WhatsApp açılmazsa yukarıdaki butonu kullanın.</p><button type="button" id="trackCurrentOrder" class="ghost" style="display:block;width:100%;margin-top:10px">📦 SİPARİŞİMİ CANLI TAKİP ET</button></div>`);
+    openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p>${order.pointsRedeemed?'<p>⭐ Sadakat indirimi: <b>'+money(order.discountAmount)+'</b> ('+order.pointsRedeemed+' puan kullanıldı). Kalan puan: <b>'+order.pointsBalance+'</b></p>':''}`+'<p>Ödenecek tutar: <b>'+money(Number(order.total)||0)+'</b></p>'+`<p>Siparişiniz kaydedildi. WhatsApp işletme sohbeti açıldıysa <b>Gönder</b> tuşuna basmanız yeterlidir.</p><a class="primary" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;margin-top:16px">💬 WHATSAPP MESAJINI AÇ / TEKRAR AÇ</a><p style="font-size:12px;color:#777;margin-top:10px">Mesaj otomatik gönderilmez; son gönderim onayı sizdedir. WhatsApp açılmazsa yukarıdaki butonu kullanın.</p><button type="button" id="trackCurrentOrder" class="ghost" style="display:block;width:100%;margin-top:10px">📦 SİPARİŞİMİ CANLI TAKİP ET</button></div>`);
     if(!$('#admin').classList.contains('hidden'))renderAdmin();
     const trackCurrentOrderButton=$('#modalBody').querySelector('#trackCurrentOrder');
     if(trackCurrentOrderButton)trackCurrentOrderButton.onclick=()=>{
@@ -1862,7 +1862,12 @@ window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();def
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;updateInstallButton();toast('YEMEK TADINDA uygulaması yüklendi')});
 installButtons.forEach(button=>button.addEventListener('click',handleAppInstallClick));
 if('serviceWorker' in navigator && location.protocol==='https:'){
- window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(err=>console.warn('Uygulama çevrimdışı bileşeni kaydedilemedi',err)));
+ window.addEventListener('load',async()=>{
+ try{
+  const registration=await navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'});
+  await registration.update();
+ }catch(err){console.warn('Uygulama çevrimdışı bileşeni güncellenemedi',err)}
+});
 }
 updateInstallButton();
 $('#year').textContent=new Date().getFullYear();renderCartCount();renderCampaignSidebar();

@@ -937,75 +937,57 @@ function getCategoryOrder(){
 }
 function saveCategoryOrder(order){localStorage.setItem('lc_category_order',JSON.stringify(order));scheduleCatalogSync()}
 function renderCustomerNavCategories(){const host=$('#customerCategoryLinks');if(!host)return;const icons=['🍲','🥖','🍕','🍢','🌯','🍖','🍰','🥤','🍽️'];host.innerHTML=getCategoryOrder().map((c,i)=>`<a href="#menu" data-side-cat="${escapeHtml(c)}">${icons[i%icons.length]} <span>${escapeHtml(c)}</span></a>`).join('')}
-function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories').innerHTML=cats.map(c=>`<button class="cat ${currentCat===c?'active':''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('');$('#categories').querySelectorAll('button').forEach(b=>b.onclick=()=>{currentCat=b.dataset.cat;renderCats();renderProducts()});renderCustomerNavCategories()}function renderProducts(){const q=$('#search').value.toLocaleLowerCase('tr');const list=[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).filter(p=>p.active&&(currentCat==='Tümü'||p.category===currentCat)&&(`${p.name} ${p.category} ${p.description}`).toLocaleLowerCase('tr').includes(q));$('#products').innerHTML=list.length?list.map(p=>`<article class="product"><img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.style.background='#eee';this.removeAttribute('src')"><div class="product-body"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description)}</p><div class="product-bottom"><span class="price">${money(p.price)}</span><button class="add" data-add="${p.id}" aria-label="Sepete ekle">+</button></div></div></article>`).join(''):'<p>Aramana uygun ürün bulunamadı.</p>';$('#products').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(+b.dataset.add))}function add(id){const p=products.find(x=>x.id===id);if(!p)return;const row=cart.find(x=>x.id===id);if(row)row.qty++;else cart.push({id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show')}function total(){return cart.reduce((s,x)=>s+(products.find(p=>p.id===x.id)?.price||0)*x.qty,0)}let checkoutLoyaltyState=null;
-function cartModal(){checkoutLoyaltyState=null;const rows=cart.map(x=>{const p=products.find(p=>p.id===x.id);return p?`<div class="cart-row"><div><b>${escapeHtml(p.name)}</b><div class="price">${money(p.price*x.qty)}</div></div><div class="qty"><button data-minus="${p.id}">−</button><b>${x.qty}</b><button data-plus="${p.id}">+</button><button data-remove="${p.id}" aria-label="Sil">×</button></div></div>`:''}).join('');openModal('Sepetim',`${rows||'<p>Sepetin henüz boş. Menüden ürün ekleyebilirsin.</p>'}${rows?`<div class="total"><span>Ürün toplamı</span><span id="checkoutSubtotal">${money(total())}</span></div><div class="total"><span>⭐ Sadakat indirimi</span><span id="checkoutDiscount">${money(0)}</span></div><div class="total"><b>Ödenecek tutar</b><b id="checkoutDue">${money(total())}</b></div><form id="checkout"><div class="field"><label>Ad soyad</label><input name="name" required placeholder="Adınız soyadınız"></div><div class="field"><label>Telefon</label><input name="phone" required type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></div><section style="margin:12px 0;padding:14px;border:1px solid #e6d6aa;border-radius:14px;background:#fffaf0"><b style="display:block;margin-bottom:6px">⭐ Sadakat puanını kullan</b><p style="font-size:12px;color:#6f6250;margin:0 0 10px">100 puan = 10 TL indirim. Puan bakiyeni doğrulamak için aynı telefonla verilmiş önceki sipariş numaranı yaz.</p><div class="field"><label>Önceki sipariş numarası</label><input name="verificationOrderNumber" autocomplete="off" placeholder="Örn. LC-..."></div><button type="button" class="ghost" id="verifyLoyaltyPoints" style="width:100%">PUAN BAKİYESİNİ SORGULA</button><div id="loyaltyPointsStatus" style="font-size:13px;margin:9px 0;color:#6f6250">Henüz puan sorgulanmadı.</div><label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700"><input type="checkbox" name="useLoyaltyPoints" disabled> Puanlarımı bu siparişte kullan</label><div class="field" style="margin-top:10px"><label>Kullanılacak puan</label><input name="pointsToUse" type="number" min="100" step="1" disabled placeholder="Önce puan bakiyesini sorgulayın"></div><small style="color:#806d4d">En az 100 puan kullanılabilir. İndirim sipariş tutarını aşamaz.</small></section><div class="field"><label>Sipariş türü</label><select name="type"><option>Adrese teslim</option><option>Gel-al</option></select></div><div class="field"><label>Ödeme yöntemi</label><select name="paymentMethod" required><option value="Kapıda Nakit">KAPIDA NAKİT</option><option value="Kapıda Kredi Kartı">KAPIDA KREDİ KARTI</option></select></div><div class="field"><label>Teslimat adresi <span style="color:#e11d2e">*</span></label><textarea name="note" rows="3" required minlength="10" autocomplete="street-address" placeholder="Mahalle, cadde, sokak, bina ve daire numarası"></textarea></div><button class="primary" id="checkoutSubmit" style="width:100%">SİPARİŞ OLUŞTUR · ${money(total())}</button><p style="color:#777;font-size:12px">Siparişiniz güvenli bağlantı üzerinden işletme sistemine gönderilir.</p></form>`:''}`);$('#modalBody').querySelectorAll('[data-plus]').forEach(b=>b.onclick=()=>changeQty(+b.dataset.plus,1));$('#modalBody').querySelectorAll('[data-minus]').forEach(b=>b.onclick=()=>changeQty(+b.dataset.minus,-1));$('#modalBody').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{cart=cart.filter(x=>x.id!==+b.dataset.remove);save();renderCartCount();cartModal()});const f=$('#checkout');if(f){
+function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories').innerHTML=cats.map(c=>`<button class="cat ${currentCat===c?'active':''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('');$('#categories').querySelectorAll('button').forEach(b=>b.onclick=()=>{currentCat=b.dataset.cat;renderCats();renderProducts()});renderCustomerNavCategories()}function renderProducts(){const q=$('#search').value.toLocaleLowerCase('tr');const list=[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).filter(p=>p.active&&(currentCat==='Tümü'||p.category===currentCat)&&(`${p.name} ${p.category} ${p.description}`).toLocaleLowerCase('tr').includes(q));$('#products').innerHTML=list.length?list.map(p=>`<article class="product"><img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.style.background='#eee';this.removeAttribute('src')"><div class="product-body"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description)}</p><div class="product-bottom"><span class="price">${money(p.price)}</span><button class="add" data-add="${p.id}" aria-label="Sepete ekle">+</button></div></div></article>`).join(''):'<p>Aramana uygun ürün bulunamadı.</p>';$('#products').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(+b.dataset.add))}function add(id){const p=products.find(x=>x.id===id);if(!p)return;const row=cart.find(x=>x.id===id);if(row)row.qty++;else cart.push({id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show')}function total(){return cart.reduce((s,x)=>s+(products.find(p=>p.id===x.id)?.price||0)*x.qty,0)}function readPendingLoyaltyUse(){
+ try{
+  const value=JSON.parse(sessionStorage.getItem('lc_pending_loyalty_use')||'null');
+  if(!value||!/^\d{10,15}$/.test(String(value.phoneDigits||''))||String(value.verificationOrderNumber||'').length<5)return null;
+  return {...value,pointsBalance:Math.max(0,Number(value.pointsBalance)||0),apply:value.apply===true};
+ }catch{return null;}
+}
+function savePendingLoyaltyUse(value){
+ try{sessionStorage.setItem('lc_pending_loyalty_use',JSON.stringify(value))}catch(error){console.warn('Sadakat tercihi saklanamadı:',error)}
+}
+let checkoutLoyaltyState=null;
+function cartModal(){checkoutLoyaltyState=readPendingLoyaltyUse();const rows=cart.map(x=>{const p=products.find(p=>p.id===x.id);return p?`<div class="cart-row"><div><b>${escapeHtml(p.name)}</b><div class="price">${money(p.price*x.qty)}</div></div><div class="qty"><button data-minus="${p.id}">−</button><b>${x.qty}</b><button data-plus="${p.id}">+</button><button data-remove="${p.id}" aria-label="Sil">×</button></div></div>`:''}).join('');openModal('Sepetim',`${rows||'<p>Sepetin henüz boş. Menüden ürün ekleyebilirsin.</p>'}${rows?`<div class="total"><span>Ürün toplamı</span><span id="checkoutSubtotal">${money(total())}</span></div><div class="total"><span>⭐ Sadakat indirimi</span><span id="checkoutDiscount">${money(0)}</span></div><div class="total"><b>Ödenecek tutar</b><b id="checkoutDue">${money(total())}</b></div><form id="checkout"><div class="field"><label>Ad soyad</label><input name="name" required placeholder="Adınız soyadınız"></div><div class="field"><label>Telefon</label><input name="phone" required type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></div><section style="margin:12px 0;padding:14px;border:1px solid #e6d6aa;border-radius:14px;background:#fffaf0"><b style="display:block;margin-bottom:6px">⭐ Sadakat puanların</b><div id="checkoutLoyaltyStatus" style="font-size:13px;color:#6f6250;margin:8px 0">\${checkoutLoyaltyState?checkoutLoyaltyState.pointsBalance.toLocaleString('tr-TR')+' puan · '+money(checkoutLoyaltyState.pointsBalance/10)+' indirim değeri':'Puanlarını görmek ve kullanıma açmak için Siparişlerim bölümündeki sipariş detayına git.'}</div><button type="button" class="ghost" id="checkoutLoyaltyToggle" style="width:100%" \${!checkoutLoyaltyState||checkoutLoyaltyState.pointsBalance<100?'disabled':''}>\${checkoutLoyaltyState?.apply?'✓ PUAN KULLANILIYOR · VAZGEÇ':'PUAN KULLAN'}</button><small style="display:block;color:#806d4d;margin-top:8px">100 puan = 10 TL indirim. Puan kullanımını yalnızca sen açarsın. En az 100 puan kullanılabilir.</small></section><div class="field"><label>Sipariş türü</label><select name="type"><option>Adrese teslim</option><option>Gel-al</option></select></div><div class="field"><label>Ödeme yöntemi</label><select name="paymentMethod" required><option value="Kapıda Nakit">KAPIDA NAKİT</option><option value="Kapıda Kredi Kartı">KAPIDA KREDİ KARTI</option></select></div><div class="field"><label>Teslimat adresi <span style="color:#e11d2e">*</span></label><textarea name="note" rows="3" required minlength="10" autocomplete="street-address" placeholder="Mahalle, cadde, sokak, bina ve daire numarası"></textarea></div><button class="primary" id="checkoutSubmit" style="width:100%">SİPARİŞ OLUŞTUR · ${money(total())}</button><p style="color:#777;font-size:12px">Siparişiniz güvenli bağlantı üzerinden işletme sistemine gönderilir.</p></form>`:''}`);$('#modalBody').querySelectorAll('[data-plus]').forEach(b=>b.onclick=()=>changeQty(+b.dataset.plus,1));$('#modalBody').querySelectorAll('[data-minus]').forEach(b=>b.onclick=()=>changeQty(+b.dataset.minus,-1));$('#modalBody').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{cart=cart.filter(x=>x.id!==+b.dataset.remove);save();renderCartCount();cartModal()});const f=$('#checkout');if(f){
  const phoneField=f.elements.namedItem('phone');
- const verificationField=f.elements.namedItem('verificationOrderNumber');
- const verifyButton=$('#verifyLoyaltyPoints');
- const pointsStatus=$('#loyaltyPointsStatus');
- const pointsCheckbox=f.elements.namedItem('useLoyaltyPoints');
- const pointsInput=f.elements.namedItem('pointsToUse');
+ const loyaltyStatus=$('#checkoutLoyaltyStatus');
+ const loyaltyToggle=$('#checkoutLoyaltyToggle');
  const submitButton=$('#checkoutSubmit');
- const invalidateLoyalty=()=>{
-  checkoutLoyaltyState=null;
-  pointsCheckbox.checked=false;
-  pointsCheckbox.disabled=true;
-  pointsInput.value='';
-  pointsInput.disabled=true;
-  pointsStatus.textContent='Telefon veya sipariş numarası değişti. Puan bakiyesini yeniden doğrulayın.';
-  updateCheckoutPreview();
- };
+ if(checkoutLoyaltyState&&phoneField)phoneField.value=checkoutLoyaltyState.phoneDigits;
  const updateCheckoutPreview=()=>{
   const subtotal=Number(total().toFixed(2));
   const balance=checkoutLoyaltyState?.pointsBalance||0;
-  const maxPoints=Math.min(balance,Math.floor(subtotal*10));
-  pointsInput.max=String(maxPoints);
-  let used=pointsCheckbox.checked?Math.floor(Number(pointsInput.value)||0):0;
-  if(used>maxPoints){used=maxPoints;pointsInput.value=used>=100?String(used):'';}
-  if(used<100)used=0;
-  const discount=used/10;
+  const usable=checkoutLoyaltyState?.apply?Math.min(balance,Math.floor(subtotal*10)):0;
+  const discount=usable/10;
   $('#checkoutSubtotal').textContent=money(subtotal);
   $('#checkoutDiscount').textContent=money(discount);
   $('#checkoutDue').textContent=money(Math.max(0,subtotal-discount));
   submitButton.textContent='SİPARİŞ OLUŞTUR · '+money(Math.max(0,subtotal-discount));
- };
- phoneField.addEventListener('input',invalidateLoyalty);
- verificationField.addEventListener('input',invalidateLoyalty);
- verifyButton.onclick=async()=>{
-  const phoneDigits=String(phoneField.value||'').replace(/\D/g,'');
-  const verificationOrderNumber=String(verificationField.value||'').trim().toUpperCase();
-  if(phoneDigits.length<10||phoneDigits.length>15){pointsStatus.textContent='Önce geçerli telefon numaranızı girin.';phoneField.focus();return;}
-  if(verificationOrderNumber.length<5){pointsStatus.textContent='Önceki sipariş numaranızı girin.';verificationField.focus();return;}
-  verifyButton.disabled=true;verifyButton.textContent='PUANLAR SORGULANIYOR…';
-  pointsStatus.textContent='Sipariş bilgileriniz doğrulanıyor…';
-  try{
-   const result=await supabaseRequest('/rest/v1/rpc/get_customer_loyalty_summary',{method:'POST',body:JSON.stringify({p_phone:phoneField.value,p_order_number:verificationOrderNumber})});
-   const data=Array.isArray(result)?result[0]:result;
-   if(!data)throw new Error('Puan bilgisi alınamadı.');
-   checkoutLoyaltyState={phoneDigits,verificationOrderNumber,pointsBalance:Math.max(0,Number(data.points_balance)||0)};
-   const maxPoints=Math.min(checkoutLoyaltyState.pointsBalance,Math.floor(total()*10));
-   pointsStatus.innerHTML='<b>Doğrulandı:</b> '+checkoutLoyaltyState.pointsBalance.toLocaleString('tr-TR')+' puanınız var ('+money(checkoutLoyaltyState.pointsBalance/10)+').'+(maxPoints>=100?' Bu sepette en fazla '+maxPoints.toLocaleString('tr-TR')+' puan kullanabilirsiniz.':' Bu sepet için kullanılabilir en az 100 puan bulunmuyor.');
-   pointsCheckbox.disabled=maxPoints<100;
-   pointsCheckbox.checked=false;
-   pointsInput.value=maxPoints>=100?String(maxPoints):'';
-   pointsInput.disabled=true;
-   updateCheckoutPreview();
-  }catch(error){
-   checkoutLoyaltyState=null;
-   pointsCheckbox.checked=false;pointsCheckbox.disabled=true;pointsInput.value='';pointsInput.disabled=true;
-   pointsStatus.textContent=error.message||'Telefon ve sipariş numarası doğrulanamadı.';
-   updateCheckoutPreview();
-  }finally{verifyButton.disabled=false;verifyButton.textContent='PUAN BAKİYESİNİ SORGULA';}
- };
- pointsCheckbox.onchange=()=>{
-  pointsInput.disabled=!pointsCheckbox.checked;
-  if(pointsCheckbox.checked){
-   const maxPoints=Math.min(checkoutLoyaltyState?.pointsBalance||0,Math.floor(total()*10));
-   if(!pointsInput.value||Number(pointsInput.value)<100)pointsInput.value=maxPoints>=100?String(maxPoints):'';
+  if(loyaltyToggle){
+   loyaltyToggle.textContent=checkoutLoyaltyState?.apply?'✓ PUAN KULLANILIYOR · VAZGEÇ':'PUAN KULLAN';
+   loyaltyToggle.disabled=!checkoutLoyaltyState||checkoutLoyaltyState.pointsBalance<100||Math.floor(subtotal*10)<100;
   }
+  if(loyaltyStatus&&checkoutLoyaltyState){
+   loyaltyStatus.textContent=balance.toLocaleString('tr-TR')+' puan · '+money(balance/10)+' indirim değeri'+(checkoutLoyaltyState.apply?' · Bu siparişte '+usable.toLocaleString('tr-TR')+' puan kullanılıyor.':' · Kullanım henüz açılmadı.');
+  }else if(loyaltyStatus){
+   loyaltyStatus.textContent='Puanlarını kullanıma açmak için Siparişlerim bölümündeki sipariş detayında PUAN KULLAN düğmesine bas.';
+  }
+ };
+ if(loyaltyToggle)loyaltyToggle.onclick=()=>{
+  if(!checkoutLoyaltyState)return;
+  checkoutLoyaltyState.apply=!checkoutLoyaltyState.apply;
+  savePendingLoyaltyUse(checkoutLoyaltyState);
   updateCheckoutPreview();
  };
- pointsInput.addEventListener('input',updateCheckoutPreview);
+ phoneField.addEventListener('input',()=>{
+  const digits=String(phoneField.value||'').replace(/\D/g,'');
+  if(checkoutLoyaltyState&&digits!==checkoutLoyaltyState.phoneDigits){
+   checkoutLoyaltyState=null;
+   try{sessionStorage.removeItem('lc_pending_loyalty_use')}catch{}
+   updateCheckoutPreview();
+   toast('Telefon numarası değişti. Sadakat puanı bu siparişte kullanılmayacak.');
+  }
+ });
  updateCheckoutPreview();
 }
 if(f)f.onsubmit=async e=>{
@@ -1017,13 +999,12 @@ if(f)f.onsubmit=async e=>{
   if(address.length<10){toast('Sipariş için açık teslimat adresi yazmanız zorunludur.');f.querySelector('[name="note"]').focus();return;}
   const submitButton=f.querySelector('button[type="submit"],button:not([type])');
   const subtotal=Number(total().toFixed(2));
-  const useLoyalty=!!f.elements.namedItem('useLoyaltyPoints').checked;
-  const pointsToUse=useLoyalty?Math.floor(Number(f.elements.namedItem('pointsToUse').value)||0):0;
-  const verificationOrderNumber=String(f.elements.namedItem('verificationOrderNumber').value||'').trim().toUpperCase();
+  const useLoyalty=!!checkoutLoyaltyState?.apply;
+  const pointsToUse=useLoyalty?Math.min(checkoutLoyaltyState.pointsBalance,Math.floor(subtotal*10)):0;
+  const verificationOrderNumber=useLoyalty?checkoutLoyaltyState.verificationOrderNumber:null;
   if(useLoyalty){
-   if(!checkoutLoyaltyState||checkoutLoyaltyState.phoneDigits!==phoneDigits||checkoutLoyaltyState.verificationOrderNumber!==verificationOrderNumber){toast('Sadakat puanı için telefon ve önceki sipariş numaranızı yeniden doğrulayın.');return;}
-   const maxPoints=Math.min(checkoutLoyaltyState.pointsBalance,Math.floor(subtotal*10));
-   if(pointsToUse<100||pointsToUse>maxPoints){toast('Kullanılacak puan miktarı geçersiz. En az 100 puan ve sepet tutarı kadar puan kullanabilirsiniz.');return;}
+   if(!checkoutLoyaltyState||checkoutLoyaltyState.phoneDigits!==phoneDigits){toast('Sadakat puanı için kayıtlı müşteri telefonu eşleşmiyor.');return;}
+   if(pointsToUse<100){toast('Bu siparişte kullanılabilecek en az 100 puan bulunmuyor.');return;}
   }
   if(submitButton){submitButton.disabled=true;submitButton.textContent='SİPARİŞ GÖNDERİLİYOR…'}
   const orderNumber='LC-'+Date.now().toString(36).toUpperCase();
@@ -1039,6 +1020,13 @@ if(f)f.onsubmit=async e=>{
     order.pointsRedeemed=Number(savedOrder?.points_redeemed??order.pointsRedeemed);
     order.total=Number(savedOrder?.total??order.total);
     order.pointsBalance=Number(savedOrder?.points_balance??0);
+    if(order.pointsRedeemed>0){
+     try{sessionStorage.removeItem('lc_pending_loyalty_use')}catch{}
+     checkoutLoyaltyState=null;
+    }else if(checkoutLoyaltyState){
+     checkoutLoyaltyState.pointsBalance=Number(order.pointsBalance)||0;
+     savePendingLoyaltyUse(checkoutLoyaltyState);
+    }
     orders.unshift(order);
     customers.push({name:order.name,phone:order.phone});
     cart=[];
@@ -1076,7 +1064,7 @@ if(f)f.onsubmit=async e=>{
     ];
     const whatsappUrl = 'https://wa.me/905421511186?text=' + encodeURIComponent(whatsappLines.join('\n'));
     if(whatsappTab){try{whatsappTab.location.href=whatsappUrl;}catch{}}
-    openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p>${order.pointsRedeemed?'<p>⭐ Sadakat indirimi: <b>'+money(order.discountAmount)+'</b> ('+order.pointsRedeemed+' puan kullanıldı). Kalan puan: <b>'+order.pointsBalance+'</b></p>':''}<p>Ödenecek tutar: <b>'+money(order.total)+'</b></p><p>Siparişiniz kaydedildi. WhatsApp işletme sohbeti açıldıysa <b>Gönder</b> tuşuna basmanız yeterlidir.</p><a class="primary" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;margin-top:16px">💬 WHATSAPP MESAJINI AÇ / TEKRAR AÇ</a><p style="font-size:12px;color:#777;margin-top:10px">Mesaj otomatik gönderilmez; son gönderim onayı sizdedir. WhatsApp açılmazsa yukarıdaki butonu kullanın.</p><button type="button" id="trackCurrentOrder" class="ghost" style="display:block;width:100%;margin-top:10px">📦 SİPARİŞİMİ CANLI TAKİP ET</button></div>`);
+    openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p>${order.pointsRedeemed?'<p>⭐ Sadakat indirimi: <b>'+money(order.discountAmount)+'</b> ('+order.pointsRedeemed+' puan kullanıldı). Kalan puan: <b>'+order.pointsBalance+'</b></p>':''}<p>Ödenecek tutar: <b>\${money(order.total)}</b></p><p>Siparişiniz kaydedildi. WhatsApp işletme sohbeti açıldıysa <b>Gönder</b> tuşuna basmanız yeterlidir.</p><a class="primary" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;margin-top:16px">💬 WHATSAPP MESAJINI AÇ / TEKRAR AÇ</a><p style="font-size:12px;color:#777;margin-top:10px">Mesaj otomatik gönderilmez; son gönderim onayı sizdedir. WhatsApp açılmazsa yukarıdaki butonu kullanın.</p><button type="button" id="trackCurrentOrder" class="ghost" style="display:block;width:100%;margin-top:10px">📦 SİPARİŞİMİ CANLI TAKİP ET</button></div>`);
     if(!$('#admin').classList.contains('hidden'))renderAdmin();
     const trackCurrentOrderButton=$('#modalBody').querySelector('#trackCurrentOrder');
     if(trackCurrentOrderButton)trackCurrentOrderButton.onclick=()=>{
@@ -1497,13 +1485,24 @@ restoreAdminSession();$('#historyClose').onclick=()=>$('#historyBack').classList
 
 async function showCustomerLoyalty(phone,orderNumber,target){
  if(!target)return;
- target.innerHTML='<p class="muted">Puan bakiyesi sorgulanıyor…</p>';
+ target.innerHTML='<p class="muted">Sadakat bakiyen yükleniyor…</p>';
  try{
   const result=await supabaseRequest('/rest/v1/rpc/get_customer_loyalty_summary',{method:'POST',body:JSON.stringify({p_phone:phone,p_order_number:orderNumber})});
   const data=Array.isArray(result)?result[0]:result;
   if(!data||typeof data!=='object')throw new Error('Puan bilgisi alınamadı.');
+  const balance=Math.max(0,Number(data.points_balance)||0);
   const tx=Array.isArray(data.recent_transactions)?data.recent_transactions:[];
-  target.innerHTML='<section class="customer-loyalty-card"><div style="font-size:11px;font-weight:900;color:#89621b;letter-spacing:.7px">⭐ YEMEK TADINDA SADAKAT PUANLARI</div><div class="customer-loyalty-balance">'+Number(data.points_balance||0).toLocaleString('tr-TR')+' puan</div><p class="customer-loyalty-caption">Toplam kazanılan: '+Number(data.lifetime_earned||0).toLocaleString('tr-TR')+' · Kullanılan: '+Number(data.lifetime_redeemed||0).toLocaleString('tr-TR')+'</p><div class="loyalty-rules">Her 10 TL teslim edilmiş siparişe 1 puan. <b>100 puan = 10 TL indirim değeri.</b> Puan kullanımı işletme onayıyla yapılır.</div><div class="customer-loyalty-history">'+(tx.length?tx.map(t=>'<div class="customer-loyalty-row"><span>'+escapeHtml(t.description||'Puan hareketi')+'<br><small>'+new Date(t.created_at||Date.now()).toLocaleString('tr-TR')+'</small></span><b class="'+(Number(t.points_delta)>0?'customer-loyalty-positive':'customer-loyalty-negative')+'">'+(Number(t.points_delta)>0?'+':'')+Number(t.points_delta).toLocaleString('tr-TR')+'</b></div>').join(''):'<p class="customer-loyalty-caption">Henüz puan hareketi bulunmuyor.</p>')+'</div></section>';
+  const wallet={phoneDigits:String(phone).replace(/\D/g,''),verificationOrderNumber:String(orderNumber||'').trim().toUpperCase(),pointsBalance:balance,apply:false};
+  const pending=readPendingLoyaltyUse();
+  const alreadyPrepared=!!pending&&pending.phoneDigits===wallet.phoneDigits&&pending.apply;
+  target.innerHTML='<section class="customer-loyalty-card"><div style="font-size:11px;font-weight:900;color:#89621b;letter-spacing:.7px">⭐ YEMEK TADINDA SADAKAT PUANLARI</div><div class="customer-loyalty-balance">'+balance.toLocaleString('tr-TR')+' puan</div><p class="customer-loyalty-caption">İndirim değeri: '+money(balance/10)+' · Toplam kazanılan: '+Number(data.lifetime_earned||0).toLocaleString('tr-TR')+' · Kullanılan: '+Number(data.lifetime_redeemed||0).toLocaleString('tr-TR')+'</p><div class="loyalty-rules">Her 10 TL teslim edilmiş siparişe 1 puan. <b>100 puan = 10 TL indirim.</b> Bir sonraki siparişinde puanlarını kullanmak için düğmeye bas.</div><button type="button" id="prepareLoyaltyUse" class="primary" style="width:100%;margin:10px 0" '+(balance<100?'disabled':'')+'>'+(alreadyPrepared?'✓ PUAN KULLANIMA HAZIR':'⭐ PUAN KULLAN')+'</button><div class="customer-loyalty-history">'+(tx.length?tx.map(t=>'<div class="customer-loyalty-row"><span>'+escapeHtml(t.description||'Puan hareketi')+'<br><small>'+new Date(t.created_at||Date.now()).toLocaleString('tr-TR')+'</small></span><b class="'+(Number(t.points_delta)>0?'customer-loyalty-positive':'customer-loyalty-negative')+'">'+(Number(t.points_delta)>0?'+':'')+Number(t.points_delta).toLocaleString('tr-TR')+'</b></div>').join(''):'<p class="customer-loyalty-caption">Henüz puan hareketi bulunmuyor.</p>')+'</div></section>';
+  const prepareButton=target.querySelector('#prepareLoyaltyUse');
+  if(prepareButton)prepareButton.onclick=()=>{
+   if(balance<100)return;
+   savePendingLoyaltyUse({...wallet,apply:true});
+   prepareButton.textContent='✓ PUAN KULLANIMA HAZIR';
+   toast(balance.toLocaleString('tr-TR')+' puanın bir sonraki siparişinde kullanıma hazır.');
+  };
  }catch(error){
   target.innerHTML='<div class="notice">'+escapeHtml(error.message||'Puan bakiyesi doğrulanamadı. Telefon ve sipariş numarasını kontrol edin.')+'</div>';
  }
@@ -1540,9 +1539,10 @@ $('#historyForm').onsubmit=async e=>{
    const date=new Date(o.created_at||Date.now()).toLocaleString('tr-TR');
    const items=Array.isArray(o.items)?o.items:[];
    const itemText=items.map(i=>escapeHtml(i.name||'Ürün')+' × '+escapeHtml(String(i.qty||1))).join(', ');
-   return '<article class="customer-order-card"><div class="customer-order-head"><b>Sipariş #'+escapeHtml(shortNo)+'</b><span class="status">'+escapeHtml(o.status||'Yeni')+'</span></div><p>'+escapeHtml(date)+'</p><p>Ödeme: '+escapeHtml(o.payment_method||'Belirtilmedi')+' · Toplam: <b>'+money(Number(o.total)||0)+'</b></p><p class="customer-order-items">'+(itemText||'Ürün bilgisi bulunamadı')+'</p><div class="customer-order-actions"><button type="button" class="customer-order-track" data-track-order="'+index+'">📦 Siparişi Takip Et</button><button type="button" class="customer-order-repeat" data-repeat-order="'+index+'" '+(items.length?'':'disabled')+'>🔁 Tekrar Sipariş Ver</button><button type="button" class="customer-order-loyalty" data-loyalty-order="'+index+'">⭐ Puanlarımı Gör</button></div><div class="customer-loyalty-inline" id="customerLoyalty'+index+'"></div></article>';
+   return '<article class="customer-order-card"><div class="customer-order-head"><b>Sipariş #'+escapeHtml(shortNo)+'</b><span class="status">'+escapeHtml(o.status||'Yeni')+'</span></div><p>'+escapeHtml(date)+'</p><p>Ödeme: '+escapeHtml(o.payment_method||'Belirtilmedi')+' · Toplam: <b>'+money(Number(o.total)||0)+'</b></p><p class="customer-order-items">'+(itemText||'Ürün bilgisi bulunamadı')+'</p><div class="customer-order-actions"><button type="button" class="customer-order-track" data-track-order="'+index+'">📦 Siparişi Takip Et</button><button type="button" class="customer-order-repeat" data-repeat-order="'+index+'" '+(items.length?'':'disabled')+'>🔁 Tekrar Sipariş Ver</button></div><div class="customer-loyalty-inline" id="customerLoyalty'+index+'"></div></article>';
   }).join(''):'<div class="notice">Bu telefon numarasıyla eşleşen sipariş bulunamadı.</div>';
-  $('#historyResult').querySelectorAll('[data-repeat-order]').forEach(btn=>btn.onclick=()=>repeatCustomerOrder(all[Number(btn.dataset.repeatOrder)]?.items||[]));$('#historyResult').querySelectorAll('[data-loyalty-order]').forEach(btn=>btn.onclick=()=>{const order=all[Number(btn.dataset.loyaltyOrder)];if(!order)return;const target=$('#customerLoyalty'+btn.dataset.loyaltyOrder);showCustomerLoyalty(phone,String(order.order_number||''),target)});
+  if(all.length){const newest=all[0];showCustomerLoyalty(phone,String(newest.order_number||''),$('#customerLoyalty0'));}
+  $('#historyResult').querySelectorAll('[data-repeat-order]').forEach(btn=>btn.onclick=()=>repeatCustomerOrder(all[Number(btn.dataset.repeatOrder)]?.items||[]));
   $('#historyResult').querySelectorAll('[data-track-order]').forEach(btn=>btn.onclick=()=>{
    const order=all[Number(btn.dataset.trackOrder)];
    if(!order)return;

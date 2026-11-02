@@ -1116,8 +1116,8 @@ async function enableAdminOrderNotifications(){
  const applicationServerKey=urlBase64ToUint8Array(PUSH_VAPID_PUBLIC_KEY);
  let oldSubscription=await registration.pushManager.getSubscription();
  if(oldSubscription){
-  const removed=await oldSubscription.unsubscribe();
-  if(!removed)throw new Error('Eski bildirim kaydı yenilenemedi. Tarayıcıyı kapatıp açtıktan sonra tekrar deneyin.');
+  // The push provider may have expired this endpoint already; always continue with a fresh subscription.
+  await oldSubscription.unsubscribe().catch(error=>console.warn('Eski bildirim kaydı kapatılamadı, yeni kayıt deneniyor:',error));
  }
  const subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey});
  await persistAdminOrderPushSubscription(subscription);

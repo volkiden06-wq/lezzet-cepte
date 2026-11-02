@@ -821,7 +821,7 @@ $('#admin')?.addEventListener('pointerdown',()=>prepareOrderAudio(),{once:true})
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&orderSoundEnabled&&orderAudioContext&&orderAudioContext.state==='suspended')orderAudioContext.resume().catch(e=>console.warn('Ses yeniden başlatılamadı',e))});
 window.addEventListener('focus',()=>{if(orderSoundEnabled&&orderAudioContext&&orderAudioContext.state==='suspended')orderAudioContext.resume().catch(e=>console.warn('Ses yeniden başlatılamadı',e))});
 function mapCloudOrderRow(r){
- return {id:r.order_number,orderNumber:r.order_number,name:r.customer_name,phone:r.customer_phone,
+ return {id:Number(r.id),orderNumber:r.order_number,name:r.customer_name,phone:r.customer_phone,
   type:r.customer_address||'Web',paymentMethod:r.payment_method,note:r.notes,
   items:Array.isArray(r.items)?r.items:[],subtotal:Number(r.subtotal??r.total)||0,discountAmount:Number(r.discount_amount)||0,pointsRedeemed:Number(r.points_redeemed)||0,total:Number(r.total)||0,status:r.status||'Yeni',
   date:r.created_at||r.createdAt};
@@ -1213,11 +1213,12 @@ function wireOrdersPage(){
     const confirmButton=$('#confirmSingleOrderArchive');
     confirmButton.disabled=true;confirmButton.textContent='ARŞİVLENİYOR…';
     try{
-     await supabaseRequest('/rest/v1/orders?id=eq.'+encodeURIComponent(String(o.id)),{
-      method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({status:'Arşivlendi'})
+     const archived=await supabaseRequest('/rest/v1/rpc/admin_archive_order',{
+      method:'POST',body:JSON.stringify({p_order_id:Number(o.id)})
      });
+     if(Number(archived?.deleted_orders)!==1)throw new Error('Siparişin silindiği veritabanında doğrulanamadı.');
      await loadCloudOrders({notifyNew:false});
-     closeModal();update();toast('Sipariş arşive alındı; aktif listeden ve raporlardan kaldırıldı.');
+     closeModal();update();toast('Sipariş aktif tablodan silindi; yedek arşivde saklandı.');
     }catch(error){
      confirmButton.disabled=false;confirmButton.textContent='🗑️ SİL / ARŞİVLE';
      toast('Sipariş arşivlenemedi: '+(error.message||'Bağlantıyı kontrol edin.'));
@@ -1240,15 +1241,13 @@ function wireOrdersPage(){
   $('#confirmFilteredArchive').onclick=async()=>{
    const button=$('#confirmFilteredArchive');button.disabled=true;button.textContent='ARŞİVLENİYOR…';
    try{
-    for(let offset=0;offset<ids.length;offset+=100){
-     const batch=ids.slice(offset,offset+100);
-     await supabaseRequest('/rest/v1/orders?id=in.('+batch.join(',')+')',{
-      method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({status:'Arşivlendi'})
-     });
-    }
+    const result=await supabaseRequest('/rest/v1/rpc/admin_archive_orders',{
+     method:'POST',body:JSON.stringify({p_order_ids:ids})
+    });
+    if(Number(result?.deleted_orders)!==ids.length)throw new Error('Beklenen '+ids.length+' siparişten '+(Number(result?.deleted_orders)||0)+' tanesi silindi.');
     await loadCloudOrders({notifyNew:false});
     closeModal();update();
-    toast(ids.length+' sipariş arşivlendi. Ürünler, kampanyalar, puanlar ve bildirimler korundu.');
+    toast(ids.length+' sipariş aktif tablodan silindi; yedek arşivde saklandı. Ürünler, kampanyalar, puanlar ve bildirimler korundu.');
    }catch(error){
     button.disabled=false;button.textContent='🗑️ '+ids.length+' SİPARİŞİ ARŞİVLE';
     try{await loadCloudOrders({notifyNew:false});update()}catch{}
@@ -1405,35 +1404,28 @@ async function executeReportHistoryReset(button){
  button.textContent='SIFIRLAMA YAPILIYOR…';
  try{
   downloadReportResetBackup();
-  const ids=orders.map(order=>Number(order.id)).filter(id=>Number.isSafeInteger(id)&&id>0);
-  let archivedCount=0;
-  for(let offset=0;offset<ids.length;offset+=100){
-   const batch=ids.slice(offset,offset+100);
-   await supabaseRequest('/rest/v1/orders?id=in.('+batch.join(',')+')',{
-    method:'PATCH',
-    headers:{'Prefer':'return=minimal'},
-    body:JSON.stringify({status:'Arşivlendi'})
-   });
-   archivedCount+=batch.length;
+  await loadCloudOrders({notifyNew:false});
+  const expectedCount=orders.length;
+  const result=await supabaseRequest('/rest/v1/rpc/admin_reset_order_history',{
+   method:'POST',
+   body:'{}'
+  });
+  const deletedCount=Number(result?.deleted_orders);
+  if(!Number.isInteger(deletedCount)||deletedCount!==expectedCount){
+   throw new Error('Veritabanı doğrulaması başarısız: beklenen '+expectedCount+', silinen '+(Number.isFinite(deletedCount)?deletedCount:'bilinmiyor')+'.');
   }
-  orders=[];
-  knownOrderNumbers=new Set();
-  orderBaselineReady=true;
-  saveOrderCachesOnly();
-  try{
-   await loadCloudOrders({notifyNew:false});
-  }catch(refreshError){
-   orders=[];
-   saveOrderCachesOnly();
-   console.warn('Sıfırlama sonrası sipariş listesi yenilenemedi:',refreshError);
+  await loadCloudOrders({notifyNew:false});
+  if(orders.length!==0){
+   throw new Error('Silme sonrası '+orders.length+' yeni veya kalan sipariş bulundu. Liste yenilendi; işlem sonucu kontrol edilmeli.');
   }
   closeModal();
   renderAdmin();
-  toast('Geçmiş sıfırlandı. '+archivedCount+' sipariş arşive alındı. Ürünler, kampanyalar, müşteriler, puanlar ve bildirimler korundu.');
+  toast('Geçmiş temizlendi. '+deletedCount+' sipariş silindi; yedek arşivde saklandı. Ürünler, kampanyalar, puanlar ve bildirimler korundu.');
  }catch(error){
   button.disabled=false;
   button.textContent='🗑️ GEÇMİŞİ SIFIRLA';
-  toast(error.message||'Sipariş geçmişi sıfırlanamadı.');
+  try{await loadCloudOrders({notifyNew:false});}catch(refreshError){console.warn('Hata sonrası sipariş listesi yenilenemedi:',refreshError)}
+  toast('Sıfırlama tamamlanmadı: '+(error.message||'Sipariş geçmişi sıfırlanamadı.'));
  }
 }
 function openReportResetModal(){
@@ -1460,7 +1452,7 @@ function openReportResetModal(){
    const orderCount=orders.length;
    const revenue=orders.filter(order=>order.status!=='İptal').reduce((sum,order)=>sum+(Number(order.total)||0),0);
    openModal('Son Onay: Geçmişi Sıfırla',
-    '<div class="reset-warning"><b>Son kez onaylayın.</b> '+orderCount+' sipariş arşivlenecek; aktif sipariş listesinden ve ciro raporlarından kaldırılacak. Kayıtlar müşteri sipariş geçmişi ve puan doğrulaması için korunacak.</div>'+
+    '<div class="reset-warning"><b>Son kez onaylayın.</b> '+orderCount+' sipariş aktif tablodan silinecek ve ciro raporları temizlenecek. İşlem öncesinde yedek arşive kopyalanır.</div>'+
     '<div class="reset-confirm-summary"><div><small>Arşivlenecek sipariş</small><strong>'+orderCount.toLocaleString('tr-TR')+'</strong></div><div><small>Sıfırlanacak rapor cirosu</small><strong>'+money(revenue)+'</strong></div></div>'+
     '<p style="font-size:13px;color:#475569;line-height:1.55">Ürünler, kategoriler, kampanyalar, müşteri kayıtları, kazanılmış puan bakiyeleri ve puan hareketleri ile müşteri/yönetici bildirim abonelikleri korunur.</p>'+
     '<div class="reset-modal-actions"><button class="ghost" type="button" id="cancelFinalReportReset">VAZGEÇ</button><button class="primary reset-danger-action" type="button" id="confirmReportReset">🗑️ GEÇMİŞİ SIFIRLA</button></div>'

@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.yemektadinda.app",
-      "sha256_cert_fingerprints": ["0F:06:FC:60:41:1A:CE:30:B8:D4:5B:30:1C:BF:80:96:40:D0:D7:68:70:A0:C7:B4:B1:C9:42:CB:A0:BE:11:A9"]
+      "sha256_cert_fingerprints": ["0F:06:FC:60:41:1A:CE:30:B8:D4:5B:30:1C:BF:80:96:40:D0:D7:68:70:A0:C7:B4:B1:C9:42:CB:A0:BE:11:A9", "36:AA:CF:26:16:93:7A:BE:A7:90:33:68:7D:76:16:B1:18:0F:78:7B:70:A7:8F:56:97:94:9E:5F:D4:8A:48:C1"]
     }
   }
 ]

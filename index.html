@@ -467,6 +467,33 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
 .visitor-day b{text-align:right;font-size:12px;color:#263449}
 .visitor-footnote,.visitor-loading{margin:0;color:#778294;font-size:11px;line-height:1.5}
 @media(max-width:520px){.visitor-kpis{gap:8px}.visitor-kpi{padding:12px}.visitor-kpi strong{font-size:25px}.visitor-day{grid-template-columns:70px minmax(45px,1fr) 30px;gap:7px}}
+
+/* Güvenli müşteri sipariş geçmişi ve canlı takip */
+.customer-order-card{background:#fff;border:1px solid #e8ebef;border-radius:15px;padding:16px;margin:12px 0;box-shadow:0 5px 16px #1111}
+.customer-order-head,.customer-track-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.customer-order-card p{margin:8px 0;color:#687385;font-size:13px}
+.customer-order-items{line-height:1.55}
+.customer-order-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.customer-order-actions button{flex:1;min-width:145px;border:0;border-radius:10px;padding:11px 12px;font-weight:850;cursor:pointer}
+.customer-order-actions button:disabled{opacity:.45;cursor:not-allowed}
+.customer-order-track{background:#edf3fa;color:#214365}
+.customer-order-repeat{background:#ed1024;color:#fff}
+.customer-track-card{background:#fff;border:1px solid #e8ebef;border-radius:16px;padding:18px;margin-top:14px}
+.customer-track-head small{color:#7b8492;font-size:10px;font-weight:900;letter-spacing:1px}
+.customer-track-head h3{margin:4px 0 12px;font-size:25px}
+.customer-track-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:22px 0 16px}
+.customer-track-step{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;color:#98a1ae;font-size:11px;font-weight:750}
+.customer-track-dot{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#edf0f4;color:#758092;font-weight:900}
+.customer-track-step.is-done,.customer-track-step.is-current{color:#16834a}
+.customer-track-step.is-done .customer-track-dot,.customer-track-step.is-current .customer-track-dot{background:#16834a;color:#fff}
+.customer-track-step.is-current .customer-track-dot{box-shadow:0 0 0 5px #16834a20}
+.customer-track-refresh,.customer-track-meta,.customer-track-items{font-size:12px;color:#687385;line-height:1.6}
+.customer-track-refresh{background:#f4f8fc;padding:10px;border-radius:9px}
+.customer-track-terminal{background:#fff1f2;color:#b90d18;padding:12px;border-radius:10px;font-weight:800}
+.customer-track-meta{margin:7px 0}
+.customer-track-items{border-top:1px solid #edf0f4;padding-top:10px;margin-top:10px}
+@media(max-width:520px){.customer-order-card{padding:13px}.customer-order-actions button{min-width:100%}.customer-track-card{padding:14px}.customer-track-steps{gap:3px}.customer-track-step{font-size:9px}.customer-track-dot{width:27px;height:27px}}
+
 </style></head><body>
 <header class="topbar" id="siteHeader"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK<span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><a id="headerWhatsAppBtn" href="https://wa.me/905421511186?text=Merhaba%2C%20YEMEK%20TADINDA%20%C3%BCzerinden%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 15px;border-radius:12px;background:#16a34a;color:#fff;font-weight:900;white-space:nowrap;box-shadow:0 5px 15px #16a34a40">☏ WhatsApp</a><button class="ghost" id="installAppBtn" type="button" style="border-color:#16a34a;color:#12813f;font-weight:900">⬇ Uygulamayı Yükle</button><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
 <nav class="mobile-bottom-nav" aria-label="Mobil menü">
@@ -1311,7 +1338,117 @@ $('#promoNotify').onclick=enableNotifications;$('#notifyBtn').onclick=enableNoti
  }
 }
 $('#historyBtn').onclick=()=>$('#historyBack').classList.add('show');
-restoreAdminSession();$('#historyClose').onclick=()=>$('#historyBack').classList.remove('show');$('#historyForm').onsubmit=async e=>{e.preventDefault();const phone=String(new FormData(e.currentTarget).get('phone')).replace(/\D/g,'');$('#historyResult').innerHTML='<p>Siparişler aranıyor…</p>';try{const rows=await supabaseRequest('/rest/v1/rpc/lookup_orders_by_phone',{method:'POST',body:JSON.stringify({p_phone:phone})});const all=(Array.isArray(rows)?rows:[]);$('#historyResult').innerHTML=all.length?all.map(o=>`<div class="panel"><div style="display:flex;justify-content:space-between;gap:10px"><b>Sipariş #${escapeHtml(String(o.order_number||'').slice(-6))}</b><span class="status">${escapeHtml(o.status||'Yeni')}</span></div><p>${new Date(o.created_at||Date.now()).toLocaleString('tr-TR')}</p><p>Ödeme: ${escapeHtml(o.payment_method||'Belirtilmedi')} · Toplam: ${money(Number(o.total)||0)}</p><p style="font-size:12px;color:#777">${(o.items||[]).map(i=>escapeHtml(i.name||'Ürün')+' × '+(i.qty||1)).join(', ')}</p></div>`).join(''):'<div class="notice">Bu telefon numarasıyla eşleşen sipariş bulunamadı.</div>'}catch(err){$('#historyResult').innerHTML='<div class="notice">Siparişler şu anda alınamadı. Lütfen daha sonra tekrar deneyin.</div>'}};$('#trackBtn').onclick=()=>$('#trackBack').classList.add('show');$('#trackClose').onclick=()=>$('#trackBack').classList.remove('show');$('#trackForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),orderNo=String(f.get('id')||'').trim().replace(/^#+/,'').replace(/\s+/g,'').toUpperCase(),phone=String(f.get('phone')||'').replace(/\D/g,'');$('#trackResult').innerHTML='<p>Sipariş aranıyor…</p>';try{if(!orderNo||phone.length<10)throw new Error('input');const rows=await supabaseRequest('/rest/v1/rpc/lookup_order',{method:'POST',body:JSON.stringify({p_order_number:orderNo,p_phone:phone})});const o=Array.isArray(rows)?rows[0]:null;if(!o){$('#trackResult').innerHTML='<div class="notice">Bu sipariş numarası ve telefonla eşleşen kayıt bulunamadı. Numaranın tamamını (LC-...) veya yönetici listesindeki son 6 karakteri deneyin.</div>';return}$('#trackResult').innerHTML='<div class="panel"><h3>Sipariş #'+escapeHtml(String(o.order_number).slice(-6))+'</h3><p>Durum: <b>'+escapeHtml(o.status||'Yeni')+'</b></p><p>Toplam: '+money(Number(o.total)||0)+'</p><p>'+new Date(o.created_at||Date.now()).toLocaleString('tr-TR')+'</p></div>'}catch(err){console.error('Sipariş takip hatası:',err);$('#trackResult').innerHTML='<div class="notice">'+(err.message==='input'?'Lütfen sipariş numarasını ve 10 haneli telefon numarasını kontrol edin.':'Sipariş sorgulanamadı. Supabase takip SQL kurulumunun uygulandığını kontrol edin.')+'</div>'}};let deferredInstallPrompt=null;
+restoreAdminSession();$('#historyClose').onclick=()=>$('#historyBack').classList.remove('show');
+function repeatCustomerOrder(items){
+ const missing=[];
+ let added=0;
+ (Array.isArray(items)?items:[]).forEach(item=>{
+  const product=products.find(p=>String(p.id)===String(item.id)&&p.active);
+  if(!product){missing.push(String(item.name||'Ürün'));return;}
+  const qty=Math.max(1,Math.min(99,Math.floor(Number(item.qty)||1)));
+  const row=cart.find(x=>String(x.id)===String(product.id));
+  if(row)row.qty+=qty;
+  else cart.push({id:product.id,qty});
+  added+=qty;
+ });
+ if(!added){toast('Bu siparişteki ürünler artık menüde bulunmuyor.');return;}
+ save();renderCartCount();
+ $('#historyBack').classList.remove('show');
+ cartModal();
+ toast(missing.length?'Uygun ürünler güncel fiyatlarla sepete eklendi; menüde olmayan '+missing.length+' ürün atlandı.':'Eski sipariş güncel menü fiyatlarıyla sepete eklendi.');
+}
+$('#historyForm').onsubmit=async e=>{
+ e.preventDefault();
+ const phone=String(new FormData(e.currentTarget).get('phone')||'').replace(/\D/g,'');
+ $('#historyResult').innerHTML='<p>Siparişler aranıyor…</p>';
+ try{
+  if(phone.length<10||phone.length>13)throw new Error('phone');
+  const rows=await supabaseRequest('/rest/v1/rpc/lookup_orders_by_phone',{method:'POST',body:JSON.stringify({p_phone:phone})});
+  const all=Array.isArray(rows)?rows:[];
+  $('#historyResult').innerHTML=all.length?all.map((o,index)=>{
+   const orderNo=String(o.order_number||'');
+   const shortNo=orderNo.slice(-6);
+   const date=new Date(o.created_at||Date.now()).toLocaleString('tr-TR');
+   const items=Array.isArray(o.items)?o.items:[];
+   const itemText=items.map(i=>escapeHtml(i.name||'Ürün')+' × '+escapeHtml(String(i.qty||1))).join(', ');
+   return '<article class="customer-order-card"><div class="customer-order-head"><b>Sipariş #'+escapeHtml(shortNo)+'</b><span class="status">'+escapeHtml(o.status||'Yeni')+'</span></div><p>'+escapeHtml(date)+'</p><p>Ödeme: '+escapeHtml(o.payment_method||'Belirtilmedi')+' · Toplam: <b>'+money(Number(o.total)||0)+'</b></p><p class="customer-order-items">'+(itemText||'Ürün bilgisi bulunamadı')+'</p><div class="customer-order-actions"><button type="button" class="customer-order-track" data-track-order="'+index+'">📦 Siparişi Takip Et</button><button type="button" class="customer-order-repeat" data-repeat-order="'+index+'" '+(items.length?'':'disabled')+'>🔁 Tekrar Sipariş Ver</button></div></article>';
+  }).join(''):'<div class="notice">Bu telefon numarasıyla eşleşen sipariş bulunamadı.</div>';
+  $('#historyResult').querySelectorAll('[data-repeat-order]').forEach(btn=>btn.onclick=()=>repeatCustomerOrder(all[Number(btn.dataset.repeatOrder)]?.items||[]));
+  $('#historyResult').querySelectorAll('[data-track-order]').forEach(btn=>btn.onclick=()=>{
+   const order=all[Number(btn.dataset.trackOrder)];
+   if(!order)return;
+   $('#historyBack').classList.remove('show');
+   $('#trackBack').classList.add('show');
+   $('#trackForm').elements.namedItem('id').value=String(order.order_number||'');
+   $('#trackForm').elements.namedItem('phone').value=String(order.customer_phone||phone);
+   $('#trackForm').requestSubmit();
+  });
+ }catch(err){
+  $('#historyResult').innerHTML='<div class="notice">'+(err.message==='phone'?'Lütfen geçerli telefon numaranızı girin.':'Siparişler şu anda alınamadı. Lütfen daha sonra tekrar deneyin.')+'</div>';
+ }
+};
+
+let customerOrderTrackingTimer=null;
+let activeCustomerOrderTracking=null;
+function stopCustomerOrderTracking(){
+ if(customerOrderTrackingTimer){clearInterval(customerOrderTrackingTimer);customerOrderTrackingTimer=null;}
+ activeCustomerOrderTracking=null;
+}
+function renderCustomerOrderProgress(order){
+ const status=String(order.status||'Yeni');
+ const steps=['Yeni','Hazırlanıyor','Yola çıktı','Teslim edildi'];
+ const positions={'Yeni':0,'Bekliyor':0,'Hazırlanıyor':1,'Yola çıktı':2,'Teslim edildi':3};
+ const current=positions[status]??0;
+ const terminal=['İptal','Kapalı'].includes(status);
+ const progress=steps.map((label,index)=>{
+  const state=terminal?'':(index<current?'is-done':index===current?'is-current':'');
+  return '<div class="customer-track-step '+state+'"><span class="customer-track-dot">'+(index<current?'✓':index+1)+'</span><span>'+label+'</span></div>';
+ }).join('');
+ const orderNo=String(order.order_number||'');
+ const created=new Date(order.created_at||Date.now()).toLocaleString('tr-TR');
+ const itemNames=(Array.isArray(order.items)?order.items:[]).map(i=>escapeHtml(i.name||'Ürün')+' × '+escapeHtml(String(i.qty||1))).join(', ');
+ const finalMessage=terminal?'<div class="customer-track-terminal">'+(status==='İptal'?'Bu sipariş iptal edildi.':'Bu sipariş kapatıldı.')+'</div>':'<p class="customer-track-refresh" id="trackConnectionStatus">Durum yaklaşık 12 saniyede bir otomatik güncellenir. Son kontrol: '+new Date().toLocaleTimeString('tr-TR')+'</p>';
+ $('#trackResult').innerHTML='<article class="customer-track-card"><div class="customer-track-head"><div><small>YEMEK TADINDA SİPARİŞİ</small><h3>#'+escapeHtml(orderNo.slice(-6))+'</h3></div><span class="status">'+escapeHtml(status)+'</span></div><div class="customer-track-steps '+(terminal?'is-terminal':'')+'">'+progress+'</div>'+finalMessage+'<p class="customer-track-meta">Sipariş tarihi: '+escapeHtml(created)+'</p><p class="customer-track-meta">Toplam: <b>'+money(Number(order.total)||0)+'</b></p><p class="customer-track-items">'+(itemNames||'Ürün bilgisi bulunamadı')+'</p></article>';
+}
+async function refreshCustomerOrderTracking(){
+ const tracked=activeCustomerOrderTracking;
+ if(!tracked||document.hidden)return;
+ try{
+  const rows=await supabaseRequest('/rest/v1/rpc/lookup_order',{method:'POST',body:JSON.stringify({p_order_number:tracked.orderNo,p_phone:tracked.phone})});
+  if(activeCustomerOrderTracking!==tracked)return;
+  const order=Array.isArray(rows)?rows[0]:null;
+  if(!order){
+   $('#trackResult').innerHTML='<div class="notice">Bu sipariş numarası ve telefonla eşleşen kayıt bulunamadı.</div>';
+   stopCustomerOrderTracking();
+   return;
+  }
+  renderCustomerOrderProgress(order);
+  if(['Teslim edildi','İptal','Kapalı'].includes(String(order.status||'')))stopCustomerOrderTracking();
+ }catch(err){
+  if(activeCustomerOrderTracking===tracked){
+   const connection=$('#trackConnectionStatus');
+   if(connection)connection.textContent='Bağlantı yenileniyor; ekrandaki son sipariş durumu korunuyor.';
+   else if(!$('#trackResult').querySelector('.customer-track-card'))$('#trackResult').innerHTML='<div class="notice">Sipariş sorgulanamadı. Bağlantı yeniden denenecek.</div>';
+  }
+ }
+}
+$('#trackBtn').onclick=()=>$('#trackBack').classList.add('show');
+$('#trackClose').onclick=()=>{stopCustomerOrderTracking();$('#trackBack').classList.remove('show')};
+$('#trackBack').addEventListener('click',e=>{if(e.target===$('#trackBack')){stopCustomerOrderTracking();$('#trackBack').classList.remove('show')}});
+$('#trackForm').onsubmit=async e=>{
+ e.preventDefault();
+ stopCustomerOrderTracking();
+ const f=new FormData(e.currentTarget);
+ const orderNo=String(f.get('id')||'').trim().replace(/^#+/,'').replace(/\s+/g,'').toUpperCase();
+ const phone=String(f.get('phone')||'').replace(/\D/g,'');
+ if(!orderNo||phone.length<10||phone.length>13){$('#trackResult').innerHTML='<div class="notice">Lütfen sipariş numarasını ve telefon numarasını kontrol edin.</div>';return;}
+ activeCustomerOrderTracking={orderNo,phone};
+ $('#trackResult').innerHTML='<p>Sipariş aranıyor…</p>';
+ await refreshCustomerOrderTracking();
+ if(activeCustomerOrderTracking)customerOrderTrackingTimer=window.setInterval(refreshCustomerOrderTracking,12000);
+};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeCustomerOrderTracking)refreshCustomerOrderTracking()});
+let deferredInstallPrompt=null;
 const installAppButton=$('#installAppBtn');
 const footerInstallAppButton=$('#footerInstallApp');
 const installButtons=[installAppButton,footerInstallAppButton].filter(Boolean);

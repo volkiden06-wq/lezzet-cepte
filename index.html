@@ -970,8 +970,17 @@ function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories
     ];
     const whatsappUrl = 'https://wa.me/905421511186?text=' + encodeURIComponent(whatsappLines.join('\n'));
     if(whatsappTab){try{whatsappTab.location.href=whatsappUrl;}catch{}}
-    openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p><p>Siparişiniz kaydedildi. WhatsApp işletme sohbeti açıldıysa <b>Gönder</b> tuşuna basmanız yeterlidir.</p><a class="primary" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;margin-top:16px">💬 WHATSAPP MESAJINI AÇ / TEKRAR AÇ</a><p style="font-size:12px;color:#777;margin-top:10px">Mesaj otomatik gönderilmez; son gönderim onayı sizdedir. WhatsApp açılmazsa yukarıdaki butonu kullanın.</p></div>`);
+    openModal('Sipariş alındı',`<div class="panel"><h3>Sipariş numaranız</h3><div style="font-size:30px;font-weight:950;color:var(--red)">#${escapeHtml(order.orderNumber)}</div><p>Durum: <b>Yeni</b></p><p>Siparişiniz kaydedildi. WhatsApp işletme sohbeti açıldıysa <b>Gönder</b> tuşuna basmanız yeterlidir.</p><a class="primary" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;margin-top:16px">💬 WHATSAPP MESAJINI AÇ / TEKRAR AÇ</a><p style="font-size:12px;color:#777;margin-top:10px">Mesaj otomatik gönderilmez; son gönderim onayı sizdedir. WhatsApp açılmazsa yukarıdaki butonu kullanın.</p><button type="button" id="trackCurrentOrder" class="ghost" style="display:block;width:100%;margin-top:10px">📦 SİPARİŞİMİ CANLI TAKİP ET</button></div>`);
     if(!$('#admin').classList.contains('hidden'))renderAdmin();
+    const trackCurrentOrderButton=$('#modalBody').querySelector('#trackCurrentOrder');
+    if(trackCurrentOrderButton)trackCurrentOrderButton.onclick=()=>{
+      closeModal();
+      $('#trackBack').classList.add('show');
+      $('#trackForm').elements.namedItem('id').value=order.orderNumber;
+      $('#trackForm').elements.namedItem('phone').value=order.phone;
+      $('#trackForm').requestSubmit();
+    };
+    
   }catch(err){
     if(whatsappTab){try{whatsappTab.close();}catch{}}
     console.error('Supabase order submission failed:',err);

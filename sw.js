@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yemek-tadinda-shell-v8';
+const CACHE_NAME = 'yemek-tadinda-shell-v9';
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/app-icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));

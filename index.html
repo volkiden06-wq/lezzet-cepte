@@ -1112,14 +1112,16 @@ async function enableAdminOrderNotifications(){
  if(permission!=='granted')throw new Error('Tarayıcı bildirim izni verilmedi.');
  const registration=await navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'});
  await registration.update().catch(()=>{});
- await navigator.serviceWorker.ready;
+ const readyRegistration=await navigator.serviceWorker.ready;
  const applicationServerKey=urlBase64ToUint8Array(PUSH_VAPID_PUBLIC_KEY);
- let oldSubscription=await registration.pushManager.getSubscription();
+ const oldSubscription=await readyRegistration.pushManager.getSubscription();
  if(oldSubscription){
   // The push provider may have expired this endpoint already; always continue with a fresh subscription.
   await oldSubscription.unsubscribe().catch(error=>console.warn('Eski bildirim kaydı kapatılamadı, yeni kayıt deneniyor:',error));
+  const remaining=await readyRegistration.pushManager.getSubscription();
+  if(remaining)throw new Error('Eski bildirim kaydı tarayıcıdan kaldırılamadı. Bu cihazın site bildirim iznini kontrol edin.');
  }
- const subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey});
+ const subscription=await readyRegistration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey});
  await persistAdminOrderPushSubscription(subscription);
 }
 

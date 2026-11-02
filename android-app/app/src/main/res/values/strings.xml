@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">YEMEK TADINDA</string>
     <string name="provider_authority">com.yemektadinda.app.fileprovider</string>
+    <string name="asset_statements" translatable="false">[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"web","site":"https://yemektadinda.com"}}]</string>
 </resources>

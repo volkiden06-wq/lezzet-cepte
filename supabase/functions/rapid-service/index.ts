@@ -87,7 +87,7 @@ Deno.serve(async (req: Request) => {
             tag: "yemek-tadinda-order-" + orderNumber,
             orderNumber,
           }),
-          { TTL: 86400 },
+          { TTL: 86400, urgency: "high" },
         );
         sent++;
       } catch (error) {

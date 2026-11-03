@@ -818,6 +818,7 @@ async function loadSiteVisitorStats(force=false){
 }
 
 let supabaseAccessToken='';
+let adminTokenRefreshPromise=null;
 let catalogReady=false;
 let lastCatalogSignature='';
 let catalogSyncTimer=null;
@@ -883,27 +884,44 @@ async function applySharedCatalog(row){
  return true;
 }
 async function refreshAdminAccessToken(){
- let refreshToken='';
- try{refreshToken=sessionStorage.getItem('lc_admin_refresh_token')||''}catch(e){}
- if(!refreshToken)return false;
- const response=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{
-  method:'POST',
-  headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},
-  body:JSON.stringify({refresh_token:refreshToken})
- });
- if(!response.ok)return false;
- const data=await response.json();
- if(!data.access_token)return false;
- supabaseAccessToken=data.access_token;
- if(orderRealtimeClient&&orderRealtimeClient.realtime){
-  Promise.resolve(orderRealtimeClient.realtime.setAuth(supabaseAccessToken))
-   .catch(error=>console.warn('Canlı sipariş bağlantısının tokenı yenilenemedi:',error));
- }
- try{
-  sessionStorage.setItem('lc_admin_access_token',data.access_token);
-  sessionStorage.setItem('lc_admin_refresh_token',data.refresh_token||refreshToken);
- }catch(e){}
- return true;
+ if(adminTokenRefreshPromise)return adminTokenRefreshPromise;
+ adminTokenRefreshPromise=(async()=>{
+  let refreshToken='';
+  try{refreshToken=sessionStorage.getItem('lc_admin_refresh_token')||''}catch(e){}
+  if(!refreshToken)return false;
+  let response,data={};
+  try{
+   response=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{
+    method:'POST',
+    headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({refresh_token:refreshToken})
+   });
+   data=await response.json().catch(()=>({}));
+  }catch(error){
+   console.warn('Yönetici oturumu yenilenemedi; ağ bağlantısı kontrol edilecek.',error);
+   return false;
+  }
+  if(!response.ok||!data.access_token){
+   console.warn('Yönetici yenileme anahtarı kabul edilmedi:',data.msg||data.message||data.error_description||response.status);
+   if(response.status===400||response.status===401){
+    supabaseAccessToken='';
+    try{sessionStorage.removeItem('lc_admin_access_token');sessionStorage.removeItem('lc_admin_refresh_token')}catch(e){}
+   }
+   return false;
+  }
+  supabaseAccessToken=data.access_token;
+  try{
+   sessionStorage.setItem('lc_admin_access_token',data.access_token);
+   sessionStorage.setItem('lc_admin_refresh_token',data.refresh_token||refreshToken);
+  }catch(e){}
+  if(orderRealtimeClient&&orderRealtimeClient.realtime){
+   try{await orderRealtimeClient.realtime.setAuth(supabaseAccessToken)}
+   catch(error){console.warn('Canlı sipariş bağlantısının tokenı güncellenemedi:',error)}
+  }
+  return true;
+ })();
+ try{return await adminTokenRefreshPromise}
+ finally{adminTokenRefreshPromise=null}
 }
 async function syncCatalogToCloud(){
  if(!supabaseAccessToken||!catalogReady)return;
@@ -1088,7 +1106,25 @@ document.addEventListener('visibilitychange',()=>{
 });
 window.addEventListener('focus',()=>refreshSharedCatalog());
 function supabaseHeaders(token=supabaseAccessToken){return {'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':`Bearer ${token||SUPABASE_PUBLISHABLE_KEY}`,'Content-Type':'application/json'}}
-async function supabaseRequest(path,options={}){const r=await fetch(`${SUPABASE_URL}${path}`,{...options,headers:{...supabaseHeaders(),...(options.headers||{})}});if(!r.ok){let detail='';try{detail=await r.text()}catch{}throw new Error(`Supabase ${r.status}: ${detail}`)}return r.status===204?null:r.json().catch(()=>null)}
+async function supabaseRequest(path,options={}){
+ const send=()=>{
+  const headers={...supabaseHeaders(),...(options.headers||{})};
+  headers.Authorization='Bearer '+(supabaseAccessToken||SUPABASE_PUBLISHABLE_KEY);
+  return fetch(`${SUPABASE_URL}${path}`,{...options,headers});
+ };
+ let r=await send();
+ if(r.status===401&&supabaseAccessToken&&await refreshAdminAccessToken()){
+  r=await send();
+ }
+ if(!r.ok){
+  let detail='';try{detail=await r.text()}catch{}
+  if(r.status===401&&supabaseAccessToken){
+   throw new Error('Yönetici oturumu yenilenemedi. Güvenli çıkış yapıp yeniden giriş yapın. Sipariş kayıtlarınız veritabanında korunur.');
+  }
+  throw new Error(`Supabase ${r.status}: ${detail}`);
+ }
+ return r.status===204?null:r.json().catch(()=>null);
+}
 async function loginAdmin(email,password){const r=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.msg||data.message||data.error_description||'E-posta veya şifre hatalı.');supabaseAccessToken=data.access_token;try{sessionStorage.setItem('lc_admin_access_token',data.access_token);sessionStorage.setItem('lc_admin_refresh_token',data.refresh_token||'')}catch(e){}const check=await supabaseRequest('/rest/v1/rpc/is_admin',{method:'POST',body:'{}'});if(check!==true){supabaseAccessToken='';throw new Error('Bu hesap yönetici yetkisine sahip değil. SQL yetkilendirme adımını tamamlayın.')}return data}
 let orderSoundEnabled=false;
 let orderSoundReady=false;

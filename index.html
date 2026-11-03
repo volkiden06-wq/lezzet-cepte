@@ -1333,7 +1333,7 @@ async function loadPublicProductReviewSummaries(force=false){
   productReviewSummaryLoaded=true;
  }catch(error){
   console.warn('Ürün değerlendirme özetleri yüklenemedi:',error);
-  productReviewSummaryLoaded=false;
+  productReviewSummaryLoaded=true;
  }finally{
   productReviewSummaryLoading=false;
   if(!$('#admin')?.classList.contains('hidden'))return;
@@ -2073,7 +2073,7 @@ $('#mobileMenu').onclick=()=>$('#menu').scrollIntoView({behavior:'smooth'});
 $('#mobileCart').onclick=cartModal;
 $('#mobileOrders').onclick=()=>$('#historyBack').classList.add('show');
 $('#footerHistory').onclick=()=>$('#historyBack').classList.add('show');
-$('#footerTrack').onclick=()=>$('#trackBack').classList.add('show');$('#closeModal').onclick=closeModal;$('#modalBack').onclick=e=>{if(e.target===$('#modalBack'))closeModal()};$('#adminBtn').onclick=adminLogin;$('#footerAdmin').onclick=adminLogin;$('#backSite').onclick=()=>{stopOrdersRealtime();supabaseAccessToken='';try{sessionStorage.removeItem('lc_admin_access_token');sessionStorage.removeItem('lc_admin_refresh_token')}catch(e){}$('#admin').classList.add('hidden');$('#customer').classList.remove('hidden');$('#siteHeader').classList.remove('hidden');document.querySelector('.footer').classList.remove('hidden')};$('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{adminPage=b.dataset.page;renderAdmin()});
+$('#footerTrack').onclick=()=>$('#trackBack').classList.add('show');$('#closeModal').onclick=closeModal;$('#modalBack').onclick=e=>{if(e.target===$('#modalBack'))closeModal()};$('#adminBtn').onclick=adminLogin;$('#footerAdmin').onclick=adminLogin;$('#backSite').onclick=()=>{stopOrdersRealtime();supabaseAccessToken='';try{sessionStorage.removeItem('lc_admin_access_token');sessionStorage.removeItem('lc_admin_refresh_token')}catch(e){}$('#admin').classList.add('hidden');$('#customer').classList.remove('hidden');$('#siteHeader').classList.remove('hidden');document.querySelector('.footer').classList.remove('hidden');renderProducts()};$('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{adminPage=b.dataset.page;renderAdmin()});
 /* Ana sayfa öne çıkan lezzetler slaytı */
 (()=>{
  const root=document.getElementById('heroSlider');if(!root)return;

@@ -736,21 +736,35 @@ async function prepareCatalogPayload(){
  for(const p of products){
   compact.push({...p,image:await compressCatalogImage(p.image)});
  }
- return {id:1,products:compact,categories:catalogCategories(),updated_at:new Date().toISOString()};
+ return {id:1,products:compact,categories:catalogCategories(),campaigns:Array.isArray(campaigns)?campaigns:[],updated_at:new Date().toISOString()};
+}
+function sharedCatalogSignature(){
+ return JSON.stringify([products,catalogCategories(),campaigns]);
 }
 async function readSharedCatalog(useAdminToken=false){
- const headers={'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':'Bearer '+(useAdminToken&&supabaseAccessToken?supabaseAccessToken:SUPABASE_PUBLISHABLE_KEY)};
- const response=await fetch(SUPABASE_URL+'/rest/v1/site_catalog?id=eq.1&select=products,categories', {headers});
+ const headers={'apikey':SUPABASE_PUBLISHABLE_KEY,'Cache-Control':'no-cache','Accept':'application/json'};
+ if(useAdminToken&&supabaseAccessToken)headers.Authorization='Bearer '+supabaseAccessToken;
+ const response=await fetch(SUPABASE_URL+'/rest/v1/site_catalog?id=eq.1&select=products,categories,campaigns,updated_at',{
+  method:'GET',headers,cache:'no-store'
+ });
  if(!response.ok){let detail='';try{detail=await response.text()}catch{}throw new Error('Ortak menü okunamadı: '+response.status+' '+detail)}
  const rows=await response.json();
  return Array.isArray(rows)&&rows.length?rows[0]:null;
 }
 async function applySharedCatalog(row){
  if(!row)return false;
- if(Array.isArray(row.products))products=row.products;
- if(Array.isArray(row.categories))localStorage.setItem('lc_category_order',JSON.stringify(row.categories));
- localStorage.setItem('lc_products',JSON.stringify(products));
- lastCatalogSignature=JSON.stringify([products,catalogCategories()]);
+ if(Array.isArray(row.products)){
+  products=row.products;
+  localStorage.setItem('lc_products',JSON.stringify(products));
+ }
+ if(Array.isArray(row.categories)){
+  localStorage.setItem('lc_category_order',JSON.stringify(row.categories));
+ }
+ if(Array.isArray(row.campaigns)){
+  campaigns=row.campaigns;
+  localStorage.setItem('lc_campaigns',JSON.stringify(campaigns));
+ }
+ lastCatalogSignature=sharedCatalogSignature();
  catalogReady=true;
  return true;
 }
@@ -796,22 +810,35 @@ async function syncCatalogToCloud(){
     response=await fetch(SUPABASE_URL+'/rest/v1/site_catalog?on_conflict=id',requestOptions);
    }
    if(!response.ok){let detail='';try{detail=await response.text()}catch{}throw new Error('Menü eşitlenemedi: '+response.status+' '+detail)}
-   lastCatalogSignature=JSON.stringify([products,catalogCategories()]);
+   lastCatalogSignature=sharedCatalogSignature();
   }while(catalogSyncAgain);
  }catch(err){console.error(err);toast(err.message||'Ürünler ortak veritabanına kaydedilemedi.')}
  finally{catalogSyncBusy=false}
 }
 function scheduleCatalogSync(){
  if(!supabaseAccessToken||!catalogReady)return;
- const signature=JSON.stringify([products,catalogCategories()]);
+ const signature=sharedCatalogSignature();
  if(signature===lastCatalogSignature)return;
  clearTimeout(catalogSyncTimer);
  catalogSyncTimer=setTimeout(()=>syncCatalogToCloud(),650);
 }
 async function initializeAdminCatalog(){
+ const localCampaigns=(Array.isArray(campaigns)?campaigns:[]).filter(c=>
+  !(c?.title==='Günün Kampanyası'&&c?.message==='Lezzet dolu fırsatları kaçırma!'&&!c?.image&&!c?.productId)
+ );
  const row=await readSharedCatalog(true);
- if(row){await applySharedCatalog(row);return}
- // İlk kurulum: yalnızca mevcut yönetici cihazındaki kayıtları aktar.
+ if(row){
+  await applySharedCatalog(row);
+  // Migrate existing campaigns from the established admin browser once,
+  // because the shared campaigns column was introduced after local campaigns.
+  if(Array.isArray(row.campaigns)&&row.campaigns.length===0&&localCampaigns.length){
+   campaigns=localCampaigns;
+   localStorage.setItem('lc_campaigns',JSON.stringify(campaigns));
+   scheduleCatalogSync();
+  }
+  return;
+ }
+ // First setup: only the authenticated admin device may seed the shared catalog.
  catalogReady=true;
  await syncCatalogToCloud();
 }
@@ -819,8 +846,88 @@ async function loadPublicCatalog(){
  try{
   const row=await readSharedCatalog(false);
   if(row)await applySharedCatalog(row);
- }catch(err){console.warn('Ortak menü yüklenemedi; bu cihazdaki kayıtlar korunuyor.',err)}
+  else console.warn('Ortak katalogda henüz kayıt yok; cihazdaki mevcut veriler korunuyor.');
+ }catch(err){
+  console.warn('Ortak menü yüklenemedi; cihazdaki kayıtlar korunuyor ve yeniden denenecek.',err);
+ }
+ startCatalogRealtime();
+ startCatalogFallbackPolling();
 }
+let catalogRealtimeClient=null;
+let catalogRealtimeChannel=null;
+let catalogRealtimeConnected=false;
+let catalogRefreshTimer=null;
+let catalogFallbackTimer=null;
+let catalogRefreshInFlight=false;
+let catalogLastFetchAt=0;
+function queueCatalogRefresh(){
+ clearTimeout(catalogRefreshTimer);
+ catalogRefreshTimer=setTimeout(()=>refreshSharedCatalog(),220);
+}
+async function refreshSharedCatalog(){
+ if(catalogRefreshInFlight||document.hidden)return false;
+ catalogRefreshInFlight=true;
+ try{
+  const before=sharedCatalogSignature();
+  const row=await readSharedCatalog(!!supabaseAccessToken);
+  if(!row)return false;
+  await applySharedCatalog(row);
+  catalogLastFetchAt=Date.now();
+  const changed=before!==sharedCatalogSignature();
+  if(changed){
+   renderCats();
+   renderProducts();
+   renderCampaignSidebar();
+   console.info('YEMEK TADINDA: ortak ürün, kategori ve kampanya verileri yenilendi.');
+  }
+  return changed;
+ }catch(error){
+  console.warn('Ortak katalog yenilenemedi; sonraki kontrolde tekrar denenecek.',error);
+  return false;
+ }finally{
+  catalogRefreshInFlight=false;
+ }
+}
+function startCatalogRealtime(){
+ if(catalogRealtimeChannel)return true;
+ if(!window.supabase||typeof window.supabase.createClient!=='function')return false;
+ try{
+  if(!catalogRealtimeClient){
+   catalogRealtimeClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+    auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false},
+    realtime:{params:{eventsPerSecond:4}}
+   });
+  }
+  const channel=catalogRealtimeClient.channel('yemek-tadinda-catalog-sync')
+   .on('postgres_changes',{event:'*',schema:'public',table:'catalog_sync_events',filter:'id=eq.1'},()=>queueCatalogRefresh());
+  catalogRealtimeChannel=channel;
+  channel.subscribe((status,error)=>{
+   if(status==='SUBSCRIBED'){
+    catalogRealtimeConnected=true;
+    console.info('YEMEK TADINDA: telefon-bilgisayar katalog senkronizasyonu aktif.');
+   }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+    catalogRealtimeConnected=false;
+    console.warn('Katalog canlı bağlantısı kesildi; yedek senkronizasyon devrede.',status,error||'');
+   }
+  });
+  return true;
+ }catch(error){
+  catalogRealtimeConnected=false;
+  console.warn('Katalog canlı bağlantısı kurulamadı; yedek senkronizasyon devrede.',error);
+  return false;
+ }
+}
+function startCatalogFallbackPolling(){
+ if(catalogFallbackTimer)return;
+ catalogFallbackTimer=window.setInterval(()=>{
+  if(document.hidden||catalogRefreshInFlight)return;
+  if(!catalogRealtimeConnected||Date.now()-catalogLastFetchAt>60000)refreshSharedCatalog();
+ },15000);
+}
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden){refreshSharedCatalog();startCatalogRealtime()}
+});
+window.addEventListener('focus',()=>refreshSharedCatalog());
 function supabaseHeaders(token=supabaseAccessToken){return {'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':`Bearer ${token||SUPABASE_PUBLISHABLE_KEY}`,'Content-Type':'application/json'}}
 async function supabaseRequest(path,options={}){const r=await fetch(`${SUPABASE_URL}${path}`,{...options,headers:{...supabaseHeaders(),...(options.headers||{})}});if(!r.ok){let detail='';try{detail=await r.text()}catch{}throw new Error(`Supabase ${r.status}: ${detail}`)}return r.status===204?null:r.json().catch(()=>null)}
 async function loginAdmin(email,password){const r=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.msg||data.message||data.error_description||'E-posta veya şifre hatalı.');supabaseAccessToken=data.access_token;try{sessionStorage.setItem('lc_admin_access_token',data.access_token);sessionStorage.setItem('lc_admin_refresh_token',data.refresh_token||'')}catch(e){}const check=await supabaseRequest('/rest/v1/rpc/is_admin',{method:'POST',body:'{}'});if(check!==true){supabaseAccessToken='';throw new Error('Bu hesap yönetici yetkisine sahip değil. SQL yetkilendirme adımını tamamlayın.')}return data}
@@ -2012,7 +2119,7 @@ if('serviceWorker' in navigator && location.protocol==='https:'){
 updateInstallButton();
 $('#year').textContent=new Date().getFullYear();renderCartCount();renderCampaignSidebar();
 if(!supabaseAccessToken)recordPublicSiteVisit();
-loadPublicCatalog().finally(()=>{renderCats();renderProducts()});
+loadPublicCatalog().finally(()=>{renderCats();renderProducts();renderCampaignSidebar();startCatalogRealtime();startCatalogFallbackPolling()});
 $('#customerNav').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();$('#customerNav').querySelectorAll('a').forEach(x=>x.classList.toggle('selected',x===a));if(a.dataset.sidePage==='home'){currentCat='Tümü';$('#search').value='';renderCats();renderProducts();$('#home').scrollIntoView({behavior:'smooth'});return}if(a.dataset.sidePage==='campaigns'){$('#campaigns').scrollIntoView({behavior:'smooth'});return}if(a.dataset.sideCat){currentCat=a.dataset.sideCat;$('#search').value='';renderCats();renderProducts();$('#menu').scrollIntoView({behavior:'smooth'});}});
 })();
 </script>

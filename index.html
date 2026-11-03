@@ -2007,7 +2007,8 @@ function paintCrossSellEditor(){
  const selected=new Set((Array.isArray(product.recommendedProductIds)?product.recommendedProductIds:[]).map(String));
  host.innerHTML='<form id="crossSellAdminForm" class="cross-sell-admin-form" data-product-id="'+escapeHtml(String(product.id))+'">'+
   '<div class="customization-selected-product"><div><b>'+escapeHtml(product.name)+'</b><small>'+escapeHtml(product.category||'')+' · '+money(product.price)+'</small></div><span class="review-status review-status-approved">ANA ÜRÜN</span></div>'+
-  '<p class="muted">Bu ürün sepete eklendiğinde aşağıdan seçtiğin tamamlayıcı ürünler müşteriye önerilir. En fazla 6 ürün seçebilirsin; öneriler kendiliğinden sepete eklenmez.</p>'+\n  '<div id="crossSellSelectedCount" class="cross-sell-selection-count" aria-live="polite"></div>'+
+  '<p class="muted">Bu ürün sepete eklendiğinde aşağıdan seçtiğin tamamlayıcı ürünler müşteriye önerilir. En fazla 6 ürün seçebilirsin; öneriler kendiliğinden sepete eklenmez.</p>'+
+  '<div id="crossSellSelectedCount" class="cross-sell-selection-count" aria-live="polite"></div>'+
   (candidates.length?'<div class="cross-sell-admin-list">'+candidates.map(item=>'<label class="cross-sell-admin-option"><input type="checkbox" name="recommendedProductIds" value="'+escapeHtml(String(item.id))+'"'+(selected.has(String(item.id))?' checked':'')+'><span><b>'+escapeHtml(item.name)+'</b><small>'+escapeHtml(item.category||'')+' · '+money(item.price)+'</small></span></label>').join('')+'</div>':'<div class="notice">Öneri olarak seçilebilecek başka aktif ürün bulunmuyor.</div>')+
   '<button class="primary" type="submit">ÖNERİLERİ KAYDET VE TÜM CİHAZLARA EŞİTLE</button></form>';
  const form=$('#crossSellAdminForm');

@@ -1385,41 +1385,42 @@ function addCampaignBundle(campaign,linkedProduct,freeProduct,extraProducts=[]){
  return true;
 }
 
+function openCampaignOrder(campaign){
+ if(!campaign)return false;
+ const linked=products.find(p=>String(p.id)===String(campaign.productId)&&p.active);
+ const freeOptions=campaignFreeProducts(campaign).filter(p=>!linked||String(p.id)!==String(linked.id));
+ const extraOptions=campaignExtraProducts(campaign).filter(p=>(!linked||String(p.id)!==String(linked.id))&&!freeOptions.some(g=>String(g.id)===String(p.id)));
+ const giftChoices=freeOptions.length
+  ? '<fieldset class="campaign-free-choice"><legend>🎁 HEDİYENİ SEÇ · 1 ADET</legend><p>Bu kampanyada aşağıdaki ürünlerden yalnızca bir tanesi ücretsizdir.</p>'+freeOptions.map(p=>'<label><input type="radio" name="campaignGiftChoice" value="'+escapeHtml(String(p.id))+'"><span>'+escapeHtml(p.name)+'</span><b>ÜCRETSİZ</b></label>').join('')+'</fieldset>'
+  : '';
+ const extraChoices=extraOptions.length
+  ? '<fieldset class="campaign-extra-choice"><legend>⚡ EKSTRA GELSİN · İSTEĞE BAĞLI</legend><p>İstediğin ekstra ürünleri seçebilirsin. Seçtiğin her ürün normal menü fiyatıyla toplam tutara eklenir.</p>'+extraOptions.map(p=>'<label><input type="checkbox" name="campaignExtraChoice" value="'+escapeHtml(String(p.id))+'"><img src="'+escapeHtml(String(p.image||img('photo-1547592166-23ac45744acd'))) +'" alt="'+escapeHtml(p.name)+'" loading="lazy" onerror="this.onerror=null;this.src=\\''+img('photo-1547592166-23ac45744acd')+'\\'"><span><b>'+escapeHtml(p.name)+'</b><small>'+escapeHtml(p.category||'Menü ürünü')+'</small></span><strong>'+money(p.price)+'</strong></label>').join('')+'</fieldset>'
+  : '';
+ const linkedHtml=linked
+  ? '<div class="campaign-product"><div><b>'+escapeHtml(linked.name)+'</b><small>'+money(linked.price)+' · '+escapeHtml(linked.description||'')+'</small></div></div>'+giftChoices+extraChoices+'<button class="primary" id="campaignAddProduct" '+(freeOptions.length?'disabled':'')+'>'+(freeOptions.length?'Önce ücretsiz ürününü seç':(extraOptions.length?'Kampanyayı ve seçtiğim ekstraları sepete ekle':'Sepete Ekle'))+'</button>'
+  : '<div class="notice">Bu kampanyaya henüz özel bir ana ürün bağlanmamış. Menüden ilgili ürünleri inceleyebilirsin.</div>';
+ const body='<div class="campaign-detail"><img src="'+escapeHtml(campaign.image||img('photo-1565299624946-b28f40a0ae38'))+'" alt="'+escapeHtml(campaign.title||'Kampanya')+'"><span class="campaign-tag">ÖZEL KAMPANYA</span><h3>'+escapeHtml(campaign.title||'Kampanya')+'</h3><p>'+escapeHtml(campaign.message||'Kampanya açıklaması bulunmuyor.')+'</p>'+linkedHtml+'<button class="ghost" id="campaignBrowse">Menüde diğer ürünleri gör</button></div>';
+ openModal('Kampanya Detayı',body);
+ const addBtn=$('#campaignAddProduct');
+ $('#modalBody').querySelectorAll('[name="campaignGiftChoice"]').forEach(radio=>radio.onchange=()=>{if(addBtn){addBtn.disabled=false;addBtn.textContent='🎁 Hediyem ve seçtiğim ekstralarla sepete ekle'}});
+ if(addBtn&&linked)addBtn.onclick=()=>{
+  const selectedId=freeOptions.length?$('#modalBody').querySelector('[name="campaignGiftChoice"]:checked')?.value:null;
+  if(freeOptions.length&&!selectedId){toast('Lütfen ücretsiz ürün seçeneklerinden birini seç.');return}
+  const gift=selectedId?freeOptions.find(p=>String(p.id)===String(selectedId)):null;
+  const selectedExtraIds=[...$('#modalBody').querySelectorAll('[name="campaignExtraChoice"]:checked')].map(input=>String(input.value));
+  const selectedExtras=selectedExtraIds.map(id=>extraOptions.find(p=>String(p.id)===id)).filter(Boolean);
+  addCampaignBundle(campaign,linked,gift,selectedExtras);
+  closeModal();cartModal();
+ };
+ const browse=$('#campaignBrowse');
+ if(browse)browse.onclick=()=>{closeModal();currentCat='Tümü';$('#search').value='';renderCats();renderProducts();$('#menu').scrollIntoView({behavior:'smooth'})};
+ return true;
+}
 function renderCampaignSidebar(){
  const host=$('#campaignList');if(!host)return;
  const active=(campaigns||[]).filter(c=>c.active!==false);
  host.innerHTML=active.length?active.map((c,i)=>`<article class="campaign-card"><img src="${c.image||img('photo-1565299624946-b28f40a0ae38')}" alt="${escapeHtml(c.title||'Kampanya')}" onerror="this.onerror=null;this.src='${img('photo-1565299624946-b28f40a0ae38')}'"><div class="campaign-card-copy"><span class="campaign-tag">ÖZEL KAMPANYA</span><h3>${escapeHtml(c.title||'Kampanya')}</h3><p>${escapeHtml(c.message||'Fırsatı kaçırma!')}</p><button class="campaign-action" data-campaign-order="${i}">İncele / Sipariş Ver</button></div></article>`).join(''):'<div class="campaign-empty">🎁<br><b>Yeni kampanyalar burada görünecek.</b><br>Yönetim panelinden görselli kampanya ekleyebilirsin.</div>';
-
- host.querySelectorAll('[data-campaign-order]').forEach(b=>b.onclick=()=>{
-  const campaign=active[Number(b.dataset.campaignOrder)];
-  if(!campaign)return;
-  const linked=products.find(p=>String(p.id)===String(campaign.productId)&&p.active);
-  const freeOptions=campaignFreeProducts(campaign).filter(p=>!linked||String(p.id)!==String(linked.id));
-  const extraOptions=campaignExtraProducts(campaign).filter(p=>(!linked||String(p.id)!==String(linked.id))&&!freeOptions.some(g=>String(g.id)===String(p.id)));
-  const giftChoices=freeOptions.length
-   ? '<fieldset class="campaign-free-choice"><legend>🎁 HEDİYENİ SEÇ · 1 ADET</legend><p>Bu kampanyada aşağıdaki ürünlerden yalnızca bir tanesi ücretsizdir.</p>'+freeOptions.map(p=>'<label><input type="radio" name="campaignGiftChoice" value="'+escapeHtml(String(p.id))+'"><span>'+escapeHtml(p.name)+'</span><b>ÜCRETSİZ</b></label>').join('')+'</fieldset>'
-   : '';
-  const extraChoices=extraOptions.length
-   ? '<fieldset class="campaign-extra-choice"><legend>⚡ EKSTRA GELSİN · İSTEĞE BAĞLI</legend><p>İstediğin ekstra ürünleri seçebilirsin. Seçtiğin her ürün normal menü fiyatıyla toplam tutara eklenir.</p>'+extraOptions.map(p=>'<label><input type="checkbox" name="campaignExtraChoice" value="'+escapeHtml(String(p.id))+'"><img src="'+escapeHtml(String(p.image||img('photo-1547592166-23ac45744acd'))) +'" alt="'+escapeHtml(p.name)+'" loading="lazy" onerror="this.onerror=null;this.src=\''+img('photo-1547592166-23ac45744acd')+'\'"><span><b>'+escapeHtml(p.name)+'</b><small>'+escapeHtml(p.category||'Menü ürünü')+'</small></span><strong>'+money(p.price)+'</strong></label>').join('')+'</fieldset>'
-   : '';
-  const linkedHtml=linked
-   ? '<div class="campaign-product"><div><b>'+escapeHtml(linked.name)+'</b><small>'+money(linked.price)+' · '+escapeHtml(linked.description||'')+'</small></div></div>'+giftChoices+extraChoices+'<button class="primary" id="campaignAddProduct" '+(freeOptions.length?'disabled':'')+'>'+(freeOptions.length?'Önce ücretsiz ürününü seç':(extraOptions.length?'Kampanyayı ve seçtiğim ekstraları sepete ekle':'Sepete Ekle'))+'</button>'
-   : '<div class="notice">Bu kampanyaya henüz özel bir ana ürün bağlanmamış. Menüden ilgili ürünleri inceleyebilirsin.</div>';
-  const body='<div class="campaign-detail"><img src="'+escapeHtml(campaign.image||img('photo-1565299624946-b28f40a0ae38'))+'" alt="'+escapeHtml(campaign.title||'Kampanya')+'"><span class="campaign-tag">ÖZEL KAMPANYA</span><h3>'+escapeHtml(campaign.title||'Kampanya')+'</h3><p>'+escapeHtml(campaign.message||'Kampanya açıklaması bulunmuyor.')+'</p>'+linkedHtml+'<button class="ghost" id="campaignBrowse">Menüde diğer ürünleri gör</button></div>';
-  openModal('Kampanya Detayı',body);
-  const addBtn=$('#campaignAddProduct');
-  $('#modalBody').querySelectorAll('[name="campaignGiftChoice"]').forEach(radio=>radio.onchange=()=>{if(addBtn){addBtn.disabled=false;addBtn.textContent='🎁 Hediyem ve seçtiğim ekstralarla sepete ekle'}});
-  if(addBtn&&linked)addBtn.onclick=()=>{
-   const selectedId=freeOptions.length?$('#modalBody').querySelector('[name="campaignGiftChoice"]:checked')?.value:null;
-   if(freeOptions.length&&!selectedId){toast('Lütfen ücretsiz ürün seçeneklerinden birini seç.');return}
-   const gift=selectedId?freeOptions.find(p=>String(p.id)===String(selectedId)):null;
-   const selectedExtraIds=[...$('#modalBody').querySelectorAll('[name="campaignExtraChoice"]:checked')].map(input=>String(input.value));
-   const selectedExtras=selectedExtraIds.map(id=>extraOptions.find(p=>String(p.id)===id)).filter(Boolean);
-   addCampaignBundle(campaign,linked,gift,selectedExtras);
-   closeModal();cartModal();
-  };
-  $('#campaignBrowse').onclick=()=>{closeModal();currentCat='Tümü';$('#search').value='';renderCats();renderProducts();$('#menu').scrollIntoView({behavior:'smooth'})};
- });
+ host.querySelectorAll('[data-campaign-order]').forEach(b=>b.onclick=()=>openCampaignOrder(active[Number(b.dataset.campaignOrder)]));
 }
 function getCategoryOrder(){
  const productCategories=[...new Set(products.map(p=>String(p.category||'').trim()).filter(Boolean))];
@@ -1559,7 +1560,7 @@ function openProductCustomization(productId,cartIndex=null){
   toast(product.name+' kişiselleştirilerek sepete eklendi.');
  };
 }
-function renderProducts(){if(!productReviewSummaryLoaded&&!productReviewSummaryLoading)loadPublicProductReviewSummaries();const q=$('#search').value.toLocaleLowerCase('tr');const list=[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).filter(p=>p.active&&(currentCat==='Tümü'||p.category===currentCat)&&(`${p.name} ${p.category} ${p.description}`).toLocaleLowerCase('tr').includes(q));$('#products').innerHTML=list.length?list.map(p=>{const customization=getProductCustomizationConfig(p);return `<article class="product"><img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.style.background='#eee';this.removeAttribute('src')"><div class="product-body"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description)}</p>${productReviewRatingMarkup(p.id)}<div class="product-bottom"><span class="price">${money(p.price)}</span><div class="product-actions"><button class="add" data-add="${p.id}" aria-label="Sepete ekle">+</button>${customization.enabled?'<button class="customize-product-btn" data-customize-product="'+escapeHtml(String(p.id))+'">ÖZELLEŞTİR</button>':''}</div></div></div></article>`}).join(''):'<p>Aramana uygun ürün bulunamadı.</p>';$('#products').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(+b.dataset.add));$('#products').querySelectorAll('[data-customize-product]').forEach(b=>b.onclick=()=>openProductCustomization(b.dataset.customizeProduct));$('#products').querySelectorAll('[data-open-product-reviews]').forEach(b=>b.onclick=()=>openProductReviewsList(b.dataset.openProductReviews))}function add(id){const p=products.find(x=>x.id===id);if(!p)return;const row=cart.find(x=>x.id===id&&!x.campaignId&&!x.customization);if(row)row.qty++;else cart.push({id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function changeCartLine(index,delta){const row=cart[index];if(!row)return;row.qty=Number(row.qty||1)+delta;if(row.qty<=0)cart.splice(index,1);save();renderCartCount();cartModal();}function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show')}function total(){return Number(cart.reduce((sum,row)=>sum+cartLineUnitPrice(row,products.find(p=>String(p.id)===String(row.id)))*Math.max(1,Number(row.qty)||1),0).toFixed(2))}function readPendingLoyaltyUse(){
+function renderProducts(){if(!productReviewSummaryLoaded&&!productReviewSummaryLoading)loadPublicProductReviewSummaries();const q=$('#search').value.toLocaleLowerCase('tr');const list=[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).filter(p=>p.active&&(currentCat==='Tümü'||p.category===currentCat)&&(`${p.name} ${p.category} ${p.description}`).toLocaleLowerCase('tr').includes(q));$('#products').innerHTML=list.length?list.map(p=>{const customization=getProductCustomizationConfig(p);return `<article class="product"><img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.style.background='#eee';this.removeAttribute('src')"><div class="product-body"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description)}</p>${productReviewRatingMarkup(p.id)}<div class="product-bottom"><span class="price">${money(p.price)}</span><div class="product-actions"><button class="add" data-add="${p.id}" aria-label="Sepete ekle">+</button>${customization.enabled?'<button class="customize-product-btn" data-customize-product="'+escapeHtml(String(p.id))+'">ÖZELLEŞTİR</button>':''}</div></div></div></article>`}).join(''):'<p>Aramana uygun ürün bulunamadı.</p>';$('#products').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(+b.dataset.add));$('#products').querySelectorAll('[data-customize-product]').forEach(b=>b.onclick=()=>openProductCustomization(b.dataset.customizeProduct));$('#products').querySelectorAll('[data-open-product-reviews]').forEach(b=>b.onclick=()=>openProductReviewsList(b.dataset.openProductReviews))}function add(id){const p=products.find(x=>String(x.id)===String(id));if(!p)return;const linkedCampaign=(campaigns||[]).find(c=>c&&c.active!==false&&String(c.productId||'')===String(p.id));if(linkedCampaign){openCampaignOrder(linkedCampaign);return}const row=cart.find(x=>String(x.id)===String(p.id)&&!x.campaignId&&!x.customization);if(row)row.qty++;else cart.push({id:p.id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function changeCartLine(index,delta){const row=cart[index];if(!row)return;row.qty=Number(row.qty||1)+delta;if(row.qty<=0)cart.splice(index,1);save();renderCartCount();cartModal();}function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show')}function total(){return Number(cart.reduce((sum,row)=>sum+cartLineUnitPrice(row,products.find(p=>String(p.id)===String(row.id)))*Math.max(1,Number(row.qty)||1),0).toFixed(2))}function readPendingLoyaltyUse(){
  try{
   const value=JSON.parse(sessionStorage.getItem('lc_pending_loyalty_use')||'null');
   if(!value||!/^\d{10,15}$/.test(String(value.phoneDigits||''))||String(value.verificationOrderNumber||'').length<5)return null;

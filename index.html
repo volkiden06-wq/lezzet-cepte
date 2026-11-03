@@ -1308,19 +1308,21 @@ function getCategoryOrder(){
 function saveCategoryOrder(order){localStorage.setItem('lc_category_order',JSON.stringify(order));scheduleCatalogSync()}
 function renderCustomerNavCategories(){const host=$('#customerCategoryLinks');if(!host)return;const icons=['🍲','🥖','🍕','🍢','🌯','🍖','🍰','🥤','🍽️'];host.innerHTML=getCategoryOrder().map((c,i)=>`<a href="#menu" data-side-cat="${escapeHtml(c)}">${icons[i%icons.length]} <span>${escapeHtml(c)}</span></a>`).join('')}
 function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories').innerHTML=cats.map(c=>`<button class="cat ${currentCat===c?'active':''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('');$('#categories').querySelectorAll('button').forEach(b=>b.onclick=()=>{currentCat=b.dataset.cat;renderCats();renderProducts()});renderCustomerNavCategories()}let productReviewSummaryCache={};
+let productReviewPublicRows=[];
 let productReviewSummaryLoaded=false;
 let productReviewSummaryLoading=false;
 async function loadPublicProductReviewSummaries(force=false){
  if(productReviewSummaryLoading||(!force&&productReviewSummaryLoaded))return;
  productReviewSummaryLoading=true;
  try{
-  const response=await fetch(SUPABASE_URL+'/rest/v1/product_reviews?select=product_id,rating&is_approved=eq.true&order=created_at.desc&limit=1000',{
+  const response=await fetch(SUPABASE_URL+'/rest/v1/product_reviews?select=product_id,product_name,display_name,rating,comment,created_at&is_approved=eq.true&order=created_at.desc&limit=1000',{
    method:'GET',headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Cache-Control':'no-store'}
   });
   if(!response.ok)throw new Error('Yorum puanları alınamadı: '+response.status);
   const rows=await response.json();
+  productReviewPublicRows=Array.isArray(rows)?rows:[];
   const summary={};
-  (Array.isArray(rows)?rows:[]).forEach(row=>{
+  productReviewPublicRows.forEach(row=>{
    const id=String(row.product_id||'');
    const rating=Math.min(5,Math.max(1,Number(row.rating)||0));
    if(!id||!rating)return;
@@ -1331,21 +1333,33 @@ async function loadPublicProductReviewSummaries(force=false){
   productReviewSummaryLoaded=true;
  }catch(error){
   console.warn('Ürün değerlendirme özetleri yüklenemedi:',error);
-  productReviewSummaryLoaded=true;
+  productReviewSummaryLoaded=false;
  }finally{
   productReviewSummaryLoading=false;
   if(!$('#admin')?.classList.contains('hidden'))return;
   renderProducts();
  }
 }
+function openProductReviewsList(productId){
+ const id=String(productId||'');
+ const rows=productReviewPublicRows.filter(row=>String(row.product_id||'')===id);
+ const product=products.find(item=>String(item.id)===id);
+ const title=product?.name||rows[0]?.product_name||'Ürün değerlendirmeleri';
+ const cards=rows.map(row=>{
+  const rating=Math.min(5,Math.max(1,Number(row.rating)||0));
+  const date=new Date(row.created_at||Date.now()).toLocaleDateString('tr-TR');
+  return '<article class="public-review-card"><div class="public-review-head"><b>'+escapeHtml(row.display_name||'Müşteri')+'</b><span>'+('★'.repeat(rating))+('☆'.repeat(5-rating))+'</span></div>'+(row.comment?'<p>'+escapeHtml(row.comment)+'</p>':'<p class="public-review-no-comment">Yalnızca yıldız puanı verildi.</p>')+'<small>'+escapeHtml(date)+'</small></article>';
+ }).join('');
+ openModal(title+' · Değerlendirmeler',cards||'<div class="notice">Bu ürün için henüz yayınlanmış değerlendirme yok.</div>');
+}
 function productReviewRatingMarkup(productId){
  const summary=productReviewSummaryCache[String(productId)];
  if(!summary||!summary.count)return '<div class="product-review-summary empty"><span>☆☆☆☆☆</span><small>Henüz değerlendirme yok</small></div>';
  const average=summary.sum/summary.count;
  const rounded=Math.round(average);
- return '<div class="product-review-summary" aria-label="'+average.toFixed(1)+' / 5 yıldız, '+summary.count+' değerlendirme"><span>'+('★'.repeat(rounded))+('☆'.repeat(5-rounded))+'</span><b>'+average.toFixed(1).replace('.',',')+'</b><small>('+summary.count+' değerlendirme)</small></div>';
+ return '<button type="button" class="product-review-summary product-review-open" data-open-product-reviews="'+escapeHtml(String(productId))+'" aria-label="'+average.toFixed(1)+' / 5 yıldız, '+summary.count+' değerlendirme. Yorumları oku"><span>'+('★'.repeat(rounded))+('☆'.repeat(5-rounded))+'</span><b>'+average.toFixed(1).replace('.',',')+'</b><small>'+summary.count+' değerlendirme · Yorumları oku</small></button>';
 }
-function renderProducts(){if(!productReviewSummaryLoaded&&!productReviewSummaryLoading)loadPublicProductReviewSummaries();const q=$('#search').value.toLocaleLowerCase('tr');const list=[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).filter(p=>p.active&&(currentCat==='Tümü'||p.category===currentCat)&&(`${p.name} ${p.category} ${p.description}`).toLocaleLowerCase('tr').includes(q));$('#products').innerHTML=list.length?list.map(p=>`<article class="product"><img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.style.background='#eee';this.removeAttribute('src')"><div class="product-body"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description)}</p>${productReviewRatingMarkup(p.id)}<div class="product-bottom"><span class="price">${money(p.price)}</span><button class="add" data-add="${p.id}" aria-label="Sepete ekle">+</button></div></div></article>`).join(''):'<p>Aramana uygun ürün bulunamadı.</p>';$('#products').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(+b.dataset.add))}function add(id){const p=products.find(x=>x.id===id);if(!p)return;const row=cart.find(x=>x.id===id&&!x.campaignId);if(row)row.qty++;else cart.push({id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function changeCartLine(index,delta){const row=cart[index];if(!row)return;row.qty=Number(row.qty||1)+delta;if(row.qty<=0)cart.splice(index,1);save();renderCartCount();cartModal();}function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show')}function total(){return cart.reduce((s,x)=>s+(products.find(p=>p.id===x.id)?.price||0)*x.qty,0)}function readPendingLoyaltyUse(){
+function renderProducts(){if(!productReviewSummaryLoaded&&!productReviewSummaryLoading)loadPublicProductReviewSummaries();const q=$('#search').value.toLocaleLowerCase('tr');const list=[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).filter(p=>p.active&&(currentCat==='Tümü'||p.category===currentCat)&&(`${p.name} ${p.category} ${p.description}`).toLocaleLowerCase('tr').includes(q));$('#products').innerHTML=list.length?list.map(p=>`<article class="product"><img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.style.background='#eee';this.removeAttribute('src')"><div class="product-body"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description)}</p>${productReviewRatingMarkup(p.id)}<div class="product-bottom"><span class="price">${money(p.price)}</span><button class="add" data-add="${p.id}" aria-label="Sepete ekle">+</button></div></div></article>`).join(''):'<p>Aramana uygun ürün bulunamadı.</p>';$('#products').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(+b.dataset.add));$('#products').querySelectorAll('[data-open-product-reviews]').forEach(b=>b.onclick=()=>openProductReviewsList(b.dataset.openProductReviews))}function add(id){const p=products.find(x=>x.id===id);if(!p)return;const row=cart.find(x=>x.id===id&&!x.campaignId);if(row)row.qty++;else cart.push({id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function changeCartLine(index,delta){const row=cart[index];if(!row)return;row.qty=Number(row.qty||1)+delta;if(row.qty<=0)cart.splice(index,1);save();renderCartCount();cartModal();}function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show')}function total(){return cart.reduce((s,x)=>s+(products.find(p=>p.id===x.id)?.price||0)*x.qty,0)}function readPendingLoyaltyUse(){
  try{
   const value=JSON.parse(sessionStorage.getItem('lc_pending_loyalty_use')||'null');
   if(!value||!/^\d{10,15}$/.test(String(value.phoneDigits||''))||String(value.verificationOrderNumber||'').length<5)return null;
@@ -2289,7 +2303,7 @@ $('#historyForm').onsubmit=async e=>{
    const items=Array.isArray(o.items)?o.items:[];
    const itemText=items.map(i=>escapeHtml(i.base_product_name||i.name||'Ürün')+' × '+escapeHtml(String(i.qty||1))).join(', ');
    const delivered=String(o.status||'').toLocaleLowerCase('tr')==='teslim edildi';
-   const reviewItems=delivered?[...new Map(items.filter(i=>i&&i.id!=null).map(i=>[String(i.id),i])).values()]:[];
+   const reviewItems=delivered?[...new Map(items.flatMap(i=>{if(!i)return[];const entries=[];if(i.id!=null)entries.push([String(i.id),{...i,reviewLabel:i.base_product_name||i.name||'Ürün'}]);if(i.free_gift_product_id!=null)entries.push([String(i.free_gift_product_id),{...i,id:i.free_gift_product_id,name:i.free_gift_name||'Ücretsiz hediye',base_product_name:i.free_gift_name||'Ücretsiz hediye',reviewLabel:i.free_gift_name||'Ücretsiz hediye'}]);return entries;})).values()]:[];
    const reviewMarkup=reviewItems.length?'<div class="customer-order-review-list"><b>Bu siparişteki ürünleri değerlendir</b>'+reviewItems.map(item=>'<button type="button" class="customer-review-button" data-write-review="'+index+'" data-review-product="'+escapeHtml(String(item.id))+'">⭐ '+escapeHtml(item.base_product_name||item.name||'Ürün')+' · DEĞERLENDİR</button>').join('')+'</div>':'';
    return '<article class="customer-order-card"><div class="customer-order-head"><b>Sipariş #'+escapeHtml(shortNo)+'</b><span class="status">'+escapeHtml(o.status||'Yeni')+'</span></div><p>'+escapeHtml(date)+'</p><p>Ödeme: '+escapeHtml(o.payment_method||'Belirtilmedi')+' · Toplam: <b>'+money(Number(o.total)||0)+'</b></p><p class="customer-order-items">'+(itemText||'Ürün bilgisi bulunamadı')+'</p>'+reviewMarkup+'<div class="customer-order-actions"><button type="button" class="customer-order-track" data-track-order="'+index+'">📦 Siparişi Takip Et</button><button type="button" class="customer-order-repeat" data-repeat-order="'+index+'" '+(items.length?'':'disabled')+'>🔁 Tekrar Sipariş Ver</button></div><div class="customer-loyalty-inline" id="customerLoyalty'+index+'"></div></article>';
   }).join(''):'<div class="notice">Bu telefon numarasıyla eşleşen sipariş bulunamadı.</div>';

@@ -16,7 +16,7 @@ self.addEventListener('activate', event => {
 // Renew push subscriptions when the browser reports that its endpoint changed.
 const PUSH_VAPID_PUBLIC_KEY = 'BJatR0nF1y1SyWJP3LQwAsjmcGXk4LHdwgHo7sVdcl9Wfe7DFvFG4_XG2DPTy_dEW2EKht-Kua_Pl9qS6m8-6FQ';
 const SUPABASE_URL = 'https://jlpqdjhxdpmighnpebkj.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpscHFkamh4ZHBtaWdobnBlYmtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzMTg0MDAsImV4cCI6MjEwODg5NDQwMH0.placeholder';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_0jwHKXSBerbH6swoXYCRog_j3g8j5z6';
 function pushKeyBytes(value) {
   const pad = '='.repeat((4 - value.length % 4) % 4);
   const raw = atob((value + pad).replace(/-/g, '+').replace(/_/g, '/'));

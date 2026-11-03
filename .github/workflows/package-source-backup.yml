@@ -1,0 +1,39 @@
+name: YEMEK TADINDA - Kaynak ZIP paketi
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  package-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kaynak kodunu indir
+        uses: actions/checkout@v4
+
+      - name: Taşınabilir kaynak ZIP oluştur
+        shell: bash
+        run: |
+          zip -r YEMEK-TADINDA-KAYNAK-KOD.zip . \
+            -x ".git/*" \
+               "node_modules/*" \
+               "**/node_modules/*" \
+               ".env" \
+               ".env.*" \
+               "**/.env" \
+               "**/.env.*" \
+               "*.keystore" \
+               "*.jks"
+
+      - name: ZIP paketini sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: YEMEK-TADINDA-KAYNAK-KOD
+          path: YEMEK-TADINDA-KAYNAK-KOD.zip
+          if-no-files-found: error
+          retention-days: 90

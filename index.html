@@ -1616,7 +1616,19 @@ function getCategoryOrder(){
 }
 function saveCategoryOrder(order){localStorage.setItem('lc_category_order',JSON.stringify(order));scheduleCatalogSync()}
 function renderCustomerNavCategories(){const host=$('#customerCategoryLinks');if(!host)return;const icons=['🍲','🥖','🍕','🍢','🌯','🍖','🍰','🥤','🍽️'];host.innerHTML=getCategoryOrder().map((c,i)=>`<a href="#menu" data-side-cat="${escapeHtml(c)}">${icons[i%icons.length]} <span>${escapeHtml(c)}</span></a>`).join('')}
-function renderCats(){const cats=['Tümü',...getCategoryOrder()];$('#categories').innerHTML=cats.map(c=>`<button class="cat ${currentCat===c?'active':''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('');$('#categories').querySelectorAll('button').forEach(b=>b.onclick=()=>{currentCat=b.dataset.cat;renderCats();renderProducts()});renderCustomerNavCategories()}let productReviewSummaryCache={};
+function renderCats(){
+ const cats=['Tümü',...getCategoryOrder().map(cleanCategoryName).filter(isValidCategoryName)];
+ const host=$('#categories');
+ host.innerHTML=cats.map(category=>`<button class="cat ${currentCat===category?'active':''}" data-cat="${escapeHtml(category)}">${escapeHtml(category)}</button>`).join('');
+ host.querySelectorAll('button.cat').forEach(button=>{
+  const label=cleanCategoryName(button.textContent);
+  if(!isValidCategoryName(label)){button.remove();return;}
+  button.textContent=label;
+  button.dataset.cat=label;
+  button.onclick=()=>{currentCat=label;renderCats();renderProducts()};
+ });
+ renderCustomerNavCategories();
+}let productReviewSummaryCache={};
 let productReviewPublicRows=[];
 let productReviewSummaryLoaded=false;
 let productReviewSummaryLoading=false;

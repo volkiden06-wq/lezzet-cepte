@@ -1596,12 +1596,22 @@ function renderCampaignSidebar(){
  host.querySelectorAll('[data-campaign-order]').forEach(b=>b.onclick=()=>openCampaignOrder(active[Number(b.dataset.campaignOrder)]));
 }
 function cleanCategoryName(value){
- return String(value??'').replace(/[\\u200B-\\u200D\\uFEFF\\u2060]/g,'').replace(/[\\u00A0\\u202F]/g,' ').replace(/\\s+/g,' ').trim();
+ return String(value??'')
+  .normalize('NFKC')
+  .replace(/[\u200B-\u200D\uFEFF\u2060]/g,'')
+  .replace(/[\u00A0\u202F]/g,' ')
+  .replace(/\s+/g,' ')
+  .trim();
+}
+function isValidCategoryName(value){
+ const name=cleanCategoryName(value);
+ return name.length>0 && /[\p{L}\p{N}]/u.test(name);
 }
 function getCategoryOrder(){
- const productCategories=[...new Set(products.map(p=>cleanCategoryName(p.category)).filter(c=>c&&/[\\p{L}\\p{N}]/u.test(c)))];
- let stored=[];try{stored=JSON.parse(localStorage.getItem('lc_category_order')||'[]')}catch(e){}
- const saved=Array.isArray(stored)?stored.map(cleanCategoryName).filter(c=>c&&/[\\p{L}\\p{N}]/u.test(c)): [];
+ const productCategories=[...new Set(products.map(p=>cleanCategoryName(p.category)).filter(isValidCategoryName))];
+ let stored=[];
+ try{stored=JSON.parse(localStorage.getItem('lc_category_order')||'[]')}catch(e){}
+ const saved=Array.isArray(stored)?stored.map(cleanCategoryName).filter(isValidCategoryName):[];
  return [...new Set([...saved,...productCategories])];
 }
 function saveCategoryOrder(order){localStorage.setItem('lc_category_order',JSON.stringify(order));scheduleCatalogSync()}

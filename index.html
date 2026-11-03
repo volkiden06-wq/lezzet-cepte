@@ -880,6 +880,7 @@ async function applySharedCatalog(row){
   campaigns=row.campaigns.map((campaign,index)=>({...campaign,sortOrder:index+1}));
   localStorage.setItem('lc_campaigns',JSON.stringify(campaigns));
  }
+ if(row.updated_at)catalogKnownUpdatedAt=String(row.updated_at);
  lastCatalogSignature=sharedCatalogSignature();
  catalogReady=true;
  return true;
@@ -943,10 +944,14 @@ async function syncCatalogToCloud(){
     response=await fetch(SUPABASE_URL+'/rest/v1/site_catalog?on_conflict=id',requestOptions);
    }
    if(!response.ok){let detail='';try{detail=await response.text()}catch{}throw new Error('Menü eşitlenemedi: '+response.status+' '+detail)}
+   catalogKnownUpdatedAt=String(payload.updated_at||catalogKnownUpdatedAt);
    lastCatalogSignature=sharedCatalogSignature();
   }while(catalogSyncAgain);
- }catch(err){console.error(err);toast(err.message||'Ürünler ortak veritabanına kaydedilemedi.')}
- finally{catalogSyncBusy=false}
+ }catch(err){
+  console.error(err);
+  toast(err.message||'Menü ortak veritabanına kaydedilemedi. Bağlantı gelince tekrar denenecek.');
+  scheduleCatalogSyncRetry();
+ }finally{catalogSyncBusy=false}
 }
 let campaignOrderSaveBusy=false;
 async function persistCampaignOrderToCloud(){
@@ -983,6 +988,7 @@ async function persistCampaignOrderToCloud(){
   Number(campaign.sortOrder)===index+1&&String(campaign.id||campaign.title||'')===String(campaigns[index].id||campaigns[index].title||'')
  );
  if(!orderVerified)throw new Error('Sunucu sıralamayı doğrulayamadı. Sıra numarası kaydedilmedi; tekrar deneyin.');
+ catalogKnownUpdatedAt=String(saved?.updated_at||catalogKnownUpdatedAt);
  lastCatalogSignature=sharedCatalogSignature();
  localStorage.setItem('lc_campaigns',JSON.stringify(campaigns));
  return true;
@@ -1038,27 +1044,70 @@ let catalogRealtimeChannel=null;
 let catalogRealtimeConnected=false;
 let catalogRefreshTimer=null;
 let catalogFallbackTimer=null;
+let catalogRealtimeRetryTimer=null;
 let catalogRefreshInFlight=false;
-let catalogLastFetchAt=0;
+let catalogRefreshAgain=false;
+let catalogVersionCheckBusy=false;
+let catalogKnownUpdatedAt='';
+let catalogSyncRetryTimer=null;
+let catalogSyncRetryDelay=2500;
+function scheduleCatalogSyncRetry(){
+ if(!supabaseAccessToken||!catalogReady||catalogSyncRetryTimer)return;
+ catalogSyncRetryTimer=setTimeout(()=>{
+  catalogSyncRetryTimer=null;
+  catalogSyncRetryDelay=Math.min(30000,catalogSyncRetryDelay*2);
+  syncCatalogToCloud();
+ },catalogSyncRetryDelay);
+}
 function queueCatalogRefresh(){
  clearTimeout(catalogRefreshTimer);
- catalogRefreshTimer=setTimeout(()=>refreshSharedCatalog(),220);
+ catalogRefreshTimer=setTimeout(()=>refreshSharedCatalog(),180);
+}
+async function readSharedCatalogVersion(){
+ const response=await fetch(SUPABASE_URL+'/rest/v1/site_catalog?id=eq.1&select=updated_at',{
+  method:'GET',
+  headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Cache-Control':'no-cache','Accept':'application/json'},
+  cache:'no-store'
+ });
+ if(!response.ok)throw new Error('Katalog sürümü kontrol edilemedi: '+response.status);
+ const rows=await response.json();
+ return Array.isArray(rows)&&rows.length?String(rows[0].updated_at||''):'';
+}
+async function checkSharedCatalogVersion(){
+ if(document.hidden||catalogVersionCheckBusy||catalogRefreshInFlight)return false;
+ catalogVersionCheckBusy=true;
+ try{
+  const remoteVersion=await readSharedCatalogVersion();
+  if(!remoteVersion)return false;
+  if(!catalogKnownUpdatedAt){
+   catalogKnownUpdatedAt=remoteVersion;
+   // The first successful check also closes the initial-load / subscription race.
+   return await refreshSharedCatalog();
+  }
+  if(remoteVersion!==catalogKnownUpdatedAt)return await refreshSharedCatalog();
+  return false;
+ }catch(error){
+  console.warn('Ortak katalog sürümü kontrol edilemedi; tekrar denenecek.',error);
+  return false;
+ }finally{
+  catalogVersionCheckBusy=false;
+ }
 }
 async function refreshSharedCatalog(){
- if(catalogRefreshInFlight||document.hidden)return false;
+ if(document.hidden)return false;
+ if(catalogRefreshInFlight){catalogRefreshAgain=true;return false}
  catalogRefreshInFlight=true;
  try{
   const before=sharedCatalogSignature();
-  const row=await readSharedCatalog(!!supabaseAccessToken);
+  const row=await readSharedCatalog();
   if(!row)return false;
   await applySharedCatalog(row);
-  catalogLastFetchAt=Date.now();
   const changed=before!==sharedCatalogSignature();
   if(changed){
    renderCats();
    renderProducts();
    renderCampaignSidebar();
-   console.info('YEMEK TADINDA: ortak ürün, kategori ve kampanya verileri yenilendi.');
+   console.info('YEMEK TADINDA: ortak ürün, kategori, kampanya ve ürün ayarları yenilendi.');
   }
   return changed;
  }catch(error){
@@ -1066,11 +1115,29 @@ async function refreshSharedCatalog(){
   return false;
  }finally{
   catalogRefreshInFlight=false;
+  if(catalogRefreshAgain&&!document.hidden){
+   catalogRefreshAgain=false;
+   queueCatalogRefresh();
+  }
  }
 }
+function scheduleCatalogRealtimeReconnect(){
+ if(catalogRealtimeRetryTimer)return;
+ catalogRealtimeRetryTimer=setTimeout(()=>{
+  catalogRealtimeRetryTimer=null;
+  startCatalogRealtime();
+ },4000);
+}
 function startCatalogRealtime(){
- if(catalogRealtimeChannel)return true;
- if(!window.supabase||typeof window.supabase.createClient!=='function')return false;
+ if(catalogRealtimeChannel&&catalogRealtimeConnected)return true;
+ if(catalogRealtimeChannel&&!catalogRealtimeConnected){
+  try{catalogRealtimeClient?.removeChannel(catalogRealtimeChannel).catch(()=>{})}catch(error){}
+  catalogRealtimeChannel=null;
+ }
+ if(!window.supabase||typeof window.supabase.createClient!=='function'){
+  scheduleCatalogRealtimeReconnect();
+  return false;
+ }
  try{
   if(!catalogRealtimeClient){
    catalogRealtimeClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
@@ -1079,35 +1146,49 @@ function startCatalogRealtime(){
    });
   }
   const channel=catalogRealtimeClient.channel('yemek-tadinda-catalog-sync')
-   .on('postgres_changes',{event:'*',schema:'public',table:'catalog_sync_events',filter:'id=eq.1'},()=>queueCatalogRefresh());
+   .on('postgres_changes',{event:'*',schema:'public',table:'catalog_sync_events',filter:'id=eq.1'},payload=>{
+    if(payload?.new?.updated_at)catalogKnownUpdatedAt='';
+    queueCatalogRefresh();
+   });
   catalogRealtimeChannel=channel;
   channel.subscribe((status,error)=>{
    if(status==='SUBSCRIBED'){
     catalogRealtimeConnected=true;
-    console.info('YEMEK TADINDA: telefon-bilgisayar katalog senkronizasyonu aktif.');
+    if(catalogRealtimeRetryTimer){clearTimeout(catalogRealtimeRetryTimer);catalogRealtimeRetryTimer=null}
+    console.info('YEMEK TADINDA: telefon-bilgisayar canlı katalog senkronizasyonu aktif.');
+    checkSharedCatalogVersion();
    }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
     catalogRealtimeConnected=false;
-    console.warn('Katalog canlı bağlantısı kesildi; yedek senkronizasyon devrede.',status,error||'');
+    if(catalogRealtimeChannel===channel)catalogRealtimeChannel=null;
+    try{catalogRealtimeClient?.removeChannel(channel).catch(()=>{})}catch(error){}
+    console.warn('Katalog canlı bağlantısı kesildi; otomatik yeniden bağlanılıyor.',status,error||'');
+    scheduleCatalogRealtimeReconnect();
    }
   });
   return true;
  }catch(error){
   catalogRealtimeConnected=false;
-  console.warn('Katalog canlı bağlantısı kurulamadı; yedek senkronizasyon devrede.',error);
+  catalogRealtimeChannel=null;
+  console.warn('Katalog canlı bağlantısı kurulamadı; otomatik yeniden denenecek.',error);
+  scheduleCatalogRealtimeReconnect();
   return false;
  }
 }
 function startCatalogFallbackPolling(){
  if(catalogFallbackTimer)return;
- catalogFallbackTimer=window.setInterval(()=>{
-  if(document.hidden||catalogRefreshInFlight)return;
-  if(!catalogRealtimeConnected||Date.now()-catalogLastFetchAt>60000)refreshSharedCatalog();
- },15000);
+ // A tiny updated_at check runs every 5 seconds. The full catalogue (and its images)
+ // is downloaded only when a version change is detected or Realtime reports an update.
+ catalogFallbackTimer=setInterval(()=>{
+  if(document.hidden)return;
+  checkSharedCatalogVersion();
+  if(!catalogRealtimeConnected)startCatalogRealtime();
+ },5000);
 }
 document.addEventListener('visibilitychange',()=>{
- if(!document.hidden){refreshSharedCatalog();startCatalogRealtime()}
+ if(!document.hidden){checkSharedCatalogVersion();startCatalogRealtime()}
 });
-window.addEventListener('focus',()=>refreshSharedCatalog());
+window.addEventListener('focus',()=>checkSharedCatalogVersion());
+window.addEventListener('online',()=>{checkSharedCatalogVersion();startCatalogRealtime()});
 function supabaseHeaders(token=supabaseAccessToken){return {'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':`Bearer ${token||SUPABASE_PUBLISHABLE_KEY}`,'Content-Type':'application/json'}}
 async function supabaseFetch(path,options={}){
  const send=()=>{

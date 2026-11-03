@@ -31,6 +31,12 @@ update public.product_reviews
    set moderation_status = case when is_approved then 'approved' else 'pending' end
  where (moderation_status = 'approved') is distinct from is_approved;
 
+alter table public.product_reviews
+  drop constraint if exists product_reviews_approval_consistency_check;
+alter table public.product_reviews
+  add constraint product_reviews_approval_consistency_check
+  check ((moderation_status = 'approved') = is_approved);
+
 create index if not exists product_reviews_approved_product_created_idx
   on public.product_reviews (product_id, created_at desc)
   where is_approved = true;

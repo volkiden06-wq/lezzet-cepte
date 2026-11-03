@@ -733,17 +733,20 @@ function compressCatalogImage(src){
 }
 async function prepareCatalogPayload(){
  const compact=[];
- for(const p of products){
-  compact.push({...p,image:await compressCatalogImage(p.image)});
+ for(const product of products){
+  compact.push({...product,image:await compressCatalogImage(product.image)});
  }
- return {id:1,products:compact,categories:catalogCategories(),campaigns:Array.isArray(campaigns)?campaigns:[],updated_at:new Date().toISOString()};
+ const compactCampaigns=[];
+ for(const campaign of (Array.isArray(campaigns)?campaigns:[])){
+  compactCampaigns.push({...campaign,image:await compressCatalogImage(campaign.image)});
+ }
+ return {id:1,products:compact,categories:catalogCategories(),campaigns:compactCampaigns,updated_at:new Date().toISOString()};
 }
 function sharedCatalogSignature(){
  return JSON.stringify([products,catalogCategories(),campaigns]);
 }
-async function readSharedCatalog(useAdminToken=false){
+async function readSharedCatalog(){
  const headers={'apikey':SUPABASE_PUBLISHABLE_KEY,'Cache-Control':'no-cache','Accept':'application/json'};
- if(useAdminToken&&supabaseAccessToken)headers.Authorization='Bearer '+supabaseAccessToken;
  const response=await fetch(SUPABASE_URL+'/rest/v1/site_catalog?id=eq.1&select=products,categories,campaigns,updated_at',{
   method:'GET',headers,cache:'no-store'
  });
@@ -822,15 +825,16 @@ function scheduleCatalogSync(){
  clearTimeout(catalogSyncTimer);
  catalogSyncTimer=setTimeout(()=>syncCatalogToCloud(),650);
 }
-async function initializeAdminCatalog(){
- const localCampaigns=(Array.isArray(campaigns)?campaigns:[]).filter(c=>
-  !(c?.title==='Günün Kampanyası'&&c?.message==='Lezzet dolu fırsatları kaçırma!'&&!c?.image&&!c?.productId)
+function getRealLocalCampaigns(){
+ return (Array.isArray(campaigns)?campaigns:[]).filter(c=>
+  c&&!(c.title==='Günün Kampanyası'&&c.message==='Lezzet dolu fırsatları kaçırma!'&&!c.image&&!c.productId)
  );
- const row=await readSharedCatalog(true);
+}
+async function initializeAdminCatalog(){
+ const localCampaigns=getRealLocalCampaigns();
+ const row=await readSharedCatalog();
  if(row){
   await applySharedCatalog(row);
-  // Migrate existing campaigns from the established admin browser once,
-  // because the shared campaigns column was introduced after local campaigns.
   if(Array.isArray(row.campaigns)&&row.campaigns.length===0&&localCampaigns.length){
    campaigns=localCampaigns;
    localStorage.setItem('lc_campaigns',JSON.stringify(campaigns));
@@ -838,15 +842,22 @@ async function initializeAdminCatalog(){
   }
   return;
  }
- // First setup: only the authenticated admin device may seed the shared catalog.
  catalogReady=true;
  await syncCatalogToCloud();
 }
 async function loadPublicCatalog(){
+ // The logged-in admin session handles catalog initialization and one-time migration.
+ if(supabaseAccessToken)return;
+ const localCampaigns=getRealLocalCampaigns();
  try{
-  const row=await readSharedCatalog(false);
-  if(row)await applySharedCatalog(row);
-  else console.warn('Ortak katalogda henüz kayıt yok; cihazdaki mevcut veriler korunuyor.');
+  const row=await readSharedCatalog();
+  if(row){
+   await applySharedCatalog(row);
+   if(Array.isArray(row.campaigns)&&row.campaigns.length===0&&localCampaigns.length){
+    campaigns=localCampaigns;
+    localStorage.setItem('lc_campaigns',JSON.stringify(campaigns));
+   }
+  }else console.warn('Ortak katalogda henüz kayıt yok; cihazdaki mevcut veriler korunuyor.');
  }catch(err){
   console.warn('Ortak menü yüklenemedi; cihazdaki kayıtlar korunuyor ve yeniden denenecek.',err);
  }

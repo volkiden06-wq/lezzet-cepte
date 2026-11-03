@@ -1,5 +1,5 @@
 -- YEMEK TADINDA - Yöneticiye özel tam yedek dışa aktarma
--- Bu dosya mevcut şema, tablolar ve is_admin() fonksiyonu kurulduktan sonra çalıştırılır.
+-- Bu dosyayı çalıştırmadan önce supabase/product-reviews.sql dosyasını da kurun.
 -- Parola, service-role key, VAPID private key ve cihaz bildirim tokenları dışa aktarılmaz.
 
 create or replace function public.admin_export_full_backup()

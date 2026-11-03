@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yemek-tadinda-shell-v22';
+const CACHE_NAME = 'yemek-tadinda-shell-v23';
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/app-icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {

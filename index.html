@@ -800,6 +800,153 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
 #categories .cat .cat-label{display:inline!important;visibility:visible!important;opacity:1!important;color:inherit!important;font-size:inherit!important;line-height:1.2!important;white-space:nowrap!important}
 #categories .cat.active{background:var(--red)!important;color:#fff!important;border-color:var(--red)!important}
 @media(max-width:900px){#menu #categories{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important}#menu #categories::-webkit-scrollbar{display:none!important}#menu #categories .cat{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;min-width:max-content!important}}
+
+
+/* LEZZET ATLASI — yalnızca müşteri tarafı görsel tema katmanı.
+   Mevcut HTML kimlikleri, ürün/kategori verileri, sepet, sipariş ve yönetim mantığı korunur. */
+:root{
+ --red:#9f1d24;--red2:#74131b;--ink:#34251e;--muted:#786b5c;
+ --cream:#f3e6cb;--line:#d9c49d;--green:#36724b;
+ --shadow:0 14px 34px rgba(76,42,19,.13);
+}
+body{background:#ead9b8;color:#35251d}
+#siteHeader.topbar{
+ height:76px;background:rgba(250,241,220,.97);border-bottom:1px solid #c9aa76;
+ box-shadow:0 5px 22px rgba(61,37,18,.12);backdrop-filter:blur(14px)
+}
+#siteHeader .top-actions .ghost{background:#fff9eb;border-color:#ddc89f;color:#513c2c}
+#siteHeader .primary,#siteHeader .cart-btn{background:linear-gradient(135deg,#b52b2b,#78151d);color:#fff;box-shadow:0 6px 15px #7e1b2030}
+#siteHeader .cart-btn b{background:#d69b36;color:#281b12}
+#customer{
+ position:relative;isolation:isolate;
+ background:
+  radial-gradient(ellipse at 72% 8%,rgba(255,255,255,.72),transparent 37%),
+  repeating-linear-gradient(13deg,rgba(132,93,48,.025) 0 1px,transparent 1px 8px),
+  linear-gradient(135deg,#f5e9d0 0%,#ead7b2 52%,#f8efd9 100%);
+}
+#customer:before{
+ content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.34;
+ background:
+  radial-gradient(ellipse at 20% 22%,transparent 0 16%,#b58e5d 16.15% 16.3%,transparent 16.45% 23%,#b58e5d 23.15% 23.3%,transparent 23.45%),
+  radial-gradient(ellipse at 78% 65%,transparent 0 12%,#b58e5d 12.15% 12.3%,transparent 12.45% 20%,#b58e5d 20.15% 20.3%,transparent 20.45%);
+}
+.customer-left{
+ background:
+  radial-gradient(circle at 15% 12%,#a8332d 0 1px,transparent 2px),
+  repeating-linear-gradient(145deg,rgba(255,255,255,.025) 0 1px,transparent 1px 7px),
+  linear-gradient(180deg,#7e171d,#4b1117 72%,#2e1013);
+ border-right:3px solid #c69a50;box-shadow:8px 0 25px #3c1b1420;
+}
+.side-logo{border-bottom-color:#d8b77a55}
+.side-logo .chef{color:#e6c17c;text-shadow:0 2px 10px #e6c17c55}
+.side-logo b{font-family:Georgia,serif;letter-spacing:.4px}
+.side-logo b span{color:#f1cf87}
+.side-logo small{color:#e7d2ae}
+.customer-nav a{color:#f5e8d0;border:1px solid transparent}
+.customer-nav a:hover,.customer-nav a.selected{
+ background:linear-gradient(110deg,#c18a3b,#946126);color:#24160f;
+ border-color:#f0d59d;box-shadow:0 5px 16px #2c100f55
+}
+.side-contact{border-color:#d8b77a66;background:#ffffff0b;color:#f9ecd5}
+.side-contact span,.side-contact small{color:#e1c9a2}
+.hero{position:relative}
+.hero-photo{
+ border:5px solid #f8edda;border-radius:22px;
+ box-shadow:0 14px 32px rgba(66,37,18,.24),0 0 0 1px #b88a4d;
+ background:#4b2a1b;
+}
+.hero-photo:after{
+ content:"✥";position:absolute;z-index:4;right:18px;top:16px;
+ display:grid;place-items:center;width:44px;height:44px;border-radius:50%;
+ color:#f4d38f;border:1px solid #f4d38f;background:#4b241cbb;
+ font-size:25px;pointer-events:none
+}
+.hero-slide-shade{background:linear-gradient(90deg,rgba(40,19,13,.68),rgba(40,19,13,.06) 78%)}
+.hero-slide-copy{color:#fff4dc;text-shadow:0 2px 8px #1b0d09}
+.hero-slide-copy small{color:#f2cd83;letter-spacing:2px}
+.hero-slide-copy strong{font-family:Georgia,serif}
+.hero-slide-copy strong em{color:#f1c879}
+.hero-brand{background:#70151c;color:#fff0d2;border:1px solid #e4bd72;border-radius:12px;padding:9px 13px}
+.hero-brand span{color:#f0c878}
+.hero-arrow,.hero-dots button{border-color:#edcf91}
+.hero-arrow{background:#7e171ddd;color:#fff}
+.hero-dots button.active{background:#edc477}
+.campaign-sidebar{
+ background:#fbf2df;border:1px solid #c8a36b;border-radius:18px;
+ box-shadow:0 12px 28px rgba(73,43,20,.15)
+}
+.campaign-side-head{
+ background:linear-gradient(120deg,#8f1c23,#541117);color:#fff1d5;
+ border-bottom:2px solid #c99a4d
+}
+.campaign-all{background:#ffffff12;border-color:#e8c982;color:#fff4dc}
+.campaign-list{background:linear-gradient(180deg,#fbf1dd,#f3e4c6)}
+.campaign-card{background:#fffaf0;border-color:#d8bd8e;box-shadow:0 4px 12px #56351a13}
+.campaign-card h3{font-family:Georgia,serif;color:#432b1d}
+.campaign-card p{color:#796858}
+.campaign-tag{background:#f2dfb5;color:#744514}
+.campaign-card .campaign-action{background:linear-gradient(110deg,#b32b2c,#76151d);color:#fff4df}
+.campaign-help{background:#f0dfbb;color:#7b451d;border-top-color:#d9bd8a}
+#menu .section-head h2,#menu h2{font-family:Georgia,serif;color:#422b1d}
+#menu .eyebrow,.loyalty .eyebrow{color:#9b2825}
+#menu .search{background:#fff9eb;border-color:#d8c29a;box-shadow:0 4px 12px #5b3b1a0c}
+#menu .search input{background:transparent;color:#3b2b20}
+#menu .cats .cat{
+ background:#fff7e6;border-color:#d4b98a;color:#694c32;
+ box-shadow:0 3px 8px #6b481414
+}
+#menu .cats .cat.active,#menu .cats .cat:hover{
+ background:linear-gradient(120deg,#a92a2a,#74151c);border-color:#8c1d22;color:#fff2d7
+}
+#menu .product{
+ background:#fff9ec;border-color:#d9c39b;border-radius:16px;
+ box-shadow:0 7px 18px rgba(72,43,20,.09)
+}
+#menu .product:hover{box-shadow:0 13px 25px rgba(72,43,20,.17)}
+#menu .product img{background:#e8d8bb}
+#menu .product-body{background:linear-gradient(180deg,#fffaf0,#f8edd8)}
+#menu .product h3{font-family:Georgia,serif;color:#3e2b20}
+#menu .product p{color:#7b6b59}
+#menu .price{color:#9d2427}
+#menu .product .add{background:linear-gradient(135deg,#ad292b,#74151c);color:#fff1d8;border-radius:9px}
+.loyalty{
+ background:linear-gradient(120deg,#78171d,#4d1117)!important;
+ border:1px solid #d1a45e!important;border-radius:18px;color:#fff1d6;
+ box-shadow:0 10px 25px #491a1928
+}
+.loyalty h2{font-family:Georgia,serif;color:#fff0d4}
+.loyalty p{color:#e7d2ad}
+.loyalty .primary{background:linear-gradient(120deg,#e2b45f,#bd8533);color:#321f12}
+.features .feature{
+ background:#fff8e9;border-color:#d8c096;border-radius:16px;
+ box-shadow:0 6px 16px #62431b12
+}
+.features .feature b{font-family:Georgia,serif;color:#4a3020}
+.features .feature p{color:#796957}
+.footer{background:linear-gradient(135deg,#3e1115,#71181e 60%,#2d1013)!important;border-top:2px solid #c59a55}
+.footer .brand-mark{background:#c09148;color:#351c12}
+.footer .red{color:#edc77f}
+.footer .footer-links button,.footer .footer-social a{border-color:#e5c98d55!important}
+.mobile-bottom-nav{
+ background:#5d1319!important;border-top:2px solid #c69b56!important;
+ box-shadow:0 -6px 20px #34131125!important
+}
+.mobile-bottom-nav button{color:#f8e8c9!important}
+.mobile-bottom-nav button.active,.mobile-bottom-nav button:focus{color:#f0c879!important}
+@media(max-width:900px){
+ #customer{background:linear-gradient(150deg,#f6e9d0,#ead7b4)}
+ .customer-left{border:1px solid #c79a58;border-radius:15px}
+ .customer-nav a{background:#ffffff0c}
+ .hero-photo{border-width:4px;border-radius:17px}
+ .campaign-sidebar{border-radius:15px}
+}
+@media(max-width:560px){
+ #siteHeader.topbar{background:#f8edd8}
+ #menu .product{border-radius:13px}
+ #menu .product img{border-bottom:1px solid #ddc59a}
+ .hero-photo:after{width:36px;height:36px;font-size:20px}
+}
+
 </style></head><body>
 <header class="topbar" id="siteHeader"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK<span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><a id="headerWhatsAppBtn" href="https://wa.me/905421511186?text=Merhaba%2C%20YEMEK%20TADINDA%20%C3%BCzerinden%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 15px;border-radius:12px;background:#16a34a;color:#fff;font-weight:900;white-space:nowrap;box-shadow:0 5px 15px #16a34a40">☏ WhatsApp</a><button class="ghost" id="installAppBtn" type="button" style="border-color:#16a34a;color:#12813f;font-weight:900">⬇ Uygulamayı Yükle</button><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
 <nav class="mobile-bottom-nav" aria-label="Mobil menü">

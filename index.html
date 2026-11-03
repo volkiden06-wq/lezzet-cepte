@@ -707,6 +707,31 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
 .customer-track-push-action button{width:100%;padding:11px 14px}
 .customer-track-push-action small{color:#547160;line-height:1.45;text-align:center}
 #fullBackupRestorePanel{margin-top:16px}
+
+/* Ayrı ürün detay görünümü — mevcut sepet ve ürün işlemlerinden bağımsız */
+.product>img[data-open-product-detail]{cursor:zoom-in}
+.product>img[data-open-product-detail]:focus-visible{outline:3px solid #ed1024;outline-offset:-3px}
+.product-detail-view{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:18px;align-items:start}
+.product-detail-media{min-width:0;overflow:hidden;border-radius:16px;background:#f5f5f5}
+.product-detail-media img{display:block;width:100%;height:320px;max-height:48vh;object-fit:contain;object-position:center;background:#f5f5f5}
+.product-detail-no-image{height:220px;display:grid;place-items:center;font-size:54px;color:#999}
+.product-detail-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:11px}
+.product-detail-category{display:inline-flex;align-items:center;padding:6px 10px;border-radius:30px;background:#fff0f1;color:#c90018;font-size:11px;font-weight:850}
+.product-detail-copy h3{font-size:clamp(21px,3vw,27px);line-height:1.2;margin:0;color:#171719;overflow-wrap:anywhere}
+.product-detail-description{margin:0;color:#616875;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.product-detail-price{font-size:25px;font-weight:950;color:#df1824}
+.product-detail-actions{display:grid;grid-template-columns:1fr;gap:9px;width:100%;margin-top:5px}
+.product-detail-actions button{width:100%;min-height:46px}
+.product-detail-hint{font-size:11px;color:#7a7f88;line-height:1.45}
+@media(max-width:560px){
+ .modal{padding:17px;border-radius:18px}
+ .product-detail-view{grid-template-columns:minmax(0,1fr);gap:14px}
+ .product-detail-media img{height:250px;max-height:38vh}
+ .product-detail-copy{gap:9px}
+ .product-detail-copy h3{font-size:22px}
+ .product-detail-description{font-size:13px}
+ .product-detail-price{font-size:23px}
+}
 </style></head><body>
 <header class="topbar" id="siteHeader"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK<span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><a id="headerWhatsAppBtn" href="https://wa.me/905421511186?text=Merhaba%2C%20YEMEK%20TADINDA%20%C3%BCzerinden%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 15px;border-radius:12px;background:#16a34a;color:#fff;font-weight:900;white-space:nowrap;box-shadow:0 5px 15px #16a34a40">☏ WhatsApp</a><button class="ghost" id="installAppBtn" type="button" style="border-color:#16a34a;color:#12813f;font-weight:900">⬇ Uygulamayı Yükle</button><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
 <nav class="mobile-bottom-nav" aria-label="Mobil menü">
@@ -1646,7 +1671,40 @@ function openProductCustomization(productId,cartIndex=null){
   toast(product.name+' kişiselleştirilerek sepete eklendi.');
  };
 }
-function renderProducts(){if(!productReviewSummaryLoaded&&!productReviewSummaryLoading)loadPublicProductReviewSummaries();const q=$('#search').value.toLocaleLowerCase('tr');const list=[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).filter(p=>p.active&&(currentCat==='Tümü'||p.category===currentCat)&&(`${p.name} ${p.category} ${p.description}`).toLocaleLowerCase('tr').includes(q));$('#products').innerHTML=list.length?list.map(p=>{const customization=getProductCustomizationConfig(p);return `<article class="product"><img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.style.background='#eee';this.removeAttribute('src')"><div class="product-body"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description)}</p>${productReviewRatingMarkup(p.id)}<div class="product-bottom"><span class="price">${money(p.price)}</span><div class="product-actions"><button class="add" data-add="${p.id}" aria-label="Sepete ekle">+</button>${customization.enabled?'<button class="customize-product-btn" data-customize-product="'+escapeHtml(String(p.id))+'">ÖZELLEŞTİR</button>':''}</div></div></div></article>`}).join(''):'<p>Aramana uygun ürün bulunamadı.</p>';$('#products').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(+b.dataset.add));$('#products').querySelectorAll('[data-customize-product]').forEach(b=>b.onclick=()=>openProductCustomization(b.dataset.customizeProduct));$('#products').querySelectorAll('[data-open-product-reviews]').forEach(b=>b.onclick=()=>openProductReviewsList(b.dataset.openProductReviews))}function add(id){const p=products.find(x=>String(x.id)===String(id));if(!p)return;const linkedCampaign=(campaigns||[]).find(c=>c&&c.active!==false&&String(c.productId||'')===String(p.id));if(linkedCampaign){openCampaignOrder(linkedCampaign);return}const row=cart.find(x=>String(x.id)===String(p.id)&&!x.campaignId&&!x.customization);if(row)row.qty++;else cart.push({id:p.id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function changeCartLine(index,delta){const row=cart[index];if(!row)return;row.qty=Number(row.qty||1)+delta;if(row.qty<=0)cart.splice(index,1);save();renderCartCount();cartModal();}function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show')}function total(){return Number(cart.reduce((sum,row)=>sum+cartLineUnitPrice(row,products.find(p=>String(p.id)===String(row.id)))*Math.max(1,Number(row.qty)||1),0).toFixed(2))}function readPendingLoyaltyUse(){
+function openProductDetail(productId){
+ const product=products.find(item=>String(item.id)===String(productId)&&item.active);
+ if(!product)return;
+ const customization=getProductCustomizationConfig(product);
+ const image=String(product.image||'');
+ const imageMarkup=image
+  ?'<img src="'+escapeHtml(image)+'" alt="'+escapeHtml(product.name)+'" onerror="this.style.display=\'none\'">'
+  :'<div class="product-detail-no-image">🍽️</div>';
+ const description=String(product.description||'').trim();
+ const category=String(product.category||'').trim();
+ openModal('ÜRÜN DETAYI',
+  '<article class="product-detail-view">'+
+   '<div class="product-detail-media">'+imageMarkup+'</div>'+
+   '<div class="product-detail-copy">'+
+    (category?'<span class="product-detail-category">'+escapeHtml(category)+'</span>':'')+
+    '<h3>'+escapeHtml(product.name)+'</h3>'+
+    (productReviewRatingMarkup(product.id)||'')+
+    '<p class="product-detail-description">'+escapeHtml(description||'Bu ürün için henüz açıklama eklenmedi.')+'</p>'+
+    '<div class="product-detail-price">'+money(product.price)+'</div>'+
+    '<div class="product-detail-actions">'+
+     '<button type="button" class="primary" id="productDetailAdd">🛒 SEPETE EKLE</button>'+
+     (customization.enabled?'<button type="button" class="ghost" id="productDetailCustomize">✳ ÜRÜNÜ ÖZELLEŞTİR</button>':'')+
+    '</div>'+
+    '<small class="product-detail-hint">Sepete eklediğinde ürün mevcut sepetine eklenir.</small>'+
+   '</div>'+
+  '</article>'
+ );
+ const addButton=$('#productDetailAdd');
+ if(addButton)addButton.onclick=()=>{closeModal();add(product.id)};
+ const customizeButton=$('#productDetailCustomize');
+ if(customizeButton)customizeButton.onclick=()=>openProductCustomization(product.id);
+ $('#modalBody')?.querySelectorAll('[data-open-product-reviews]').forEach(button=>button.onclick=()=>openProductReviewsList(button.dataset.openProductReviews));
+}
+function renderProducts(){if(!productReviewSummaryLoaded&&!productReviewSummaryLoading)loadPublicProductReviewSummaries();const q=$('#search').value.toLocaleLowerCase('tr');const list=[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).filter(p=>p.active&&(currentCat==='Tümü'||p.category===currentCat)&&(`${p.name} ${p.category} ${p.description}`).toLocaleLowerCase('tr').includes(q));$('#products').innerHTML=list.length?list.map(p=>{const customization=getProductCustomizationConfig(p);return `<article class="product"><img src="${p.image}" alt="${escapeHtml(p.name)}" data-open-product-detail="${escapeHtml(String(p.id))}" role="button" tabindex="0" aria-label="${escapeHtml(p.name)} ürün detayını aç" style="cursor:zoom-in" onerror="this.style.background='#eee';this.removeAttribute('src')"><div class="product-body"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description)}</p>${productReviewRatingMarkup(p.id)}<div class="product-bottom"><span class="price">${money(p.price)}</span><div class="product-actions"><button class="add" data-add="${p.id}" aria-label="Sepete ekle">+</button>${customization.enabled?'<button class="customize-product-btn" data-customize-product="'+escapeHtml(String(p.id))+'">ÖZELLEŞTİR</button>':''}</div></div></div></article>`}).join(''):'<p>Aramana uygun ürün bulunamadı.</p>';$('#products').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>add(+b.dataset.add));$('#products').querySelectorAll('[data-open-product-detail]').forEach(img=>{img.onclick=()=>openProductDetail(img.dataset.openProductDetail);img.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openProductDetail(img.dataset.openProductDetail)}}});$('#products').querySelectorAll('[data-customize-product]').forEach(b=>b.onclick=()=>openProductCustomization(b.dataset.customizeProduct));$('#products').querySelectorAll('[data-open-product-reviews]').forEach(b=>b.onclick=()=>openProductReviewsList(b.dataset.openProductReviews))}function add(id){const p=products.find(x=>String(x.id)===String(id));if(!p)return;const linkedCampaign=(campaigns||[]).find(c=>c&&c.active!==false&&String(c.productId||'')===String(p.id));if(linkedCampaign){openCampaignOrder(linkedCampaign);return}const row=cart.find(x=>String(x.id)===String(p.id)&&!x.campaignId&&!x.customization);if(row)row.qty++;else cart.push({id:p.id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function changeCartLine(index,delta){const row=cart[index];if(!row)return;row.qty=Number(row.qty||1)+delta;if(row.qty<=0)cart.splice(index,1);save();renderCartCount();cartModal();}function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show')}function total(){return Number(cart.reduce((sum,row)=>sum+cartLineUnitPrice(row,products.find(p=>String(p.id)===String(row.id)))*Math.max(1,Number(row.qty)||1),0).toFixed(2))}function readPendingLoyaltyUse(){
  try{
   const value=JSON.parse(sessionStorage.getItem('lc_pending_loyalty_use')||'null');
   if(!value||!/^\d{10,15}$/.test(String(value.phoneDigits||''))||String(value.verificationOrderNumber||'').length<5)return null;

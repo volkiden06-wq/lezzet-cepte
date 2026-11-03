@@ -15,6 +15,7 @@ declare
   v_loyalty_accounts jsonb;
   v_loyalty_transactions jsonb;
   v_visitors jsonb;
+  v_reviews jsonb;
   v_storage_objects jsonb;
 begin
   if auth.uid() is null or not coalesce(public.is_admin(), false) then
@@ -39,6 +40,9 @@ begin
 
   select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(v) order by v.visit_date, v.visitor_id), '[]'::jsonb)
   into v_visitors from public.site_daily_visitors v;
+
+  select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(r) order by r.created_at, r.id), '[]'::jsonb)
+  into v_reviews from public.product_reviews r;
 
   select coalesce(
     pg_catalog.jsonb_agg(
@@ -66,6 +70,7 @@ begin
       'loyalty_accounts', v_loyalty_accounts,
       'loyalty_transactions', v_loyalty_transactions,
       'site_daily_visitors', v_visitors,
+      'product_reviews', v_reviews,
       'catalog_sync_events', (
         select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(e)), '[]'::jsonb)
         from public.catalog_sync_events e
@@ -90,6 +95,8 @@ begin
       'loyalty_accounts', pg_catalog.jsonb_array_length(v_loyalty_accounts),
       'loyalty_transactions', pg_catalog.jsonb_array_length(v_loyalty_transactions),
       'site_visits', pg_catalog.jsonb_array_length(v_visitors),
+      'product_reviews', pg_catalog.jsonb_array_length(v_reviews),
+      'published_product_reviews', (select count(*) from public.product_reviews where moderation_status = 'approved'),
       'storage_objects', pg_catalog.jsonb_array_length(v_storage_objects)
     )
   );

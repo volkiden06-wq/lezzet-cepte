@@ -761,7 +761,40 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
  #modalBack.product-detail-open .product-detail-media img{height:190px}
  #modalBack.product-detail-open .product-detail-price{font-size:21px}
 }
-\n.footer-social{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#555;font-size:12px}.footer-social strong{color:#171719;font-size:11px;letter-spacing:.5px}.footer-social a{display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border:1px solid #e8e8eb;border-radius:10px;background:#fff;color:#25252a;font-weight:800;transition:background .18s,border-color .18s}.footer-social a:hover{background:#fff0f1;border-color:#f3b9bf;color:#c90018}.footer-social a span{font-weight:600;color:#777}@media(max-width:650px){.footer-social{width:100%;justify-content:center}.footer-social strong{width:100%;text-align:center}.footer-social a{flex:1;justify-content:center}}\n</style></head><body>
+\n.footer-social{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#555;font-size:12px}.footer-social strong{color:#171719;font-size:11px;letter-spacing:.5px}.footer-social a{display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border:1px solid #e8e8eb;border-radius:10px;background:#fff;color:#25252a;font-weight:800;transition:background .18s,border-color .18s}.footer-social a:hover{background:#fff0f1;border-color:#f3b9bf;color:#c90018}.footer-social a span{font-weight:600;color:#777}@media(max-width:650px){.footer-social{width:100%;justify-content:center}.footer-social strong{width:100%;text-align:center}.footer-social a{flex:1;justify-content:center}}\n
+/* Footer düzeni: sosyal bağlantılar ve alt menü hizalaması */
+.footer{padding:28px 0 20px!important;background:linear-gradient(135deg,#171719 0%,#302018 100%)!important}
+.footer .footer-inner{display:grid!important;grid-template-columns:minmax(170px,1fr) minmax(220px,1.15fr) minmax(270px,1.35fr) auto!important;align-items:center!important;justify-content:stretch!important;gap:18px 24px!important;text-align:left!important}
+.footer .footer-inner>.brand{display:flex!important;justify-self:start;min-width:0;color:#fff!important}
+.footer .footer-links{display:flex!important;justify-content:center!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important;min-width:0}
+.footer .footer-links button{border:1px solid #ffffff24!important;background:#ffffff0d!important;color:#fff!important;border-radius:10px!important;padding:10px 11px!important;font-size:11px!important;font-weight:800!important;line-height:1.35!important}
+.footer .footer-links button:hover{background:#ffffff1b!important}
+.footer .footer-social{width:auto!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:center!important;gap:8px!important;padding:12px 14px!important;border:1px solid #ffffff20!important;border-radius:14px!important;background:#ffffff0a!important;color:#fff!important}
+.footer .footer-social strong{color:#fff!important;font-size:11px!important;letter-spacing:1px!important;text-align:left!important}
+.footer .footer-social a{display:flex!important;justify-content:flex-start!important;align-items:center!important;gap:7px!important;width:100%!important;padding:8px 10px!important;border:1px solid #ffffff20!important;border-radius:9px!important;background:#ffffff0d!important;color:#fff!important;font-size:12px!important}
+.footer .footer-social a span{color:#d8c9c1!important}
+.footer .footer-social a:hover{background:#ffffff1c!important;border-color:#ffffff50!important;color:#fff!important}
+.footer .footer-inner>span{grid-column:1/4;grid-row:2;border-top:1px solid #ffffff20;padding-top:13px;color:#c9bdb7!important;text-align:center!important;line-height:1.5}
+.footer #footerAdmin{justify-self:end;white-space:nowrap}
+@media(max-width:900px){
+ .footer .footer-inner{grid-template-columns:1fr 1fr!important;gap:16px!important}
+ .footer .footer-inner>.brand{grid-column:1;grid-row:1}
+ .footer .footer-links{grid-column:2;grid-row:1}
+ .footer .footer-social{grid-column:1;grid-row:2}
+ .footer #footerAdmin{grid-column:2;grid-row:2;justify-self:center}
+ .footer .footer-inner>span{grid-column:1/-1;grid-row:3}
+}
+@media(max-width:560px){
+ .footer{padding:22px 0 16px!important}
+ .footer .footer-inner{grid-template-columns:1fr!important;gap:13px!important;text-align:center!important}
+ .footer .footer-inner>.brand{grid-column:1;grid-row:1;justify-self:center}
+ .footer .footer-links{grid-column:1;grid-row:2;width:100%}
+ .footer .footer-links button{flex:1;min-width:0}
+ .footer .footer-social{grid-column:1;grid-row:3;width:100%!important;max-width:360px;justify-self:center;align-items:stretch!important}
+ .footer .footer-social strong{text-align:center!important}
+ .footer #footerAdmin{grid-column:1;grid-row:4;justify-self:center}
+ .footer .footer-inner>span{grid-column:1;grid-row:5;width:100%;font-size:11px}
+}</style></head><body>
 <header class="topbar" id="siteHeader"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK<span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><a id="headerWhatsAppBtn" href="https://wa.me/905421511186?text=Merhaba%2C%20YEMEK%20TADINDA%20%C3%BCzerinden%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 15px;border-radius:12px;background:#16a34a;color:#fff;font-weight:900;white-space:nowrap;box-shadow:0 5px 15px #16a34a40">☏ WhatsApp</a><button class="ghost" id="installAppBtn" type="button" style="border-color:#16a34a;color:#12813f;font-weight:900">⬇ Uygulamayı Yükle</button><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
 <nav class="mobile-bottom-nav" aria-label="Mobil menü">
  <button type="button" id="mobileHome"><span>⌂</span><small>Ana Sayfa</small></button>

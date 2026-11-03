@@ -794,7 +794,13 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffb36b;outline-offset:2p
  .footer .footer-social strong{text-align:center!important}
  .footer #footerAdmin{grid-column:1;grid-row:4;justify-self:center}
  .footer .footer-inner>span{grid-column:1;grid-row:5;width:100%;font-size:11px}
-}</style></head><body>
+}
+/* Mobil kategori etiketlerinin görünürlüğü ve boş buton koruması */
+#categories .cat{color:#555!important;font-size:12px!important;text-indent:0!important;letter-spacing:normal!important;visibility:visible!important;opacity:1!important}
+#categories .cat .cat-label{display:inline!important;visibility:visible!important;opacity:1!important;color:inherit!important;font-size:inherit!important;line-height:1.2!important;white-space:nowrap!important}
+#categories .cat.active{background:var(--red)!important;color:#fff!important;border-color:var(--red)!important}
+@media(max-width:900px){#menu #categories{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important}#menu #categories::-webkit-scrollbar{display:none!important}#menu #categories .cat{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;min-width:max-content!important}}
+</style></head><body>
 <header class="topbar" id="siteHeader"><a class="brand" href="#home"><span class="brand-mark">YT</span><span>YEMEK<span class="red">TADINDA</span><small>PİDE · LAHMACUN · KEBAP</small></span></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><a id="headerWhatsAppBtn" href="https://wa.me/905421511186?text=Merhaba%2C%20YEMEK%20TADINDA%20%C3%BCzerinden%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 15px;border-radius:12px;background:#16a34a;color:#fff;font-weight:900;white-space:nowrap;box-shadow:0 5px 15px #16a34a40">☏ WhatsApp</a><button class="ghost" id="installAppBtn" type="button" style="border-color:#16a34a;color:#12813f;font-weight:900">⬇ Uygulamayı Yükle</button><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
 <nav class="mobile-bottom-nav" aria-label="Mobil menü">
  <button type="button" id="mobileHome"><span>⌂</span><small>Ana Sayfa</small></button>
@@ -1617,15 +1623,23 @@ function getCategoryOrder(){
 function saveCategoryOrder(order){localStorage.setItem('lc_category_order',JSON.stringify(order));scheduleCatalogSync()}
 function renderCustomerNavCategories(){const host=$('#customerCategoryLinks');if(!host)return;const icons=['🍲','🥖','🍕','🍢','🌯','🍖','🍰','🥤','🍽️'];host.innerHTML=getCategoryOrder().map((c,i)=>`<a href="#menu" data-side-cat="${escapeHtml(c)}">${icons[i%icons.length]} <span>${escapeHtml(c)}</span></a>`).join('')}
 function renderCats(){
- const cats=['Tümü',...getCategoryOrder().map(cleanCategoryName).filter(isValidCategoryName)];
+ const categories=getCategoryOrder().map(cleanCategoryName).filter(isValidCategoryName);
+ const cats=['Tümü',...categories.filter(category=>category.toLocaleLowerCase('tr')!=='tümü')];
  const host=$('#categories');
- host.innerHTML=cats.map(category=>`<button class="cat ${currentCat===category?'active':''}" data-cat="${escapeHtml(category)}">${escapeHtml(category)}</button>`).join('');
- host.querySelectorAll('button.cat').forEach(button=>{
-  const label=cleanCategoryName(button.textContent);
-  if(!isValidCategoryName(label)){button.remove();return;}
-  button.textContent=label;
-  button.dataset.cat=label;
-  button.onclick=()=>{currentCat=label;renderCats();renderProducts()};
+ host.replaceChildren();
+ cats.forEach(category=>{
+  if(!isValidCategoryName(category))return;
+  const button=document.createElement('button');
+  button.type='button';
+  button.className='cat'+(currentCat===category?' active':'');
+  button.dataset.cat=category;
+  const label=document.createElement('span');
+  label.className='cat-label';
+  label.textContent=category;
+  button.appendChild(label);
+  button.setAttribute('aria-label',category);
+  button.onclick=()=>{currentCat=category;renderCats();renderProducts()};
+  host.appendChild(button);
  });
  renderCustomerNavCategories();
 }let productReviewSummaryCache={};

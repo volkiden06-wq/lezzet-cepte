@@ -3372,3 +3372,17 @@ $('#customerNav').addEventListener('click',e=>{const a=e.target.closest('a');if(
   #siteHeader .top-actions .ghost{padding:9px 8px!important;font-size:12px!important}
 }
 </style>
+
+<style id="desktop-install-button-final-fix">
+@media(min-width:901px){
+ #siteHeader .top-actions #installAppBtn{
+  display:inline-flex!important;flex:0 0 156px!important;width:156px!important;min-width:156px!important;max-width:156px!important;
+  height:48px!important;min-height:48px!important;padding:8px 9px!important;
+  white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;
+  font-size:12px!important;line-height:1.15!important;
+ }
+}
+@media(min-width:901px) and (max-width:1100px){
+ #siteHeader .top-actions #installAppBtn{flex-basis:132px!important;width:132px!important;min-width:132px!important;max-width:132px!important;font-size:11px!important}
+}
+</style>

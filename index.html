@@ -2610,7 +2610,7 @@ function renderProducts(){if(!productReviewSummaryLoaded&&!productReviewSummaryL
  const host=$('#premiumShowcases');if(!host)return;
  const search=$('#search');
  const all=(products||[]).filter(p=>p.active);
- if(currentCat!=='Tümü'||(search&&search.value.trim())||!all.length){host.hidden=true;host.innerHTML='';return}
+ if(!all.length){host.hidden=true;host.innerHTML='';return}
  host.hidden=false;
  const cats=getCategoryOrder().filter(c=>c.toLocaleLowerCase('tr')!=='tümü');
  const categoryIcons=['🍲','🥖','🍕','🍢','🌯','🍖','🍰','🥤','🍽️'];

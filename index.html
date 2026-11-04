@@ -3819,3 +3819,67 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 #modalBack.review-on-top{z-index:100!important}
 
 </style>
+
+<style id="mobile-alignment-and-social-contrast-fix">
+
+/* Mobile category strip: keep first 'Tümü' chip visible and align the row evenly. */
+@media(max-width:900px){
+ #menu #categories{
+  box-sizing:border-box!important;
+  width:100%!important;
+  padding:4px 12px 12px!important;
+  margin-left:0!important;margin-right:0!important;
+  scroll-padding-left:12px!important;
+  justify-content:flex-start!important;
+  direction:ltr!important;
+ }
+ #menu #categories .cat{
+  box-sizing:border-box!important;
+  flex:0 0 auto!important;
+  min-width:112px!important;
+  min-height:44px!important;
+  padding:10px 16px!important;
+  text-align:center!important;
+  transform:none!important;
+ }
+ #menu #categories .cat:first-child .cat-label{
+  display:inline-block!important;
+  color:#35251d!important;
+  font-size:13px!important;
+  font-weight:850!important;
+  visibility:visible!important;opacity:1!important;
+ }
+ #menu #categories .cat:first-child.active .cat-label{color:#fff!important}
+ .mobile-bottom-nav{
+  left:0!important;right:0!important;width:100%!important;
+  box-sizing:border-box!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  justify-items:stretch!important;
+  padding-left:8px!important;padding-right:8px!important;
+ }
+ .mobile-bottom-nav button{
+  width:100%!important;min-width:0!important;
+  margin:0!important;justify-self:stretch!important;
+  text-align:center!important;
+ }
+ .mobile-bottom-nav button small{
+  display:block!important;max-width:100%!important;
+  white-space:nowrap!important;font-size:10px!important;
+ }
+}
+/* Social media area: use dark readable lettering on a light surface. */
+.footer .footer-social{
+ background:#fffaf1!important;
+ border:1px solid #e4d2b4!important;
+ color:#30251e!important;
+}
+.footer .footer-social strong{color:#30251e!important}
+.footer .footer-social a{
+ background:#fff!important;
+ border:1px solid #e2d4c2!important;
+ color:#30251e!important;
+}
+.footer .footer-social a span{color:#51463e!important}
+.footer .footer-social a:hover{color:#9f1d24!important;background:#fff2e8!important}
+
+</style>

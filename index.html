@@ -2972,7 +2972,7 @@ $('#promoNotify').onclick=enableNotifications;$('#notifyBtn').onclick=enableNoti
  }
 }
 $('#historyBtn').onclick=()=>$('#historyBack').classList.add('show');
-restoreAdminSession();$('#historyClose').onclick=()=>$('#historyBack').classList.remove('show');
+// Otomatik yönetici oturumu geri yükleme kapalı: yönetim paneli yalnızca yönetici giriş formuyla açılır.$('#historyClose').onclick=()=>$('#historyBack').classList.remove('show');
 
 async function showCustomerLoyalty(phone,orderNumber,target){
  if(!target)return;

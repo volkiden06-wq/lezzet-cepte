@@ -4180,6 +4180,32 @@ body #customer #menu #products>.product img{height:170px!important;object-fit:co
  body #customer #menu #products>.product img{height:130px!important}
  #customer>.loyalty,#customer>.features{width:calc(100% - 24px)!important}
 }
+
+/* Mobile product grid overflow/overlap fix: cards must fit their grid tracks, not retain desktop carousel widths. */
+@media(max-width:900px){
+ html,body,#customer,#customer #menu,#customer #menu #products{max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+ body #customer #menu #products{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-flow:row!important;align-items:stretch!important;overflow:visible!important}
+ body #customer #menu #products>.product{display:flex!important;flex-direction:column!important;flex:initial!important;flex-basis:auto!important;width:auto!important;min-width:0!important;max-width:100%!important;margin:0!important;box-sizing:border-box!important;overflow:hidden!important}
+ body #customer #menu #products>.product>*{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+ body #customer #menu #products>.product>img{display:block!important;width:100%!important;max-width:100%!important;height:clamp(112px,27vw,160px)!important;object-fit:cover!important}
+ body #customer #menu #products>.product .product-body{width:100%!important;min-width:0!important;flex:1 1 auto!important;overflow:hidden!important}
+ body #customer #menu #products>.product h3,body #customer #menu #products>.product p{max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important}
+ body #customer #menu #products>.product .product-bottom,body #customer #menu #products>.product .product-actions{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:6px!important;min-width:0!important}
+ body #customer #menu #products>.product [class*="review"],body #customer #menu #products>.product .rating{max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important}
+}
+@media(max-width:520px){
+ body #customer #menu #products{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;padding:0!important}
+ body #customer #menu #products>.product{min-width:0!important;width:auto!important;max-width:100%!important;border-radius:16px!important}
+ body #customer #menu #products>.product>img{height:clamp(105px,31vw,145px)!important}
+ body #customer #menu #products>.product .product-body{padding:9px!important}
+ body #customer #menu #products>.product h3{font-size:clamp(13px,3.5vw,16px)!important;line-height:1.25!important}
+ body #customer #menu #products>.product p{font-size:12px!important;line-height:1.4!important}
+ body #customer #menu #products>.product .price{font-size:17px!important}
+ body #customer #menu #products>.product .product-bottom{justify-content:space-between!important}
+ body #customer #menu #products>.product .product-actions{justify-content:flex-end!important}
+ body #customer #menu #products>.product .add{min-width:34px!important;min-height:34px!important;padding:6px 9px!important}
+}
+
 @media(max-width:520px){
  #customer>.hero .hero-slider{height:225px!important}
  #customer>.hero .hero-slide-copy{left:5%!important;max-width:65%!important}

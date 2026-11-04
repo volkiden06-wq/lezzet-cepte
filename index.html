@@ -3026,7 +3026,9 @@ $('#promoNotify').onclick=enableNotifications;$('#notifyBtn').onclick=enableNoti
  }
 }
 $('#historyBtn').onclick=()=>$('#historyBack').classList.add('show');
-// Otomatik yönetici oturumu geri yükleme kapalı: yönetim paneli yalnızca yönetici giriş formuyla açılır.$('#historyClose').onclick=()=>$('#historyBack').classList.remove('show');
+// Otomatik yönetici oturumu geri yükleme kapalı: yönetim paneli yalnızca yönetici giriş formuyla açılır.
+$('#historyClose').onclick=()=>{$('#historyBack').classList.remove('show');$('#modalBack').classList.remove('show','product-detail-open')};
+$('#historyBack').onclick=e=>{if(e.target===$('#historyBack'))$('#historyBack').classList.remove('show')};
 
 async function showCustomerLoyalty(phone,orderNumber,target){
  if(!target)return;

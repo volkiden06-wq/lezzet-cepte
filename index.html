@@ -3774,3 +3774,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 </style>
+
+<style id="customer-review-dialog-layer">
+
+/* Customer review/cart/product dialogs must appear above order history and tracking overlays. */
+#modalBack{z-index:60!important}
+#historyBack,#trackBack{z-index:50!important}
+
+</style>

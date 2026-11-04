@@ -947,7 +947,35 @@ body{background:#ead9b8;color:#35251d}
  .hero-photo:after{width:36px;height:36px;font-size:20px}
 }
 
-</style></head><body>
+</style><style id="yemektadinda-premium-product-showcases">
+#menu{padding-top:26px!important;padding-bottom:26px!important}
+#menu .section-head{align-items:end;margin-bottom:18px}
+#menu .section-head h2{font-size:clamp(24px,2.4vw,32px);font-weight:950;letter-spacing:-.8px}
+#menu .eyebrow{color:#d71927;font-weight:900;letter-spacing:1.3px}
+#menu .search{border:1px solid #eadfe0!important;border-radius:14px!important;background:#fff!important;box-shadow:0 5px 18px #3010100b;padding:10px 14px!important}
+#categories{display:flex!important;flex-wrap:nowrap!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:5px 3px 16px!important;margin:0 0 15px!important;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#e7a0a5 transparent}
+#categories .cat{flex:0 0 auto!important;min-height:48px;padding:12px 20px!important;border:1px solid #f0e4e2!important;border-radius:15px!important;background:linear-gradient(180deg,#fff,#fff9f8)!important;color:#3c2525!important;box-shadow:0 4px 12px #3a11110b!important;scroll-snap-align:start;font-weight:850!important;transition:transform .18s,box-shadow .18s}
+#categories .cat:hover{transform:translateY(-2px);box-shadow:0 8px 18px #3a111118!important}
+#categories .cat.active{background:linear-gradient(135deg,#f21d2c,#c80d1b)!important;border-color:#d71927!important;color:#fff!important;box-shadow:0 7px 17px #d7192733!important}
+#products{display:flex!important;flex-wrap:nowrap!important;gap:16px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:5px 3px 18px!important;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#e7a0a5 transparent;-webkit-overflow-scrolling:touch;align-items:stretch}
+#products .product{flex:0 0 clamp(220px,24%,270px)!important;width:clamp(220px,24%,270px)!important;scroll-snap-align:start;border:1px solid #f0e5e2!important;border-radius:19px!important;background:#fff!important;box-shadow:0 6px 20px #3813130e!important;transition:transform .2s,box-shadow .2s!important}
+#products .product:hover{transform:translateY(-4px)!important;box-shadow:0 13px 26px #38131318!important}
+#products .product img{height:175px!important;object-fit:cover!important;background:#fff5f2!important}
+#products .product-body{padding:14px 15px 15px!important}
+#products .product h3{font-size:16px!important;font-weight:900!important;color:#21191a!important}
+#products .product p{font-size:12px!important;color:#777!important;min-height:34px!important}
+#products .price{font-size:19px!important;font-weight:950!important;color:#d71927!important}
+#products .add{width:42px!important;height:42px!important;border-radius:13px!important;background:linear-gradient(135deg,#f21d2c,#c80d1b)!important;color:#fff!important;box-shadow:0 5px 12px #d7192730!important}
+#campaigns{border:1px solid #f2dfe0!important;border-radius:20px!important;box-shadow:0 10px 30px #36131312!important}
+#campaigns .campaign-side-head{background:linear-gradient(120deg,#f21d2c,#bd0d1b)!important;padding:17px!important}
+#campaigns .campaign-card{border-radius:15px!important;border-color:#f2e3e1!important;box-shadow:0 4px 13px #3213130d!important}
+#campaigns .campaign-card .campaign-action{border-radius:10px!important;box-shadow:0 4px 10px #d7192725}
+#menu,#campaigns,.product,.campaign-card{min-width:0}
+@media(max-width:900px){#menu{width:100%!important}#categories{gap:9px!important}#categories .cat{padding:11px 16px!important}#products .product{flex-basis:min(72vw,285px)!important;width:min(72vw,285px)!important}.campaign-list{display:flex!important;flex-wrap:nowrap!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:12px!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}.campaign-list .campaign-card{flex:0 0 min(86vw,360px)!important;scroll-snap-align:start;min-height:150px!important}}
+@media(max-width:520px){#menu{padding:18px 0 22px!important}#menu .section-head{align-items:stretch!important;gap:12px!important}#menu .section-head>div{width:100%}#menu .search{width:100%!important;min-width:0!important}#products{gap:12px!important;padding-bottom:15px!important}#products .product{flex-basis:76vw!important;width:76vw!important;max-width:290px!important}#products .product img{height:160px!important}#products .product-body{padding:12px!important}#products .product h3{font-size:15px!important}#categories .cat{min-height:44px!important;padding:10px 14px!important;font-size:13px!important}.campaign-list .campaign-card{flex-basis:88vw!important}}
+@media(prefers-reduced-motion:reduce){#products .product,#categories .cat{transition:none!important}}
+</style>
+</head><body>
 <header class="topbar" id="siteHeader"><a class="brand" href="#home" aria-label="Yemek Tadında Ana Sayfa"><img class="header-logo-image" src="/assets/yemektadinda-logo.png" alt="Yemek Tadında - Online Sipariş ve Hızlı Teslimat"></a><div class="top-actions"><button class="ghost" id="historyBtn">📋 Siparişlerim</button><button class="ghost" id="trackBtn">📦 Sipariş Takip</button><button class="ghost" id="notifyBtn">♧ Bildirimler</button><button class="ghost" id="installAppBtn" type="button" style="border-color:#16a34a;color:#12813f;font-weight:900">⬇ Uygulamayı Yükle</button><button class="cart-btn" id="cartBtn">🛒 Sepet <b id="cartCount">0</b></button><button class="primary" id="adminBtn">Yönetim ↗</button></div></header>
 <nav class="mobile-bottom-nav" aria-label="Mobil menü">
  <button type="button" id="mobileHome"><span>⌂</span><small>Ana Sayfa</small></button>

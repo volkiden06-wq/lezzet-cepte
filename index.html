@@ -3594,3 +3594,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 </style>
+
+<style id="admin-visibility-isolation-fix">
+
+/* Keep private administration screens out of the public storefront.
+   The admin layout's display:grid must never override the hidden state. */
+#admin.hidden{display:none!important;visibility:hidden!important}
+#customer.hidden,#siteHeader.hidden,.footer.hidden{display:none!important;visibility:hidden!important}
+#admin:not(.hidden){display:grid!important}
+
+</style>

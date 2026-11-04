@@ -3301,81 +3301,272 @@ $('#customerNav').addEventListener('click',e=>{const a=e.target.closest('a');if(
 
 <style id="yemek-tadinda-logo-fix">#customer .side-logo{min-height:132px;justify-content:center;gap:0;padding:10px 8px 18px;overflow:hidden}#customer .side-logo-image{display:block;width:100%;max-width:205px;height:auto;max-height:105px;object-fit:contain;margin:0 auto}@media(max-width:900px){#customer .side-logo-image{max-width:190px;max-height:92px}}</style>
 
-<style id="desktop-and-mobile-header-logo-fix">
-#siteHeader .brand{display:flex!important;align-items:center;justify-content:flex-start;flex:0 0 170px;min-width:0;height:100%;padding:5px 0;margin:0;overflow:visible}
-#siteHeader .header-logo-image{display:block!important;visibility:visible!important;opacity:1!important;width:160px;height:56px;max-width:100%;object-fit:contain;background:#090909;border-radius:8px}
-@media(max-width:1250px){#siteHeader .brand{flex-basis:145px}#siteHeader .header-logo-image{width:138px;height:50px}}
-@media(max-width:900px){#siteHeader .brand{flex:0 0 132px;height:58px;padding:3px 0}#siteHeader .header-logo-image{width:128px;height:48px}}
-</style>
 
-<style id="desktop-sidebar-logo-visibility-fix">
-@media(min-width:901px){
-  #customer aside.customer-left{
-    display:flex!important;
-    visibility:visible!important;
-    opacity:1!important;
-  }
-  #customer aside.customer-left>a.side-logo{
-    display:flex!important;
-    visibility:visible!important;
-    opacity:1!important;
-    flex:0 0 auto!important;
-    width:100%!important;
-    min-height:118px!important;
-    height:auto!important;
-    padding:8px 4px 18px!important;
-    margin:0 0 12px!important;
-    align-items:center!important;
-    justify-content:center!important;
-    overflow:visible!important;
-  }
-  #customer aside.customer-left>a.side-logo>img.side-logo-image{
-    display:block!important;
-    visibility:visible!important;
-    opacity:1!important;
-    position:static!important;
-    width:100%!important;
-    max-width:216px!important;
-    height:92px!important;
-    max-height:none!important;
-    object-fit:contain!important;
-    object-position:center!important;
-    margin:0 auto!important;
-    background:#080808!important;
-    border-radius:7px!important;
-  }
+
+
+
+
+
+
+
+
+<style id="yemektadinda-neon-fire-theme">
+
+/* YEMEK TADINDA — NEON FIRE THEME
+   Presentation layer only. No application logic or data selectors are changed. */
+:root{
+ --red:#f20b18;--red2:#ff3944;--ink:#f8f4ef;--muted:#b9adb0;--line:#56302e;
+ --shadow:0 12px 35px rgba(0,0,0,.42);
 }
-@media(max-width:900px){
-  #customer aside.customer-left>a.side-logo>img.side-logo-image{
-    display:block!important;
-    visibility:visible!important;
-    opacity:1!important;
-  }
+html{scroll-behavior:smooth;background:#070606}
+body{background:#080707!important;color:#f8f3ed!important}
+#siteHeader{
+ height:88px!important;min-height:88px!important;position:sticky!important;top:0!important;z-index:30!important;
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:16px!important;padding:8px 22px!important;margin:0!important;
+ background:linear-gradient(180deg,#090606f7,#100807f5)!important;
+ border-bottom:1px solid #9a2722!important;box-shadow:0 5px 24px #000a,0 1px 0 #ff332b55!important;
+ backdrop-filter:blur(14px)!important;
 }
-</style>
-
-
-
-
-
-<style id="yemektadinda-clean-brand-layout">
-@media(min-width:901px){
- #siteHeader{display:flex!important;align-items:center!important;gap:12px!important;padding:8px 14px!important;min-height:78px!important}
- #siteHeader .brand{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 220px!important;width:220px!important;min-width:220px!important;height:62px!important;padding:0!important;margin:0!important;overflow:hidden!important;background:transparent!important}
- #siteHeader .header-logo-image{display:block!important;visibility:visible!important;opacity:1!important;width:210px!important;height:60px!important;max-width:210px!important;max-height:60px!important;object-fit:contain!important;background:transparent!important;border:0!important;border-radius:0!important}
- #siteHeader .top-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;flex:1 1 auto!important;min-width:0!important;margin-left:auto!important}
- #siteHeader .top-actions #installAppBtn{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 150px!important;width:150px!important;min-width:150px!important;max-width:150px!important;height:46px!important;padding:8px 9px!important;white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;font-size:12px!important;line-height:1.15!important}
- #customer aside.customer-left>a.side-logo{display:flex!important;align-items:center!important;justify-content:center!important;min-height:0!important;height:auto!important;padding:14px 10px 18px!important;margin:0 0 12px!important;overflow:visible!important;background:transparent!important}
- #customer aside.customer-left>a.side-logo>img.side-logo-image{display:block!important;width:100%!important;max-width:205px!important;height:auto!important;max-height:72px!important;object-fit:contain!important;object-position:center!important;background:transparent!important;border:0!important;border-radius:0!important}
+#siteHeader .brand{display:flex!important;flex:0 0 300px!important;width:300px!important;min-width:0!important;height:72px!important;
+ align-items:center!important;justify-content:flex-start!important;padding:0!important;margin:0!important;background:transparent!important;overflow:hidden!important}
+#siteHeader .header-logo-image{display:block!important;visibility:visible!important;opacity:1!important;
+ width:290px!important;height:70px!important;max-width:100%!important;max-height:70px!important;object-fit:contain!important;
+ background:transparent!important;border:0!important;border-radius:0!important}
+#siteHeader .top-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;
+ flex:1 1 auto!important;min-width:0!important;gap:9px!important;margin-left:auto!important}
+#siteHeader .top-actions button,#siteHeader .top-actions a{
+ min-height:46px!important;border-radius:13px!important;padding:11px 14px!important;
+ color:#fff!important;background:linear-gradient(180deg,#17100f,#0b0909)!important;
+ border:1px solid #71423b!important;box-shadow:inset 0 1px #ffffff12,0 5px 14px #0008!important;
+ font-size:13px!important;font-weight:850!important;white-space:nowrap!important;text-decoration:none!important;
 }
-@media(min-width:901px) and (max-width:1150px){
- #siteHeader{gap:7px!important;padding-left:8px!important;padding-right:8px!important}
- #siteHeader .brand{flex-basis:170px!important;width:170px!important;min-width:170px!important}
- #siteHeader .header-logo-image{width:165px!important;max-width:165px!important}
+#siteHeader .top-actions button:hover,#siteHeader .top-actions a:hover{
+ border-color:#ff4a38!important;box-shadow:0 0 16px #ff251c66,inset 0 1px #ffffff18!important;
+}
+#siteHeader #headerWhatsAppBtn{background:linear-gradient(180deg,#16a34a,#087a36)!important;border-color:#36d675!important}
+#siteHeader #installAppBtn{flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:170px!important;
+ padding:10px 12px!important;font-size:12px!important;line-height:1.2!important;white-space:nowrap!important;
+ color:#fff!important;border-color:#d7a45c!important;box-shadow:0 0 12px #d7a45c35!important}
+#siteHeader #cartBtn{background:linear-gradient(180deg,#ed1b24,#8e080f)!important;border-color:#ff544b!important}
+#siteHeader #cartBtn b{background:#f3b94c!important;color:#1b0d08!important}
+#customer{
+ display:grid!important;grid-template-columns:minmax(0,1fr) 350px!important;
+ grid-template-rows:auto auto auto auto!important;gap:18px 20px!important;
+ width:100%!important;max-width:none!important;margin:0!important;
+ padding:22px 22px 42px 292px!important;align-items:start!important;
+ background:
+ radial-gradient(ellipse at 65% 0%,rgba(117,20,17,.16),transparent 48%),
+ linear-gradient(180deg,#0a0808,#080707 65%,#0b0707)!important;
+}
+#customer .customer-left{
+ position:fixed!important;left:0!important;top:88px!important;bottom:0!important;width:270px!important;
+ padding:18px 14px 20px!important;display:flex!important;flex-direction:column!important;
+ background:linear-gradient(180deg,#151010,#090808 72%,#1a0909)!important;
+ border-right:1px solid #74231f!important;box-shadow:8px 0 28px #0008!important;
+ z-index:20!important;overflow-y:auto!important;
+}
+#customer .side-logo{display:flex!important;align-items:center!important;justify-content:center!important;
+ padding:5px 6px 15px!important;margin:0 0 12px!important;border-bottom:1px solid #8a332b!important;
+ background:transparent!important;min-height:0!important}
+#customer .side-logo-image{display:block!important;width:100%!important;max-width:230px!important;
+ height:76px!important;max-height:76px!important;object-fit:contain!important;background:transparent!important;
+ border:0!important;border-radius:0!important}
+#customer .customer-nav{gap:7px!important;padding-top:8px!important}
+#customer .customer-nav a{
+ display:flex!important;align-items:center!important;gap:13px!important;min-height:47px!important;
+ padding:12px 14px!important;border:1px solid transparent!important;border-radius:12px!important;
+ color:#e9ded8!important;background:transparent!important;font-size:14px!important;font-weight:800!important;
+ transition:background .18s,border-color .18s,box-shadow .18s!important;
+}
+#customer .customer-nav a:hover,#customer .customer-nav a.selected{
+ color:#fff!important;background:linear-gradient(100deg,#a50810,#f20c19 58%,#8e070d)!important;
+ border-color:#ff6654!important;box-shadow:0 0 18px #ed111b55,inset 0 1px #ffffff22!important;
+}
+#customer .side-contact{margin-top:auto!important;background:#110b0a!important;border:1px solid #75402e!important;
+ border-radius:14px!important;color:#fff!important;box-shadow:inset 0 0 22px #a52a1715!important}
+#customer .side-contact span,#customer .side-contact small{color:#c5b5ad!important}
+#customer .hero{grid-column:1!important;grid-row:1!important;width:100%!important;min-width:0!important;margin:0!important;padding:0!important}
+#customer .hero>div:first-child{display:none!important}
+#customer .hero-slider{
+ height:390px!important;min-height:300px!important;border-radius:20px!important;overflow:hidden!important;
+ border:1px solid #a34d35!important;box-shadow:0 0 0 1px #f2b45a30,0 14px 38px #000b,0 0 28px #b91c1c22!important;
+ background:#130a08!important;
+}
+#customer .hero-slide img{filter:saturate(1.2) contrast(1.08)!important}
+#customer .hero-slide-shade{
+ background:linear-gradient(90deg,rgba(5,4,4,.92),rgba(12,6,5,.72) 38%,rgba(12,6,5,.08) 82%),
+ linear-gradient(0deg,rgba(0,0,0,.42),transparent 52%)!important;
+}
+#customer .hero-slide-copy small{color:#ffc35d!important}
+#customer .hero-slide-copy em{color:#ffbf4f!important}
+#customer .hero-slide-copy span{color:#fff!important}
+#customer .hero-arrow{background:#120b0bdc!important;border:1px solid #f4c477!important;color:#fff!important;
+ box-shadow:0 0 14px #ff4b2a44!important}
+#customer .hero-arrow:hover{background:#c20b15!important}
+#customer .hero-dots{background:#080606d9!important;border:1px solid #7b4938!important}
+#customer .hero-dots button.active{background:#ff3028!important}
+#customer #campaigns{
+ grid-column:2!important;grid-row:1/5!important;position:sticky!important;top:106px!important;
+ max-height:calc(100vh - 126px)!important;background:linear-gradient(180deg,#140d0c,#090808)!important;
+ border:1px solid #8e4534!important;border-radius:18px!important;box-shadow:0 12px 32px #0009,0 0 18px #ad1b1825!important;
+}
+#customer .campaign-side-head{
+ background:linear-gradient(110deg,#76090e,#df101b 58%,#74090d)!important;
+ border-bottom:1px solid #f36b48!important;color:#fff!important;padding:17px 15px!important;
+}
+#customer .campaign-all{background:#180b0a!important;border:1px solid #d9a45e!important;color:#ffe4b2!important}
+#customer .campaign-list{background:transparent!important;padding:10px!important;gap:10px!important}
+#customer .campaign-card{
+ background:linear-gradient(135deg,#1b1210,#0d0a09)!important;border:1px solid #704333!important;
+ border-radius:14px!important;box-shadow:inset 0 1px #ffffff0c,0 6px 16px #0007!important;
+}
+#customer .campaign-card h3{color:#fff0df!important}
+#customer .campaign-card p{color:#c3b3a8!important}
+#customer .campaign-tag{background:#f2b941!important;color:#241209!important}
+#customer .campaign-card .campaign-action{
+ background:linear-gradient(180deg,#f3232c,#a40710)!important;border:1px solid #ff6756!important;
+ color:#fff!important;box-shadow:0 0 12px #e7192050!important;
+}
+#customer .campaign-help{background:#1b0e0c!important;color:#f5c77d!important;border-top:1px solid #71402d!important}
+#customer #menu{
+ grid-column:1!important;grid-row:2!important;width:100%!important;max-width:none!important;
+ padding:16px 0 10px!important;margin:0!important;
+}
+#customer #menu .section-head{align-items:center!important;margin-bottom:18px!important}
+#customer #menu .eyebrow{color:#ff6550!important}
+#customer #menu h2{color:#fff1e7!important;font-size:30px!important}
+#customer #menu .search{
+ background:#17100f!important;border:1px solid #80503b!important;border-radius:14px!important;
+ color:#ffd18a!important;box-shadow:inset 0 1px #ffffff0b!important;
+}
+#customer #menu .search input{background:transparent!important;color:#fff!important}
+#customer #menu .search input::placeholder{color:#b9a9a2!important}
+#customer #menu .cats{gap:10px!important;margin-bottom:20px!important}
+#customer #menu .cat{
+ background:linear-gradient(180deg,#1a1210,#0d0909)!important;color:#f4e6dc!important;
+ border:1px solid #79503a!important;border-radius:12px!important;padding:11px 16px!important;
+ box-shadow:inset 0 1px #ffffff0c,0 4px 12px #0007!important;
+}
+#customer #menu .cat.active,#customer #menu .cat:hover{
+ background:linear-gradient(100deg,#8e080f,#e51a23)!important;color:#fff!important;
+ border-color:#ff735a!important;box-shadow:0 0 16px #ed171c66!important;
+}
+#customer #products{gap:14px!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+#customer #products .product{
+ background:linear-gradient(155deg,#1b1311,#0c0909)!important;border:1px solid #67402f!important;
+ border-radius:16px!important;box-shadow:0 8px 22px #0008!important;overflow:hidden!important;
+}
+#customer #products .product:hover{transform:translateY(-3px)!important;border-color:#d18b4a!important;
+ box-shadow:0 12px 28px #000b,0 0 15px #f12a1e25!important}
+#customer #products .product img{background:#160f0d!important}
+#customer #products .product-body{padding:13px!important}
+#customer #products .product h3{color:#fff0e5!important}
+#customer #products .product p{color:#c0b0a7!important}
+#customer #products .price{color:#ffc15a!important}
+#customer #products .add{background:linear-gradient(180deg,#f3262e,#a50911)!important;color:#fff!important;
+ border:1px solid #ff6b55!important;box-shadow:0 0 10px #ee211d40!important}
+#customer .loyalty{
+ background:linear-gradient(110deg,#260d0d,#130b0a)!important;border:1px solid #8d4934!important;
+ border-radius:18px!important;color:#fff!important;box-shadow:0 8px 22px #0008!important;
+}
+#customer .loyalty h2{color:#fff0e6!important}
+#customer .loyalty p{color:#cbb9ae!important}
+#customer .features .feature{
+ background:linear-gradient(150deg,#19110f,#0b0909)!important;border:1px solid #68402f!important;
+ border-radius:16px!important;color:#fff!important;
+}
+#customer .features .feature p{color:#c7b7ad!important}
+.footer{background:#080606!important;border-top:1px solid #713027!important;color:#bcaea5!important}
+.footer .brand{color:#fff!important}
+.footer .brand small{color:#c2aaa0!important}
+.footer .footer-links button{color:#e8d5ca!important}
+.modal-back{background:rgba(0,0,0,.78)!important;backdrop-filter:blur(8px)!important}
+.modal{background:linear-gradient(160deg,#1c1412,#0d0a09)!important;color:#fff1e7!important;
+ border:1px solid #8a513b!important;box-shadow:0 22px 70px #000d,0 0 28px #e01a2022!important}
+.modal h2,.modal h3,.modal h4,.modal label{color:#ffe9d9!important}
+.modal .close{background:#2b1b17!important;color:#fff!important;border:1px solid #80503b!important}
+.modal input,.modal select,.modal textarea,.modal .field input,.modal .field select,.modal .field textarea{
+ background:#100c0b!important;color:#fff!important;border:1px solid #704936!important;border-radius:10px!important;
+}
+.modal input::placeholder,.modal textarea::placeholder{color:#bca9a0!important}
+.toast{background:#200d0d!important;border:1px solid #b84b36!important;color:#fff!important;box-shadow:0 10px 30px #000b!important}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+ outline:2px solid #ffbf55!important;outline-offset:2px!important;
+}
+/* Admin panel uses the same visual language without changing controls or navigation. */
+.admin{background:#090707!important;color:#f8eee7!important}
+.admin .sidebar{background:linear-gradient(180deg,#170d0d,#080707)!important;border-right:1px solid #70302b!important}
+.admin .sidebar .brand{color:#fff!important}
+.admin .nav button{color:#d8c8c0!important;border:1px solid transparent!important}
+.admin .nav button.active,.admin .nav button:hover{background:linear-gradient(100deg,#8e080f,#e51a23)!important;
+ color:#fff!important;border-color:#ff6b55!important;box-shadow:0 0 14px #e31b2440!important}
+.admin .admin-main{background:radial-gradient(ellipse at top right,#36100f55,transparent 40%),#090707!important;color:#fff!important}
+.admin .admin-head h1,.admin .admin-head h2,.admin .admin-head h3{color:#fff1e7!important}
+.admin .stat,.admin .panel{background:linear-gradient(150deg,#1b1311,#0d0a09)!important;
+ border:1px solid #68402f!important;border-radius:15px!important;color:#f9eee7!important;box-shadow:0 8px 20px #0007!important}
+.admin .stat span,.admin .panel p,.admin .panel label{color:#c7b7ad!important}
+.admin .stat strong,.admin .panel h3{color:#ffc15a!important}
+.admin input,.admin select,.admin textarea{background:#100c0b!important;color:#fff!important;border:1px solid #704936!important}
+.admin table th{color:#f3c780!important;border-color:#58362b!important}
+.admin table td{color:#eee0d7!important;border-color:#382720!important}
+.admin .small-btn,.admin button.primary{background:linear-gradient(180deg,#f3262e,#a50911)!important;color:#fff!important;border:1px solid #ff6b55!important}
+.admin .notice{background:#24170d!important;color:#ffd79c!important;border:1px solid #7e5532!important}
+.admin .status{border:1px solid #35764b!important}
+@media(min-width:901px) and (max-width:1250px){
+ #siteHeader{padding:8px 12px!important;gap:8px!important}
+ #siteHeader .brand{flex-basis:210px!important;width:210px!important}
+ #siteHeader .header-logo-image{width:205px!important}
  #siteHeader .top-actions{gap:5px!important}
- #siteHeader .top-actions #installAppBtn{flex-basis:132px!important;width:132px!important;min-width:132px!important;max-width:132px!important;font-size:11px!important}
+ #siteHeader .top-actions button,#siteHeader .top-actions a{padding:9px 9px!important;font-size:11px!important}
+ #siteHeader #installAppBtn{max-width:145px!important;font-size:11px!important}
+ #customer{grid-template-columns:minmax(0,1fr) 310px!important;padding-left:282px!important;padding-right:14px!important;gap:14px!important}
+ #customer .customer-left{width:260px!important}
+ #customer #products{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ #customer .hero-slider{height:340px!important}
 }
 @media(max-width:900px){
- #siteHeader .header-logo-image,#customer .side-logo-image{background:transparent!important;object-fit:contain!important}
+ body{background:#080707!important;color:#fff!important;padding-bottom:76px!important}
+ #siteHeader{height:68px!important;min-height:68px!important;padding:5px 12px!important;gap:8px!important;
+  background:#090707f5!important;border-bottom:1px solid #79312b!important}
+ #siteHeader .brand{flex:0 0 145px!important;width:145px!important;height:54px!important}
+ #siteHeader .header-logo-image{width:142px!important;height:52px!important;max-height:52px!important}
+ #siteHeader .top-actions{gap:5px!important}
+ #siteHeader .top-actions #historyBtn,#siteHeader .top-actions #trackBtn,#siteHeader .top-actions #notifyBtn{display:none!important}
+ #siteHeader .top-actions button,#siteHeader .top-actions a{min-height:40px!important;padding:8px 10px!important;font-size:11px!important}
+ #siteHeader #installAppBtn{max-width:130px!important;font-size:10px!important}
+ #customer{display:flex!important;flex-direction:column!important;gap:15px!important;padding:12px 12px 24px!important;
+  width:100%!important;max-width:720px!important;margin:0 auto!important}
+ #customer .customer-left{display:none!important}
+ #customer .hero{order:0!important;width:100%!important}
+ #customer .hero-slider{height:255px!important;min-height:0!important;border-radius:16px!important}
+ #customer #campaigns{order:1!important;position:static!important;width:100%!important;max-height:390px!important}
+ #customer #menu{order:2!important;width:100%!important;padding:4px 0!important}
+ #customer #menu .section-head{align-items:stretch!important;flex-direction:column!important}
+ #customer #menu h2{font-size:25px!important}
+ #customer #menu .search{width:100%!important}
+ #customer #products{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+ #customer #products .product img{height:145px!important}
+ #customer .loyalty{order:3!important;margin:0 auto 12px!important;width:100%!important}
+ #customer .features{order:4!important;grid-template-columns:1fr!important;width:100%!important;margin-bottom:18px!important}
+ .mobile-bottom-nav{background:#0b0808f5!important;border-top:1px solid #79312b!important;box-shadow:0 -6px 22px #000a!important}
+ .mobile-bottom-nav button{color:#e9d8ce!important}
+ .mobile-bottom-nav button.active{color:#ff6151!important}
+ .footer{padding-bottom:88px!important}
 }
+@media(max-width:520px){
+ #siteHeader .brand{flex-basis:118px!important;width:118px!important}
+ #siteHeader .header-logo-image{width:116px!important;height:48px!important}
+ #siteHeader .top-actions #installAppBtn{max-width:108px!important;padding:7px 6px!important;font-size:9px!important}
+ #siteHeader .top-actions #headerWhatsAppBtn{display:none!important}
+ #siteHeader .top-actions .cart-btn{padding:8px 9px!important;font-size:11px!important}
+ #customer .hero-slider{height:220px!important}
+ #customer .hero-slide-copy{max-width:76%!important}
+ #customer .hero-slide-copy strong{font-size:24px!important}
+ #customer #products .product img{height:125px!important}
+ #customer #products .product-body{padding:9px!important}
+ #customer #products .product h3{font-size:13px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
 </style>

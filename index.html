@@ -2701,6 +2701,28 @@ function openProductReviewsList(productId){
   return '<article class="public-review-card"><div class="public-review-head"><b>'+escapeHtml(row.display_name||'Müşteri')+'</b><span>'+('★'.repeat(rating))+('☆'.repeat(5-rating))+'</span></div>'+(row.comment?'<p>'+escapeHtml(row.comment)+'</p>':'<p class="public-review-no-comment">Yalnızca yıldız puanı verildi.</p>')+'<small>'+escapeHtml(date)+'</small></article>';
  }).join('');
  openModal(title+' · Değerlendirmeler',cards||'<div class="notice">Bu ürün için henüz yayınlanmış değerlendirme yok.</div>');
+ // Mobil tarayıcılarda alt sayfa hizalamasını kesin olarak geçersiz kıl.
+ const reviewLayer=$('#modalBack');
+ const reviewDialog=reviewLayer?.querySelector('.modal');
+ if(reviewLayer&&reviewDialog&&window.matchMedia('(max-width: 900px)').matches){
+  reviewLayer.style.setProperty('display','flex','important');
+  reviewLayer.style.setProperty('align-items','center','important');
+  reviewLayer.style.setProperty('justify-content','center','important');
+  reviewLayer.style.setProperty('padding','12px 12px calc(86px + env(safe-area-inset-bottom))','important');
+  reviewDialog.style.setProperty('position','fixed','important');
+  reviewDialog.style.setProperty('left','50%','important');
+  reviewDialog.style.setProperty('top','46%','important');
+  reviewDialog.style.setProperty('bottom','auto','important');
+  reviewDialog.style.setProperty('transform','translate(-50%,-50%)','important');
+  reviewDialog.style.setProperty('margin','0','important');
+  reviewDialog.style.setProperty('width','calc(100vw - 24px)','important');
+  reviewDialog.style.setProperty('max-width','620px','important');
+  reviewDialog.style.setProperty('max-height','min(70dvh, calc(100dvh - 150px))','important');
+  reviewDialog.style.setProperty('overflow-y','auto','important');
+  reviewDialog.style.setProperty('overflow-x','hidden','important');
+  reviewDialog.style.setProperty('border-radius','20px','important');
+  reviewDialog.style.setProperty('-webkit-overflow-scrolling','touch','important');
+ }
 }
 function productReviewRatingMarkup(productId){
  const summary=productReviewSummaryCache[String(productId)];
@@ -4474,4 +4496,12 @@ body #customer #menu #products>.product img{height:170px!important;object-fit:co
 }
 </style>
 
+
+<style id="mobile-review-dialog-hard-position-fix">
+@media(max-width:900px){
+ #modalBack.review-on-top{display:flex!important;align-items:center!important;justify-content:center!important;padding:12px 12px calc(86px + env(safe-area-inset-bottom))!important}
+ #modalBack.review-on-top>.modal{position:fixed!important;left:50%!important;top:46%!important;bottom:auto!important;transform:translate(-50%,-50%)!important;margin:0!important;width:calc(100vw - 24px)!important;max-width:620px!important;max-height:min(70dvh,calc(100dvh - 150px))!important;overflow-x:hidden!important;overflow-y:auto!important;border-radius:20px!important;-webkit-overflow-scrolling:touch!important}
+ #modalBack.review-on-top>.modal>.modal-head{position:sticky!important;top:-18px!important;z-index:4!important;background:#fff!important;padding:4px 0 12px!important;margin:0 0 10px!important}
+}
+</style>
 </body></html>

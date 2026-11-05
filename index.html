@@ -3434,11 +3434,13 @@ function applySiteLogo(value){
  const src=value||fallback;
  document.querySelectorAll('#siteHeader .header-logo-image,.footer-brand-logo img,.admin-brand-logo img').forEach(img=>{img.src=src;img.style.objectFit='contain';img.style.objectPosition='left center';});
 }
+applySiteLogo(localStorage.getItem('lc_site_logo_url')||'');
 function readLogoFile(file){
  return new Promise((resolve,reject)=>{
   if(!file){reject(new Error('Önce bir logo dosyası seç.'));return}
   if(file.size>20*1024*1024){reject(new Error('Logo dosyası 20 MB sınırını aşıyor.'));return}
   if(file.type==='image/svg+xml'){
+   if(file.size>1200*1024){reject(new Error('SVG logo en fazla 1,2 MB olabilir.'));return}
    const reader=new FileReader();reader.onerror=()=>reject(new Error('SVG dosyası okunamadı.'));
    reader.onload=()=>{const source=String(reader.result||'');if(!/<svg[\s>]/i.test(source)||/<script|foreignObject|javascript:/i.test(source)){reject(new Error('Güvenli ve geçerli bir SVG dosyası seç.'));return}resolve('data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(source))))};reader.readAsText(file);return;
   }

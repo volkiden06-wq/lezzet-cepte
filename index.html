@@ -947,6 +947,210 @@ body{background:#ead9b8;color:#35251d}
  .hero-photo:after{width:36px;height:36px;font-size:20px}
 }
 
+
+
+/* YEMEK TADINDA — mobil yönetim paneli kaydırma ve ekran uyumu */
+@media (max-width: 900px) {
+  html, body {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100% !important;
+    height: auto !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: auto !important;
+  }
+  body {
+    padding-bottom: 0 !important;
+    position: relative !important;
+  }
+  #admin {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    height: auto !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    align-items: stretch !important;
+  }
+  #admin .sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    left: auto !important;
+    right: auto !important;
+    z-index: 120 !important;
+    display: flex !important;
+    flex: 0 0 auto !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 9px 10px !important;
+    gap: 8px !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+  #admin .sidebar .brand {
+    display: flex !important;
+    padding: 2px 5px 6px !important;
+    font-size: 15px !important;
+  }
+  #admin .sidebar .brand-mark {
+    width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+  }
+  #admin .nav {
+    display: flex !important;
+    flex-flow: row nowrap !important;
+    align-items: center !important;
+    gap: 7px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding: 2px 1px 7px !important;
+    margin: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: thin !important;
+    touch-action: pan-x !important;
+  }
+  #admin .nav button {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: max-content !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    padding: 10px 13px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+  }
+  #admin #backSite {
+    display: block !important;
+    align-self: flex-start !important;
+    width: auto !important;
+    max-width: 100% !important;
+    min-height: 38px !important;
+    padding: 8px 12px !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+  }
+  #admin .admin-main {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 16px 12px calc(28px + env(safe-area-inset-bottom)) !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+  #admin .admin-head {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: 16px !important;
+  }
+  #admin .admin-head h1 {
+    font-size: clamp(23px, 6vw, 30px) !important;
+    line-height: 1.15 !important;
+    overflow-wrap: anywhere !important;
+  }
+  #admin #page {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+  #admin #page > *,
+  #admin .panel,
+  #admin .stat,
+  #admin .admin-form {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  #admin .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+  }
+  #admin .stat {
+    padding: 12px !important;
+    overflow-wrap: anywhere !important;
+  }
+  #admin .stat strong {
+    font-size: clamp(18px, 5vw, 25px) !important;
+    overflow-wrap: anywhere !important;
+  }
+  #admin .panel {
+    width: 100% !important;
+    margin-bottom: 12px !important;
+    padding: 14px !important;
+    overflow: visible !important;
+  }
+  #admin .table-wrap,
+  #admin .order-table-wrap {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x pan-y !important;
+  }
+  #admin .table-wrap table {
+    width: max-content !important;
+    min-width: 680px !important;
+    max-width: none !important;
+  }
+  #admin input,
+  #admin select,
+  #admin textarea,
+  #admin button {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  #admin img,
+  #admin video,
+  #admin canvas {
+    max-width: 100% !important;
+  }
+}
+@media (max-width: 520px) {
+  #admin .sidebar { padding: 8px !important; }
+  #admin .sidebar .brand { font-size: 14px !important; }
+  #admin .nav button { padding: 9px 11px !important; font-size: 12px !important; }
+  #admin .admin-main { padding: 13px 10px calc(24px + env(safe-area-inset-bottom)) !important; }
+  #admin .panel { padding: 12px !important; border-radius: 14px !important; }
+  #admin .stats { gap: 8px !important; }
+  #admin .order-filter-row { flex-wrap: nowrap !important; overflow-x: auto !important; padding-bottom: 6px !important; -webkit-overflow-scrolling: touch !important; }
+  #admin .order-filter { flex: 0 0 auto !important; white-space: nowrap !important; }
+  #admin .orders-toolbar { align-items: stretch !important; }
+  #admin .orders-toolbar input,
+  #admin .orders-toolbar select { width: 100% !important; min-width: 0 !important; }
+}
+
 </style><style id="yemektadinda-premium-product-showcases">
 #menu{padding-top:26px!important;padding-bottom:26px!important}
 #menu .section-head{align-items:end;margin-bottom:18px}

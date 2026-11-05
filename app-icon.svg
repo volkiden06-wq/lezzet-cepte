@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#df1824"/><circle cx="256" cy="256" r="174" fill="#fff" opacity=".12"/><text x="256" y="320" text-anchor="middle" font-family="Arial,sans-serif" font-size="190" font-weight="900" fill="#fff">YT</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="92" fill="#111111"/>
+<g fill="none" stroke="#ed101c" stroke-linecap="round" stroke-linejoin="round">
+<path d="M170 220C95 226 58 179 69 125 81 68 143 49 188 72 218 25 284 22 318 62c25 29 22 72-1 94" stroke-width="22"/>
+<path d="M145 230l29 75q17 37 54 16l51-31q43-27 91-29h83" stroke-width="22"/>
+<path d="M151 235l36 47m-20-62l37 45m-21-61l36 44" stroke-width="12"/>
+</g>
+<text x="245" y="245" font-family="Arial,Helvetica,sans-serif" font-size="76" font-weight="900" font-style="italic" fill="#fff">Yemek</text>
+<text x="247" y="330" font-family="Arial,Helvetica,sans-serif" font-size="77" font-weight="900" font-style="italic" fill="#ed101c">Tadında</text>
+<path d="M60 382Q250 350 452 382" fill="none" stroke="#ed101c" stroke-width="12" stroke-linecap="round"/>
+</svg>

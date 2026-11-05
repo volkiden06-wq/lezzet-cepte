@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-labelledby="t">
-<title id="t">Yemek Tadında</title>
-<g fill="none" stroke="#ed101c" stroke-width="17" stroke-linecap="round" stroke-linejoin="round">
-<path d="M175 166c-48 13-96-7-107-45-13-44 19-85 64-87 19-43 78-53 111-19 29 30 23 75-7 94"/>
-<path d="M133 174c-2 30 9 55 33 72"/>
-<path d="M115 224l27 31q14 16 34 4l36-22"/>
-<path d="M118 214l34 26m-19-42l35 25m-17-42l33 22"/>
-<path d="M215 255c125-33 245-33 366-32h566"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 260" role="img" aria-labelledby="title">
+<title id="title">Yemek Tadında</title>
+<g fill="none" stroke="#e31825" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M42 126c-15-34 7-73 48-76 17-38 70-48 101-17 26 25 23 63-2 86" stroke-width="15"/>
+ <path d="M67 139c-1 24 10 43 29 56" stroke-width="13"/>
+ <path d="M55 201l25 22q13 11 29 2l30-17" stroke-width="13"/>
+ <path d="M58 190l31 22m-19-39l32 22m-19-39l32 22" stroke-width="9"/>
+ <path d="M145 225c115-25 220-26 335-26h474" stroke-width="12"/>
 </g>
-<text x="238" y="207" font-family="Arial,Helvetica,sans-serif" font-size="162" font-weight="900" font-style="italic" letter-spacing="-8">
-<tspan fill="#171719">Yemek</tspan><tspan fill="#ed101c">ta</tspan><tspan fill="#171719">dında</tspan>
+<text x="174" y="174" font-family="Arial,Helvetica,sans-serif" font-size="132" font-weight="800" font-style="italic" letter-spacing="-6">
+ <tspan fill="#171719">Yemek</tspan><tspan fill="#e31825">ta</tspan><tspan fill="#171719">dında</tspan>
 </text>
 </svg>

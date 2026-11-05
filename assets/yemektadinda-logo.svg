@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 390" role="img" aria-labelledby="title desc">
-<title id="title">Yemek Tadında</title><desc id="desc">Kırmızı aşçı şapkası ve çatal çizgisiyle YemekTadinda logosu</desc>
-<g fill="none" stroke="#ed101c" stroke-linecap="round" stroke-linejoin="round">
- <path d="M210 240 C145 246 85 214 72 162 C58 108 102 58 161 56 C185 16 244 3 286 30 C321 51 336 91 323 126 C310 155 282 168 254 166" stroke-width="25"/>
- <path d="M160 71 C186 40 228 37 255 57 C278 74 287 101 278 124 C268 148 243 158 220 153" stroke-width="18"/>
- <path d="M179 164 C177 205 192 231 218 248" stroke-width="19"/>
- <path d="M64 268 L105 326 Q130 357 163 337 L232 293 Q286 258 360 252 L1145 252" stroke-width="25"/>
- <path d="M74 255 L115 300 M91 240 L133 285 M109 226 L151 269" stroke-width="13"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-labelledby="t">
+<title id="t">Yemek Tadında</title>
+<g fill="none" stroke="#ed101c" stroke-width="17" stroke-linecap="round" stroke-linejoin="round">
+<path d="M175 166c-48 13-96-7-107-45-13-44 19-85 64-87 19-43 78-53 111-19 29 30 23 75-7 94"/>
+<path d="M133 174c-2 30 9 55 33 72"/>
+<path d="M115 224l27 31q14 16 34 4l36-22"/>
+<path d="M118 214l34 26m-19-42l35 25m-17-42l33 22"/>
+<path d="M215 255c125-33 245-33 366-32h566"/>
 </g>
-<text x="250" y="222" font-family="Arial,Helvetica,sans-serif" font-size="166" font-weight="900" font-style="italic" letter-spacing="-10" fill="#111">Yemek</text>
-<text x="638" y="222" font-family="Arial,Helvetica,sans-serif" font-size="166" font-weight="900" font-style="italic" letter-spacing="-10" fill="#ed101c">ta</text>
-<text x="788" y="222" font-family="Arial,Helvetica,sans-serif" font-size="166" font-weight="900" font-style="italic" letter-spacing="-10" fill="#111">dında</text>
+<text x="238" y="207" font-family="Arial,Helvetica,sans-serif" font-size="162" font-weight="900" font-style="italic" letter-spacing="-8">
+<tspan fill="#171719">Yemek</tspan><tspan fill="#ed101c">ta</tspan><tspan fill="#171719">dında</tspan>
+</text>
 </svg>

@@ -4438,4 +4438,40 @@ body #customer #menu #products>.product img{height:170px!important;object-fit:co
  .mobile-bottom-nav{display:flex!important;position:fixed!important;bottom:0!important;left:0!important;right:0!important;z-index:100!important}
 }
 </style>
+
+<style id="mobile-product-review-dialog-position-fix">
+/* Mobilde yalnızca ürün yorumları penceresini ekranın ortasına al; diğer modallar aynı kalır. */
+@media(max-width:900px){
+ #modalBack.review-on-top{
+  align-items:center!important;
+  justify-content:center!important;
+  padding:calc(12px + env(safe-area-inset-top)) 12px calc(88px + env(safe-area-inset-bottom))!important;
+ }
+ #modalBack.review-on-top>.modal{
+  width:100%!important;
+  max-width:620px!important;
+  max-height:min(76dvh,calc(100dvh - 120px))!important;
+  margin:auto!important;
+  border-radius:20px!important;
+  padding:18px 16px calc(18px + env(safe-area-inset-bottom))!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+ }
+ #modalBack.review-on-top>.modal>.modal-head{
+  position:sticky!important;
+  top:-18px!important;
+  z-index:3!important;
+  padding:4px 0 12px!important;
+  margin:0 0 10px!important;
+  background:#fff!important;
+ }
+ #modalBack.review-on-top .public-review-card{
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+ }
+}
+</style>
+
 </body></html>

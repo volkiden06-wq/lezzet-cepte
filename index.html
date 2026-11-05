@@ -2704,7 +2704,8 @@ function openProductReviewsList(productId){
  // Mobil tarayıcılarda alt sayfa hizalamasını kesin olarak geçersiz kıl.
  const reviewLayer=$('#modalBack');
  const reviewDialog=reviewLayer?.querySelector('.modal');
- if(reviewLayer&&reviewDialog&&window.matchMedia('(max-width: 900px)').matches){
+ const isMobileReviewView=window.matchMedia('(max-width: 900px)').matches||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+ if(reviewLayer&&reviewDialog&&isMobileReviewView){
   reviewLayer.style.setProperty('display','flex','important');
   reviewLayer.style.setProperty('align-items','center','important');
   reviewLayer.style.setProperty('justify-content','center','important');
@@ -2867,7 +2868,16 @@ function renderProducts(){if(!productReviewSummaryLoaded&&!productReviewSummaryL
  host.querySelectorAll('[data-showcase-detail]').forEach(img=>{img.onclick=()=>openProductDetail(img.dataset.showcaseDetail);img.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openProductDetail(img.dataset.showcaseDetail)}}});
  host.querySelectorAll('[data-showcase-customize]').forEach(b=>b.onclick=()=>openProductCustomization(b.dataset.showcaseCustomize));
 }
-function add(id){const p=products.find(x=>String(x.id)===String(id));if(!p)return;const linkedCampaign=(campaigns||[]).find(c=>c&&c.active!==false&&String(c.productId||'')===String(p.id));if(linkedCampaign){openCampaignOrder(linkedCampaign);return}const row=cart.find(x=>String(x.id)===String(p.id)&&!x.campaignId&&!x.customization);if(row)row.qty++;else cart.push({id:p.id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function changeCartLine(index,delta){const row=cart[index];if(!row)return;row.qty=Number(row.qty||1)+delta;if(row.qty<=0)cart.splice(index,1);save();renderCartCount();cartModal();}function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalBack').classList.remove('product-detail-open');$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){$('#modalBack').classList.remove('show','product-detail-open','review-on-top')}function total(){return Number(cart.reduce((sum,row)=>sum+cartLineUnitPrice(row,products.find(p=>String(p.id)===String(row.id)))*Math.max(1,Number(row.qty)||1),0).toFixed(2))}function readPendingLoyaltyUse(){
+function add(id){const p=products.find(x=>String(x.id)===String(id));if(!p)return;const linkedCampaign=(campaigns||[]).find(c=>c&&c.active!==false&&String(c.productId||'')===String(p.id));if(linkedCampaign){openCampaignOrder(linkedCampaign);return}const row=cart.find(x=>String(x.id)===String(p.id)&&!x.campaignId&&!x.customization);if(row)row.qty++;else cart.push({id:p.id,qty:1});save();renderCartCount();toast(p.name+' sepete eklendi')};function changeCartLine(index,delta){const row=cart[index];if(!row)return;row.qty=Number(row.qty||1)+delta;if(row.qty<=0)cart.splice(index,1);save();renderCartCount();cartModal();}function renderCartCount(){const count=cart.reduce((s,x)=>s+x.qty,0);$('#cartCount').textContent=count;const mobile=$('#mobileCartCount');if(mobile)mobile.textContent=count}function openModal(title,body){$('#modalBack').classList.remove('product-detail-open');$('#modalTitle').textContent=title;$('#modalBody').innerHTML=body;$('#modalBack').classList.add('show')}function closeModal(){
+ const layer=$('#modalBack'),dialog=layer?.querySelector('.modal');
+ if(!layer)return;
+ layer.classList.remove('show','product-detail-open','review-on-top');
+ // Değerlendirme penceresine mobil konumlandırma için eklenen inline stilleri de temizle.
+ ['display','align-items','justify-content','padding'].forEach(name=>layer.style.removeProperty(name));
+ if(dialog){
+  ['position','left','top','bottom','transform','margin','width','max-width','max-height','overflow-y','overflow-x','border-radius','-webkit-overflow-scrolling'].forEach(name=>dialog.style.removeProperty(name));
+ }
+}function total(){return Number(cart.reduce((sum,row)=>sum+cartLineUnitPrice(row,products.find(p=>String(p.id)===String(row.id)))*Math.max(1,Number(row.qty)||1),0).toFixed(2))}function readPendingLoyaltyUse(){
  try{
   const value=JSON.parse(sessionStorage.getItem('lc_pending_loyalty_use')||'null');
   if(!value||!/^\d{10,15}$/.test(String(value.phoneDigits||''))||String(value.verificationOrderNumber||'').length<5)return null;
@@ -4502,6 +4512,13 @@ body #customer #menu #products>.product img{height:170px!important;object-fit:co
  #modalBack.review-on-top{display:flex!important;align-items:center!important;justify-content:center!important;padding:12px 12px calc(86px + env(safe-area-inset-bottom))!important}
  #modalBack.review-on-top>.modal{position:fixed!important;left:50%!important;top:46%!important;bottom:auto!important;transform:translate(-50%,-50%)!important;margin:0!important;width:calc(100vw - 24px)!important;max-width:620px!important;max-height:min(70dvh,calc(100dvh - 150px))!important;overflow-x:hidden!important;overflow-y:auto!important;border-radius:20px!important;-webkit-overflow-scrolling:touch!important}
  #modalBack.review-on-top>.modal>.modal-head{position:sticky!important;top:-18px!important;z-index:4!important;background:#fff!important;padding:4px 0 12px!important;margin:0 0 10px!important}
+}
+</style>
+
+<style id="mobile-app-review-layer-fix">
+@media(max-width:1100px){
+ #modalBack.review-on-top{display:flex!important;align-items:center!important;justify-content:center!important}
+ #modalBack.review-on-top>.modal{position:fixed!important;left:50%!important;top:46%!important;bottom:auto!important;transform:translate(-50%,-50%)!important;margin:0!important;width:calc(100vw - 24px)!important;max-width:620px!important;max-height:min(70dvh,calc(100dvh - 150px))!important;overflow-x:hidden!important;overflow-y:auto!important;border-radius:20px!important;-webkit-overflow-scrolling:touch!important}
 }
 </style>
 </body></html>

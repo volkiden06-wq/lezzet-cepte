@@ -28,8 +28,9 @@ jobs:
           const path = require('node:path');
           const { execFileSync } = require('node:child_process');
           const html = fs.readFileSync('index.html', 'utf8');
-          const blocks = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)]
-            .map(match => match[1])
+          const blocks = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+            .filter(match => !/type=["']application\/ld\+json["']/i.test(match[1]))
+            .map(match => match[2])
             .filter(source => source.trim().length > 0);
           if (blocks.length === 0) {
             throw new Error('No inline JavaScript blocks found in index.html');

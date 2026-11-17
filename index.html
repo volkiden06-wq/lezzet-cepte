@@ -4210,7 +4210,7 @@ async function wirePersonnelAdmin(){
   event.preventDefault();const form=event.currentTarget,button=$('#personnelSave');
   const data=new FormData(form),id=String(data.get('personnelId')||'');
   const nationalId=String(data.get('nationalId')||'').trim();
-  if((!id||nationalId)&&!/^\\d{11}$/.test(nationalId)){
+  if((!id||nationalId)&&!/^[0-9]{11}$/.test(nationalId)){
    toast('TC Kimlik No alanına yalnızca 11 rakam yazmalısın. Dış sistem sorgulaması yapılmaz.');return;
   }
   button.disabled=true;button.textContent='KAYDEDİLİYOR…';

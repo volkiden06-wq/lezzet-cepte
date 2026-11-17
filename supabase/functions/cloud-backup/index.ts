@@ -14,6 +14,9 @@ const TABLES = [
   "customer_order_push_links",
   "site_daily_visitors",
   "catalog_sync_events",
+  "personnel",
+  "personnel_months",
+  "personnel_attendance",
 ];
 const ALLOWED_ORIGINS = new Set([
   "https://yemektadinda.com",

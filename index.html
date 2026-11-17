@@ -4002,7 +4002,7 @@ function personnelAdminMarkup(){
   '<label>İşe Başlama Tarihi<input name="startDate" type="date" required></label>'+
   '<label>Görev / Ünvan<input name="jobTitle" required minlength="2" maxlength="120" placeholder="Örn. Aşçı, Garson, Sevkiyat"></label>'+
   '<label>Telefon<input name="phone" type="tel" maxlength="30" autocomplete="tel" placeholder="05xx xxx xx xx"></label>'+
-  '<label>TC Kimlik No<input name="nationalId" inputmode="numeric" autocomplete="off" maxlength="11" pattern="[0-9]{11}" placeholder="11 haneli TC Kimlik No"><small>Yeni kayıtta zorunlu. Düzenlemede boş bırakırsan mevcut numara korunur.</small></label>'+
+  '<label>TC Kimlik No<input name="nationalId" type="text" inputmode="numeric" autocomplete="off" maxlength="11" minlength="11" pattern="[0-9]{11}" placeholder="11 haneli rakam"><small>Yalnızca 11 rakam. SGK, Nüfus Müdürlüğü veya başka bir yerden sorgulama yapılmaz. Düzenlemede boş bırakırsan mevcut numara korunur.</small></label>'+
   '<label class="personnel-active-check"><input name="isActive" type="checkbox" checked> Personel aktif olarak çalışıyor</label>'+
   '<div class="personnel-form-actions"><button class="primary" type="submit" id="personnelSave">KAYDI GÜVENLİ ŞEKİLDE KAYDET</button><button class="small-btn" type="button" id="personnelCancel">VAZGEÇ</button></div></form></section>'+
   '<section class="panel"><div class="personnel-section-head"><div><h3>Personel Listesi</h3><p>TC numarası listede maskeli görünür. Personel silinmez; ayrılanlar pasife alınır.</p></div><div class="personnel-list-tools"><input id="personnelSearch" type="search" placeholder="⌕ Ad, görev veya telefon ara"><button class="small-btn" id="personnelExport">CSV / Excel Dışa Aktar</button><button class="small-btn" id="personnelRefresh">↻ Yenile</button></div></div>'+
@@ -4204,6 +4204,8 @@ async function wirePersonnelAdmin(){
   if(personnelSelectedId){await loadPersonnelMonth(personnelSelectedId,next)}
  };
  $('#personnelYearLoad').onclick=loadPersonnelYearSummary;
+ const tcInput=$('#personnelForm').elements.nationalId;
+ tcInput.addEventListener('input',()=>{tcInput.value=tcInput.value.replace(/[^0-9]/g,'').slice(0,11)});
  $('#personnelForm').onsubmit=async event=>{
   event.preventDefault();const form=event.currentTarget,button=$('#personnelSave');
   const data=new FormData(form),id=String(data.get('personnelId')||'');

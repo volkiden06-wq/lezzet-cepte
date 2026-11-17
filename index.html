@@ -4085,7 +4085,8 @@ function personnelMonthMarkup(){
   const date=year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0');
   const disabled=date<startDate;
   const label=code==='X'?'ÇALIŞTI':code==='I'?'İZİNLİ':code==='Y'?'YILLIK İZİN':'İŞARETLE';
-  cells+='<button type="button" class="personnel-day '+(code?'code-'+code.toLowerCase():'')+(disabled?' is-disabled':'')+'" data-attendance-day="'+day+'" '+(disabled?'disabled':'')+' aria-label="'+day+'. gün '+label+'"><b>'+day+'</b><span>'+(code||'·')+'</span></button>';
+  const visibleCode=code==='I'?'İ':code;
+  cells+='<button type="button" class="personnel-day '+(code?'code-'+code.toLowerCase():'')+(disabled?' is-disabled':'')+'" data-attendance-day="'+day+'" '+(disabled?'disabled':'')+' aria-label="'+day+'. gün '+label+'"><b>'+day+'</b><span>'+(visibleCode||'·')+'</span></button>';
  }
  host.innerHTML='<div class="personnel-selected-banner"><div><b>'+escapeHtml(person.full_name)+'</b><span>'+escapeHtml(person.job_title)+' · Sicil #'+String(person.id).padStart(4,'0')+'</span></div><span class="personnel-month-label">'+new Date(year,month-1,1).toLocaleDateString('tr-TR',{month:'long',year:'numeric'})+'</span></div>'+
   '<div class="personnel-legend"><span><b class="legend-x">X</b> Çalıştı</span><span><b class="legend-i">İ</b> Normal izin</span><span><b class="legend-y">Y</b> Yıllık izin</span><span><b class="legend-empty">·</b> İşaretlenmedi</span></div>'+
@@ -4093,6 +4094,8 @@ function personnelMonthMarkup(){
   '<div class="personnel-attendance-totals"><div><span>ÇALIŞMA</span><b>'+work+' gün</b></div><div><span>NORMAL İZİN</span><b>'+leave+' gün</b></div><div><span>YILLIK İZİN</span><b>'+annual+' gün</b></div><div><span>TOPLAM İZİN</span><b>'+(leave+annual)+' gün</b></div></div>'+
   '<div class="personnel-signatory-row"><label>Puantajı Hazırlayan / İmza<input id="personnelSignatory" maxlength="180" value="'+escapeHtml(personnelMonthData.signatory_name||'')+'" placeholder="Ad Soyad"></label><div class="personnel-attendance-actions"><button type="button" class="small-btn" id="personnelMonthCsv">CSV / Excel</button><button type="button" class="small-btn" id="personnelMonthPrint">Yazdır / PDF</button><button type="button" class="primary" id="personnelMonthSave">PUANTAJI KAYDET</button></div></div>'+
   '<p class="personnel-hire-note">İşe başlama tarihinden önceki günler işaretlenemez. Boş bırakılan günler puantaja dahil edilmez. Değişiklikler Kaydet düğmesine basıldığında sunucuya gönderilir.</p>';
+ const signatory=$('#personnelSignatory');
+ if(signatory)signatory.oninput=()=>{personnelMonthData.signatory_name=signatory.value;personnelMonthDirty=true};
  host.querySelectorAll('[data-attendance-day]').forEach(button=>button.onclick=()=>{
   const day=Number(button.dataset.attendanceDay),current=personnelMonthData.days[day]||'';
   const next={'':'X','X':'I','I':'Y','Y':''}[current];
@@ -4196,8 +4199,9 @@ async function wirePersonnelAdmin(){
   const next=$('#personnelMonth').value;
   if(!next)return;
   if(personnelMonthDirty&&!confirm('Kaydedilmemiş puantaj değişiklikleri kaybolacak. Ayı değiştirmek istiyor musun?')){$('#personnelMonth').value=personnelMonthValue;return}
+  personnelMonthDirty=false;
   personnelMonthValue=next;
-  if(personnelSelectedId){personnelMonthDirty=false;await loadPersonnelMonth(personnelSelectedId,next)}
+  if(personnelSelectedId){await loadPersonnelMonth(personnelSelectedId,next)}
  };
  $('#personnelYearLoad').onclick=loadPersonnelYearSummary;
  $('#personnelForm').onsubmit=async event=>{

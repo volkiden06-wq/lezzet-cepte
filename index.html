@@ -4209,6 +4209,10 @@ async function wirePersonnelAdmin(){
  $('#personnelForm').onsubmit=async event=>{
   event.preventDefault();const form=event.currentTarget,button=$('#personnelSave');
   const data=new FormData(form),id=String(data.get('personnelId')||'');
+  const nationalId=String(data.get('nationalId')||'').trim();
+  if((!id||nationalId)&&!/^\\d{11}$/.test(nationalId)){
+   toast('TC Kimlik No alanına yalnızca 11 rakam yazmalısın. Dış sistem sorgulaması yapılmaz.');return;
+  }
   button.disabled=true;button.textContent='KAYDEDİLİYOR…';
   try{
    const savedId=await personnelRpc('admin_save_personnel',{
@@ -4216,7 +4220,7 @@ async function wirePersonnelAdmin(){
     p_full_name:String(data.get('fullName')||'').trim(),
     p_start_date:String(data.get('startDate')||''),
     p_job_title:String(data.get('jobTitle')||'').trim(),
-    p_national_id:String(data.get('nationalId')||'').trim(),
+    p_national_id:nationalId,
     p_phone:String(data.get('phone')||'').trim(),
     p_is_active:form.elements.isActive.checked
    });

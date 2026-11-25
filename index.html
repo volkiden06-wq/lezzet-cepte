@@ -1290,6 +1290,37 @@ body{background:#ead9b8;color:#35251d}
  #admin .personnel-day{min-height:48px;print-color-adjust:exact;-webkit-print-color-adjust:exact}
 }
 
+
+#admin .personnel-legend .legend-d{background:#fde8e8;color:#b4232d}
+#admin .personnel-day.code-d{background:#fff0f0;border-color:#efb1b1;color:#b4232d}
+#admin .personnel-attendance-totals-five{grid-template-columns:repeat(5,minmax(0,1fr))}
+#admin .personnel-payroll-panel{margin:16px 0;padding:16px;border:1px solid #efe1dc;border-radius:14px;background:linear-gradient(180deg,#fff,#fffbfa)}
+#admin .personnel-payroll-form{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin:10px 0 14px}
+#admin .personnel-payroll-form label,#admin .personnel-advance-form label{display:grid;gap:6px;min-width:170px;flex:1;font-size:11px;font-weight:850;color:#554a46}
+#admin .personnel-payroll-form input,#admin .personnel-advance-form input{width:100%;padding:10px 12px;border:1px solid #e5dcd7;border-radius:9px;background:#fff;color:#282322}
+#admin .personnel-payroll-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}
+#admin .personnel-payroll-cards>div{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:10px;background:#f7f3f1;min-width:0}
+#admin .personnel-payroll-cards span{font-size:9px;font-weight:900;letter-spacing:.04em;color:#807571}
+#admin .personnel-payroll-cards b{font-size:17px;font-variant-numeric:tabular-nums;color:#282322;overflow-wrap:anywhere}
+#admin .personnel-payroll-cards .is-negative{background:#fff0f0}
+#admin .personnel-payroll-cards .is-negative b{color:#b4232d}
+#admin .personnel-payroll-cards .is-positive{background:#eaf7ef}
+#admin .personnel-payroll-cards .is-positive b{color:#176d3d}
+#admin .personnel-advance-entry,#admin .personnel-advance-history{margin-top:18px;padding-top:14px;border-top:1px solid #eee5e1}
+#admin .personnel-advance-entry h4,#admin .personnel-advance-history h4{margin:0 0 10px;font-size:13px;color:#392f2c}
+#admin .personnel-advance-form{display:flex;align-items:end;gap:9px;flex-wrap:wrap}
+#admin .personnel-advance-form .small-btn{white-space:nowrap;min-height:39px}
+#admin .personnel-payroll-hint{margin:12px 0 0;font-size:10px;line-height:1.6;color:#887d78}
+#admin .personnel-payroll-form .primary{min-height:40px;white-space:nowrap}
+#admin .personnel-payroll-panel .table-wrap{max-height:260px;overflow:auto}
+@media(max-width:760px){
+ #admin .personnel-attendance-totals-five{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #admin .personnel-payroll-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #admin .personnel-payroll-form,#admin .personnel-advance-form{display:grid;grid-template-columns:1fr;width:100%}
+ #admin .personnel-payroll-form .primary,#admin .personnel-advance-form .small-btn{width:100%}
+ #admin .personnel-payroll-panel{padding:12px}
+}
+
 </style><style id="yemektadinda-premium-product-showcases">
 #menu{padding-top:26px!important;padding-bottom:26px!important}
 #menu .section-head{align-items:end;margin-bottom:18px}
@@ -3990,7 +4021,14 @@ let personnelSelectedId=null;
 let personnelMonthValue=personnelLocalMonth();
 let personnelMonthData={days:{},signatory_name:''};
 let personnelMonthDirty=false;
+let personnelPayrollData={monthly_salary:0,salary_saved:false,note:'',advances:[]};
+let personnelPayrollDirty=false;
 let personnelYearRows=[];
+let personnelRealtimeClient=null;
+let personnelRealtimeChannel=null;
+let personnelRealtimeDebounce=null;
+let personnelSyncIgnoreUntil=0;
+let personnelVisibilityListenerInstalled=false;
 
 function personnelAdminMarkup(){
  return '<div class="personnel-top-grid">'+
@@ -4007,7 +4045,7 @@ function personnelAdminMarkup(){
   '<div class="personnel-form-actions"><button class="primary" type="submit" id="personnelSave">KAYDI GÜVENLİ ŞEKİLDE KAYDET</button><button class="small-btn" type="button" id="personnelCancel">VAZGEÇ</button></div></form></section>'+
   '<section class="panel"><div class="personnel-section-head"><div><h3>Personel Listesi</h3><p>TC numarası listede maskeli görünür. Personel silinmez; ayrılanlar pasife alınır.</p></div><div class="personnel-list-tools"><input id="personnelSearch" type="search" placeholder="⌕ Ad, görev veya telefon ara"><button class="small-btn" id="personnelExport">CSV / Excel Dışa Aktar</button><button class="small-btn" id="personnelRefresh">↻ Yenile</button></div></div>'+
   '<div class="table-wrap"><table class="personnel-table"><thead><tr><th>SİCİL</th><th>AD SOYAD</th><th>GÖREV</th><th>İŞE BAŞLAMA</th><th>TC KİMLİK</th><th>TELEFON</th><th>DURUM</th><th>İŞLEM</th></tr></thead><tbody id="personnelRows"><tr><td colspan="8">Personel kayıtları yükleniyor…</td></tr></tbody></table></div></section>'+
-  '<section class="panel personnel-attendance-panel"><div class="personnel-section-head"><div><h3>📅 Aylık Puantaj Çizelgesi</h3><p>Gün kutusuna tıklayarak işareti sırayla boş → X → İ → Y olarak değiştir.</p></div><div class="personnel-month-pickers"><label>Ay<input type="month" id="personnelMonth" value="'+personnelMonthValue+'"></label></div></div>'+
+  '<section class="panel personnel-attendance-panel"><div class="personnel-section-head"><div><h3>📅 Aylık Puantaj Çizelgesi</h3><p>Güne dokunarak durumu boş → çalıştı → izinli → yıllık izin → devamsız olarak değiştir.</p></div><div class="personnel-month-pickers"><label>Ay<input type="month" id="personnelMonth" value="'+personnelMonthValue+'"></label></div></div>'+
   '<div id="personnelAttendanceHost"><div class="notice">Puantaj girmek için personel listesinden bir çalışan seçip “Puantaj” düğmesine bas.</div></div></section>'+
   '<section class="panel personnel-year-panel"><div class="personnel-section-head"><div><h3>📊 Yıllık Puantaj Özeti</h3><p>Seçilen personelin 12 aylık çalışma ve izin toplamları.</p></div><div class="personnel-month-pickers"><label>Yıl<input type="number" min="2000" max="2200" id="personnelYear" value="'+new Date().getFullYear()+'"></label><button type="button" class="small-btn" id="personnelYearLoad">ÖZETİ GÖSTER</button></div></div><div id="personnelYearHost" class="notice">Yıllık özeti görmek için önce personel listesinden bir çalışan seç.</div></section>'+
   '<div class="notice personnel-privacy-note">Gizlilik: Personel bilgileri yalnızca yönetici oturumunda kullanılabilir. TC kimlik numarası sunucuda şifreli tutulur; tabloların doğrudan REST erişimi kapalıdır. Personel kayıtları müşteri ekranında gösterilmez.</div>';
@@ -4065,6 +4103,105 @@ async function loadPersonnelRows(){
   throw error;
  }
 }
+
+function personnelMoney(value){return '₺'+(Number(value)||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function personnelPayrollSummary(days){
+ const salary=Math.max(0,Number(personnelPayrollData.monthly_salary)||0),absent=Object.values(days||{}).filter(code=>code==='D').length;
+ const daily=salary/30,deduction=Math.round(daily*absent*100)/100,earned=Math.max(0,Math.round((salary-deduction)*100)/100);
+ const advances=(personnelPayrollData.advances||[]).filter(a=>!a.voided_at).reduce((sum,a)=>sum+(Number(a.amount)||0),0);
+ return {salary,daily,absent,deduction,earned,advances,balance:Math.round((earned-advances)*100)/100};
+}
+function personnelPayrollTotalsMarkup(pay){
+ const state=pay.balance<0?'is-negative':'is-positive';
+ return '<div><span>AYLIK MAAŞ</span><b>'+personnelMoney(pay.salary)+'</b></div><div><span>GÜNLÜK ÜCRET</span><b>'+personnelMoney(pay.daily)+'</b></div><div><span>DEVAMSIZLIK KESİNTİSİ ('+pay.absent+' GÜN)</span><b>'+personnelMoney(pay.deduction)+'</b></div><div><span>HAKEDİŞ</span><b>'+personnelMoney(pay.earned)+'</b></div><div><span>TOPLAM AVANS</span><b>'+personnelMoney(pay.advances)+'</b></div><div class="'+state+'"><span>ÖDENECEK BAKİYE</span><b>'+personnelMoney(pay.balance)+'</b></div>';
+}
+function personnelPayrollMarkup(person){
+ const pay=personnelPayrollSummary(personnelMonthData.days||{}),monthEnd=new Date(Number(personnelMonthValue.slice(0,4)),Number(personnelMonthValue.slice(5,7)),0).getDate();
+ const inherited=personnelPayrollData.salary_inherited&&!personnelPayrollData.salary_saved;
+ const advances=(personnelPayrollData.advances||[]).map(a=>{
+  const voided=!!a.voided_at;
+  return '<tr><td>'+personnelFormatDate(a.advance_date)+'</td><td><b>'+personnelMoney(a.amount)+'</b></td><td>'+escapeHtml(a.description||'—')+'</td><td><span class="personnel-state '+(voided?'is-passive':'is-active')+'">'+(voided?'İPTAL':'GEÇERLİ')+'</span></td><td>'+(voided?'—':'<button type="button" class="small-btn danger" data-advance-void="'+a.id+'">İptal et</button>')+'</td></tr>';
+ }).join('');
+ return '<section class="personnel-payroll-panel"><div class="personnel-section-head"><div><h3>💰 Maaş, Avans ve Hakediş</h3><p>Günlük ücret 30 gün üzerinden hesaplanır. Yalnızca DEVAMSIZ işaretli günler kesilir.</p></div><span class="personnel-month-label">'+escapeHtml(personnelMonthValue)+'</span></div>'+
+ '<div class="personnel-payroll-form"><label>Aylık maaş (TL)<input id="personnelMonthlySalary" type="number" min="0" max="9999999999" step="0.01" inputmode="decimal" value="'+pay.salary.toFixed(2)+'" placeholder="Örn. 45000"></label><button type="button" class="primary" id="personnelSalarySave">MAAŞI KAYDET</button></div>'+
+ (inherited?'<p class="personnel-payroll-hint">Önceki ayın maaşı bu ay için öneri olarak getirildi. Bu aya özel kaydetmek için MAAŞI KAYDET düğmesine bas.</p>':'')+
+ '<div class="personnel-payroll-cards" id="personnelPayrollTotals">'+personnelPayrollTotalsMarkup(pay)+'</div>'+
+ '<div class="personnel-advance-entry"><h4>＋ Avans kaydı ekle</h4><div class="personnel-advance-form"><label>Tarih<input id="personnelAdvanceDate" type="date" min="'+personnelMonthValue+'-01" max="'+personnelMonthValue+'-'+String(monthEnd).padStart(2,'0')+'" value="'+personnelMonthValue+'-01"></label><label>Avans tutarı (TL)<input id="personnelAdvanceAmount" type="number" min="0.01" max="9999999999" step="0.01" inputmode="decimal" placeholder="Örn. 10000"></label><label>Açıklama (isteğe bağlı)<input id="personnelAdvanceDescription" maxlength="300" placeholder="Örn. Maaş avansı"></label><button type="button" class="small-btn" id="personnelAdvanceAdd">AVANSI KAYDET</button></div></div>'+
+ '<div class="personnel-advance-history"><h4>Avans hareketleri</h4><div class="table-wrap"><table class="personnel-year-table"><thead><tr><th>TARİH</th><th>TUTAR</th><th>AÇIKLAMA</th><th>DURUM</th><th>İŞLEM</th></tr></thead><tbody>'+(advances||'<tr><td colspan="5" class="personnel-empty">Bu ay için avans kaydı yok.</td></tr>')+'</tbody></table></div></div>'+
+ '<p class="personnel-payroll-hint">Hesap: Aylık maaş − (aylık maaş ÷ 30 × devamsız gün) = hakediş. Hakediş − geçerli avanslar = ödenecek bakiye. İzin ve yıllık izin günleri maaştan düşülmez. Boş günler otomatik devamsız sayılmaz.</p></section>';
+}
+function personnelRefreshPayrollTotals(){const target=$('#personnelPayrollTotals');if(target)target.innerHTML=personnelPayrollTotalsMarkup(personnelPayrollSummary(personnelMonthData.days||{}));}
+async function savePersonnelSalary(){
+ if(!personnelSelectedId)return;
+ const input=$('#personnelMonthlySalary'),button=$('#personnelSalarySave'),amount=Number(input?.value);
+ if(!Number.isFinite(amount)||amount<0){toast('Geçerli bir aylık maaş girin.');input?.focus();return;}
+ button.disabled=true;button.textContent='KAYDEDİLİYOR…';
+ try{
+  personnelSyncIgnoreUntil=Date.now()+1400;
+  const result=await personnelRpc('admin_save_personnel_payroll_month',{p_personnel_id:personnelSelectedId,p_month:personnelMonthValue+'-01',p_monthly_salary:amount,p_note:String(personnelPayrollData.note||'')});
+  personnelPayrollData.monthly_salary=Number(result.monthly_salary)||0;personnelPayrollData.salary_saved=true;personnelPayrollData.salary_inherited=false;personnelPayrollDirty=false;
+  personnelMonthMarkup();toast('Aylık maaş '+personnelMoney(amount)+' olarak kaydedildi.');
+ }catch(error){toast(error.message||'Maaş kaydedilemedi.')}
+ finally{const b=$('#personnelSalarySave');if(b){b.disabled=false;b.textContent='MAAŞI KAYDET'}}
+}
+async function addPersonnelAdvance(){
+ if(!personnelSelectedId)return;
+ if(personnelPayrollDirty){toast('Önce aylık maaşı kaydet. Ardından avans ekleyebilirsin.');return;}
+ const date=String($('#personnelAdvanceDate')?.value||''),amount=Number($('#personnelAdvanceAmount')?.value),description=String($('#personnelAdvanceDescription')?.value||'').trim(),first=personnelMonthValue+'-01';
+ const last=first.slice(0,8)+String(new Date(Number(first.slice(0,4)),Number(first.slice(5,7)),0).getDate()).padStart(2,'0');
+ if(!date||date<first||date>last){toast('Avans tarihi seçili ayın içinde olmalı.');return;}
+ if(!Number.isFinite(amount)||amount<=0){toast('Sıfırdan büyük geçerli bir avans tutarı girin.');return;}
+ const button=$('#personnelAdvanceAdd');button.disabled=true;button.textContent='KAYDEDİLİYOR…';
+ try{
+  personnelSyncIgnoreUntil=Date.now()+1400;
+  await personnelRpc('admin_add_personnel_advance',{p_personnel_id:personnelSelectedId,p_advance_date:date,p_amount:amount,p_description:description});
+  const fresh=await personnelRpc('admin_get_personnel_payroll_month',{p_personnel_id:personnelSelectedId,p_month:first});
+  personnelPayrollData.advances=Array.isArray(fresh?.advances)?fresh.advances:[];
+  $('#personnelAdvanceAmount').value='';$('#personnelAdvanceDescription').value='';personnelMonthMarkup();toast('Avans kaydı eklendi ve hakedişten düşüldü.');
+ }catch(error){toast(error.message||'Avans kaydedilemedi.')}
+ finally{const b=$('#personnelAdvanceAdd');if(b){b.disabled=false;b.textContent='AVANSI KAYDET'}}
+}
+async function voidPersonnelAdvance(id){
+ const advance=(personnelPayrollData.advances||[]).find(a=>Number(a.id)===Number(id));
+ if(!advance||advance.voided_at)return;
+ if(!confirm(personnelMoney(advance.amount)+' tutarındaki avans iptal edilsin mi? Kayıt silinmez; iptal hareketi geçmişte kalır.'))return;
+ try{
+  personnelSyncIgnoreUntil=Date.now()+1400;
+  await personnelRpc('admin_void_personnel_advance',{p_advance_id:Number(id),p_reason:'Yönetici tarafından iptal edildi'});
+  const fresh=await personnelRpc('admin_get_personnel_payroll_month',{p_personnel_id:personnelSelectedId,p_month:personnelMonthValue+'-01'});
+  personnelPayrollData.advances=Array.isArray(fresh?.advances)?fresh.advances:[];personnelMonthMarkup();toast('Avans iptal edildi. Kayıt geçmişte korundu.');
+ }catch(error){toast(error.message||'Avans iptal edilemedi.')}
+}
+async function startPersonnelRealtime(){
+ if(!supabaseAccessToken||!window.supabase||typeof window.supabase.createClient!=='function')return false;
+ if(!personnelVisibilityListenerInstalled){
+  document.addEventListener('visibilitychange',()=>{
+   if(document.hidden||adminPage!=='personnel'||personnelMonthDirty||personnelPayrollDirty)return;
+   if(personnelRealtimeDebounce)clearTimeout(personnelRealtimeDebounce);
+   personnelRealtimeDebounce=setTimeout(async()=>{
+    personnelRealtimeDebounce=null;
+    await loadPersonnelRows().catch(()=>{});
+    if(personnelSelectedId)await loadPersonnelMonth(personnelSelectedId,personnelMonthValue);
+   },200);
+  });
+  personnelVisibilityListenerInstalled=true;
+ }
+ try{
+  if(!personnelRealtimeClient)personnelRealtimeClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},realtime:{params:{eventsPerSecond:4}}});
+  await personnelRealtimeClient.realtime.setAuth(supabaseAccessToken);
+  if(personnelRealtimeChannel){try{personnelRealtimeClient.removeChannel(personnelRealtimeChannel).catch(()=>{})}catch(e){}}
+  const channel=personnelRealtimeClient.channel('yemek-tadinda-personnel-sync')
+   .on('postgres_changes',{event:'UPDATE',schema:'public',table:'personnel_sync_events',filter:'id=eq.1'},()=>{
+    if(Date.now()<personnelSyncIgnoreUntil||adminPage!=='personnel'||document.hidden)return;
+    if(personnelMonthDirty||personnelPayrollDirty){toast('Diğer cihazda personel bilgisi değişti. Kaydedilmemiş düzenlemen korunuyor; kaydettikten sonra yenile.');return;}
+    if(personnelRealtimeDebounce)clearTimeout(personnelRealtimeDebounce);
+    personnelRealtimeDebounce=setTimeout(async()=>{personnelRealtimeDebounce=null;await loadPersonnelRows().catch(()=>{});if(personnelSelectedId)await loadPersonnelMonth(personnelSelectedId,personnelMonthValue);},450);
+   });
+  personnelRealtimeChannel=channel;channel.subscribe(status=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')console.warn('Personel canlı eşitleme bağlantısı kurulamadı:',status)});
+  return true;
+ }catch(error){console.warn('Personel canlı eşitleme başlatılamadı:',error);return false;}
+}
+
 function personnelMonthMarkup(){
  const host=$('#personnelAttendanceHost');if(!host)return;
  const person=personnelRows.find(p=>Number(p.id)===Number(personnelSelectedId));
@@ -4077,6 +4214,7 @@ function personnelMonthMarkup(){
  const work=Object.values(dayCodes).filter(v=>v==='X').length;
  const leave=Object.values(dayCodes).filter(v=>v==='I').length;
  const annual=Object.values(dayCodes).filter(v=>v==='Y').length;
+ const absent=Object.values(dayCodes).filter(v=>v==='D').length;
  const weekdays=['PZT','SAL','ÇAR','PER','CUM','CMT','PAZ'];
  let cells=weekdays.map(d=>'<div class="personnel-day-name">'+d+'</div>').join('');
  for(let i=0;i<mondayOffset;i++)cells+='<div class="personnel-day-blank"></div>';
@@ -4084,21 +4222,27 @@ function personnelMonthMarkup(){
   const code=dayCodes[day]||'';
   const date=year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0');
   const disabled=date<startDate;
-  const label=code==='X'?'ÇALIŞTI':code==='I'?'İZİNLİ':code==='Y'?'YILLIK İZİN':'İŞARETLE';
+  const label=code==='X'?'ÇALIŞTI':code==='I'?'İZİNLİ':code==='Y'?'YILLIK İZİN':code==='D'?'DEVAMSIZ':'İŞARETLE';
   const visibleCode=code==='I'?'İ':code;
   cells+='<button type="button" class="personnel-day '+(code?'code-'+code.toLowerCase():'')+(disabled?' is-disabled':'')+'" data-attendance-day="'+day+'" '+(disabled?'disabled':'')+' aria-label="'+day+'. gün '+label+'"><b>'+day+'</b><span>'+(visibleCode||'·')+'</span></button>';
  }
  host.innerHTML='<div class="personnel-selected-banner"><div><b>'+escapeHtml(person.full_name)+'</b><span>'+escapeHtml(person.job_title)+' · Sicil #'+String(person.id).padStart(4,'0')+'</span></div><span class="personnel-month-label">'+new Date(year,month-1,1).toLocaleDateString('tr-TR',{month:'long',year:'numeric'})+'</span></div>'+
-  '<div class="personnel-legend"><span><b class="legend-x">X</b> Çalıştı</span><span><b class="legend-i">İ</b> Normal izin</span><span><b class="legend-y">Y</b> Yıllık izin</span><span><b class="legend-empty">·</b> İşaretlenmedi</span></div>'+
+  '<div class="personnel-legend"><span><b class="legend-x">X</b> Çalıştı</span><span><b class="legend-i">İ</b> İzinli</span><span><b class="legend-y">Y</b> Yıllık izin</span><span><b class="legend-d">D</b> Devamsız</span><span><b class="legend-empty">·</b> İşaretlenmedi</span></div>'+
   '<div class="personnel-days-grid">'+cells+'</div>'+
-  '<div class="personnel-attendance-totals"><div><span>ÇALIŞMA</span><b>'+work+' gün</b></div><div><span>NORMAL İZİN</span><b>'+leave+' gün</b></div><div><span>YILLIK İZİN</span><b>'+annual+' gün</b></div><div><span>TOPLAM İZİN</span><b>'+(leave+annual)+' gün</b></div></div>'+
+  '<div class="personnel-attendance-totals personnel-attendance-totals-five"><div><span>ÇALIŞTI</span><b>'+work+' gün</b></div><div><span>İZİNLİ</span><b>'+leave+' gün</b></div><div><span>YILLIK İZİN</span><b>'+annual+' gün</b></div><div><span>DEVAMSIZ</span><b>'+absent+' gün</b></div><div><span>TOPLAM İZİN</span><b>'+(leave+annual)+' gün</b></div></div>'+
+  personnelPayrollMarkup(person,work,leave,annual,absent)+
   '<div class="personnel-signatory-row"><label>Puantajı Hazırlayan / İmza<input id="personnelSignatory" maxlength="180" value="'+escapeHtml(personnelMonthData.signatory_name||'')+'" placeholder="Ad Soyad"></label><div class="personnel-attendance-actions"><button type="button" class="small-btn" id="personnelMonthCsv">CSV / Excel</button><button type="button" class="small-btn" id="personnelMonthPrint">Yazdır / PDF</button><button type="button" class="primary" id="personnelMonthSave">PUANTAJI KAYDET</button></div></div>'+
   '<p class="personnel-hire-note">İşe başlama tarihinden önceki günler işaretlenemez. Boş bırakılan günler puantaja dahil edilmez. Değişiklikler Kaydet düğmesine basıldığında sunucuya gönderilir.</p>';
  const signatory=$('#personnelSignatory');
  if(signatory)signatory.oninput=()=>{personnelMonthData.signatory_name=signatory.value;personnelMonthDirty=true};
+ const salaryInput=$('#personnelMonthlySalary');
+ if(salaryInput)salaryInput.oninput=()=>{const value=Number(salaryInput.value);personnelPayrollData.monthly_salary=Number.isFinite(value)&&value>=0?value:0;personnelPayrollDirty=true;personnelRefreshPayrollTotals();};
+ $('#personnelSalarySave')?.addEventListener('click',savePersonnelSalary);
+ $('#personnelAdvanceAdd')?.addEventListener('click',addPersonnelAdvance);
+ host.querySelectorAll('[data-advance-void]').forEach(button=>button.onclick=()=>voidPersonnelAdvance(button.dataset.advanceVoid));
  host.querySelectorAll('[data-attendance-day]').forEach(button=>button.onclick=()=>{
   const day=Number(button.dataset.attendanceDay),current=personnelMonthData.days[day]||'';
-  const next={'':'X','X':'I','I':'Y','Y':''}[current];
+  const next={'':'X','X':'I','I':'Y','Y':'D','D':''}[current];
   if(next)personnelMonthData.days[day]=next;else delete personnelMonthData.days[day];
   personnelMonthDirty=true;personnelMonthMarkup();
  });
@@ -4109,18 +4253,25 @@ function personnelMonthMarkup(){
 async function loadPersonnelMonth(personnelId,monthValue){
  const person=personnelRows.find(p=>Number(p.id)===Number(personnelId));
  if(!person)return;
- if(personnelMonthDirty&&!confirm('Kaydedilmemiş puantaj değişiklikleri var. Devam edersen bu değişiklikler kaybolacak. Devam edilsin mi?'))return false;
+ if((personnelMonthDirty||personnelPayrollDirty)&&!confirm('Kaydedilmemiş puantaj veya maaş değişikliği var. Devam edersen bu değişiklikler kaybolacak. Devam edilsin mi?'))return false;
+ personnelMonthDirty=false;personnelPayrollDirty=false;
  personnelSelectedId=Number(personnelId);personnelMonthValue=monthValue||personnelMonthValue;
  const input=$('#personnelMonth');if(input)input.value=personnelMonthValue;
- const host=$('#personnelAttendanceHost');if(host)host.innerHTML='<div class="notice">Puantaj verileri yükleniyor…</div>';
+ const host=$('#personnelAttendanceHost');if(host)host.innerHTML='<div class="notice">Puantaj ve bordro verileri yükleniyor…</div>';
  try{
-  const result=await personnelRpc('admin_get_personnel_month',{p_personnel_id:personnelSelectedId,p_month:personnelMonthValue+'-01'});
+  const [result,payroll]=await Promise.all([
+   personnelRpc('admin_get_personnel_month',{p_personnel_id:personnelSelectedId,p_month:personnelMonthValue+'-01'}),
+   personnelRpc('admin_get_personnel_payroll_month',{p_personnel_id:personnelSelectedId,p_month:personnelMonthValue+'-01'})
+  ]);
   const days={};(result.days||[]).forEach(item=>days[Number(item.day)]=item.code);
   personnelMonthData={days:days,signatory_name:result.signatory_name||''};
-  personnelMonthDirty=false;personnelMonthMarkup();
+  personnelPayrollData={monthly_salary:Number(payroll?.monthly_salary)||0,salary_saved:!!payroll?.salary_saved,
+   salary_inherited:!!payroll?.salary_inherited,note:payroll?.note||'',
+   advances:Array.isArray(payroll?.advances)?payroll.advances:[]};
+  personnelMonthDirty=false;personnelPayrollDirty=false;personnelMonthMarkup();
   return true;
  }catch(error){
-  if(host)host.innerHTML='<div class="notice">Puantaj yüklenemedi: '+escapeHtml(error.message||'Bilinmeyen hata')+'</div>';
+  if(host)host.innerHTML='<div class="notice">Puantaj / bordro yüklenemedi: '+escapeHtml(error.message||'Bilinmeyen hata')+'</div>';
   return false;
  }
 }
@@ -4129,22 +4280,28 @@ async function savePersonnelMonth(){
  const button=$('#personnelMonthSave');if(button){button.disabled=true;button.textContent='KAYDEDİLİYOR…'}
  try{
   const days=Object.keys(personnelMonthData.days||{}).map(day=>({day:Number(day),code:personnelMonthData.days[day]})).sort((a,b)=>a.day-b.day);
+  personnelSyncIgnoreUntil=Date.now()+1400;
   const result=await personnelRpc('admin_save_personnel_month',{
    p_personnel_id:personnelSelectedId,p_month:personnelMonthValue+'-01',
    p_days:days,p_signatory_name:String($('#personnelSignatory')?.value||'').trim()
   });
   personnelMonthData.signatory_name=String($('#personnelSignatory')?.value||'').trim();
   personnelMonthDirty=false;personnelMonthMarkup();
-  toast('Puantaj kaydedildi. Çalışma: '+Number(result.work_days||0)+' · Normal izin: '+Number(result.leave_days||0)+' · Yıllık izin: '+Number(result.annual_leave_days||0));
+  toast('Puantaj kaydedildi. Çalıştı: '+Number(result.work_days||0)+' · İzinli: '+Number(result.leave_days||0)+' · Yıllık izin: '+Number(result.annual_leave_days||0)+' · Devamsız: '+Number(result.absent_days||0));
  }catch(error){toast(error.message||'Puantaj kaydedilemedi.')}
  finally{const current=$('#personnelMonthSave');if(current){current.disabled=false;current.textContent='PUANTAJI KAYDET'}}
 }
 function exportPersonnelMonth(){
  const person=personnelRows.find(p=>Number(p.id)===Number(personnelSelectedId));if(!person)return;
  const year=Number(personnelMonthValue.slice(0,4)),month=Number(personnelMonthValue.slice(5,7)),count=new Date(year,month,0).getDate();
+ const pay=personnelPayrollSummary(personnelMonthData.days||{});
  const rows=[['Sicil','Ad Soyad','Görev','Ay','Gün','Puantaj']];
  for(let day=1;day<=count;day++)rows.push([person.id,person.full_name,person.job_title,personnelMonthValue,day,personnelMonthData.days[day]||'']);
- personnelDownloadCsv('personel-puantaj-'+person.id+'-'+personnelMonthValue+'.csv',rows);
+ rows.push([]);
+ rows.push(['AYLIK MAAŞ',pay.salary],['GÜNLÜK ÜCRET (30 GÜN)',pay.daily],['DEVAMSIZLIK GÜNÜ',pay.absent],['DEVAMSIZLIK KESİNTİSİ',pay.deduction],['HAKEDİŞ',pay.earned],['TOPLAM AVANS',pay.advances],['ÖDENECEK BAKİYE',pay.balance]);
+ rows.push([],['AVANS TARİHİ','TUTAR','AÇIKLAMA','DURUM']);
+ (personnelPayrollData.advances||[]).forEach(a=>rows.push([a.advance_date,a.amount,a.description,a.voided_at?'İPTAL':'GEÇERLİ']));
+ personnelDownloadCsv('personel-bordro-puantaj-'+person.id+'-'+personnelMonthValue+'.csv',rows);
 }
 async function loadPersonnelYearSummary(){
  const host=$('#personnelYearHost');if(!host)return;
@@ -4157,14 +4314,14 @@ async function loadPersonnelYearSummary(){
   personnelYearRows=Array.isArray(rows)?rows:[];
   const months=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
   const totals=personnelYearRows.reduce((a,r)=>({work:a.work+Number(r.work_days||0),leave:a.leave+Number(r.leave_days||0),annual:a.annual+Number(r.annual_leave_days||0)}),{work:0,leave:0,annual:0});
-  host.innerHTML='<div class="table-wrap"><table class="personnel-year-table"><thead><tr><th>AY</th><th>ÇALIŞMA</th><th>NORMAL İZİN</th><th>YILLIK İZİN</th><th>PUANTAJI HAZIRLAYAN</th></tr></thead><tbody>'+
-   personnelYearRows.map(r=>'<tr><td>'+months[Number(r.month)-1]+'</td><td>'+Number(r.work_days||0)+'</td><td>'+Number(r.leave_days||0)+'</td><td>'+Number(r.annual_leave_days||0)+'</td><td>'+escapeHtml(r.signatory_name||'—')+'</td></tr>').join('')+
-   '<tr class="personnel-year-total"><th>TOPLAM</th><th>'+totals.work+'</th><th>'+totals.leave+'</th><th>'+totals.annual+'</th><th></th></tr></tbody></table></div>'+
+  host.innerHTML='<div class="table-wrap"><table class="personnel-year-table"><thead><tr><th>AY</th><th>ÇALIŞMA</th><th>NORMAL İZİN</th><th>YILLIK İZİN</th><th>DEVAMSIZ</th><th>PUANTAJI HAZIRLAYAN</th></tr></thead><tbody>'+
+   personnelYearRows.map(r=>'<tr><td>'+months[Number(r.month)-1]+'</td><td>'+Number(r.work_days||0)+'</td><td>'+Number(r.leave_days||0)+'</td><td>'+Number(r.annual_leave_days||0)+'</td><td>'+Number(r.absent_days||0)+'</td><td>'+escapeHtml(r.signatory_name||'—')+'</td></tr>').join('')+
+   '<tr class="personnel-year-total"><th>TOPLAM</th><th>'+totals.work+'</th><th>'+totals.leave+'</th><th>'+totals.annual+'</th><th>'+personnelYearRows.reduce((sum,r)=>sum+Number(r.absent_days||0),0)+'</th><th></th></tr></tbody></table></div>'+
    '<button type="button" class="small-btn" id="personnelYearCsv">YILLIK ÖZETİ CSV / EXCEL İNDİR</button>';
   $('#personnelYearCsv').onclick=()=>{
-   const rows=[['Yıl','Ay','Çalışma Günü','Normal İzin','Yıllık İzin','Puantajı Hazırlayan']];
-   personnelYearRows.forEach(r=>rows.push([year,months[Number(r.month)-1],r.work_days,r.leave_days,r.annual_leave_days,r.signatory_name]));
-   rows.push([year,'TOPLAM',totals.work,totals.leave,totals.annual,'']);
+   const rows=[['Yıl','Ay','Çalışma Günü','Normal İzin','Yıllık İzin','Devamsız','Puantajı Hazırlayan']];
+   personnelYearRows.forEach(r=>rows.push([year,months[Number(r.month)-1],r.work_days,r.leave_days,r.annual_leave_days,r.absent_days||0,r.signatory_name]));
+   rows.push([year,'TOPLAM',totals.work,totals.leave,totals.annual,personnelYearRows.reduce((sum,r)=>sum+Number(r.absent_days||0),0),'']);
    personnelDownloadCsv('personel-yillik-ozet-'+personnelSelectedId+'-'+year+'.csv',rows);
   };
  }catch(error){host.innerHTML='<div class="notice">Yıllık özet yüklenemedi: '+escapeHtml(error.message||'Bilinmeyen hata')+'</div>'}
@@ -4198,8 +4355,8 @@ async function wirePersonnelAdmin(){
  $('#personnelMonth').onchange=async()=>{
   const next=$('#personnelMonth').value;
   if(!next)return;
-  if(personnelMonthDirty&&!confirm('Kaydedilmemiş puantaj değişiklikleri kaybolacak. Ayı değiştirmek istiyor musun?')){$('#personnelMonth').value=personnelMonthValue;return}
-  personnelMonthDirty=false;
+  if((personnelMonthDirty||personnelPayrollDirty)&&!confirm('Kaydedilmemiş puantaj veya maaş değişikliği kaybolacak. Ayı değiştirmek istiyor musun?')){$('#personnelMonth').value=personnelMonthValue;return}
+  personnelMonthDirty=false;personnelPayrollDirty=false;
   personnelMonthValue=next;
   if(personnelSelectedId){await loadPersonnelMonth(personnelSelectedId,next)}
  };
@@ -4253,6 +4410,7 @@ async function wirePersonnelAdmin(){
  };
  await loadPersonnelRows().catch(error=>toast(error.message||'Personel listesi yüklenemedi'));
  if(personnelSelectedId)await loadPersonnelMonth(personnelSelectedId,personnelMonthValue);
+ startPersonnelRealtime();
 }
 
 function renderAdmin(){ $('#pageTitle').textContent=titles[adminPage];$('#adminDate').textContent=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});$('#nav').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.page===adminPage));const revenue=orders.filter(o=>o.status!=='İptal').reduce((s,o)=>s+o.total,0);const stat=(label,val)=>`<div class="stat"><span>${label}</span><strong>${val}</strong></div>`;let html='';if(adminPage==='overview'){const statusCount=name=>orders.filter(o=>orderStatus(o)===name).length;const pendingCount=orders.filter(o=>['Yeni','Bekliyor'].includes(orderStatus(o))).length;html=`<div class="stats overview-stats">${stat('Toplam sipariş',orders.length)}${stat('Sipariş toplamı',money(revenue))}${stat('Aktif ürün',products.filter(p=>p.active).length)}${stat('Müşteri kaydı',customers.length)}${stat('Bekleyen sipariş',pendingCount)}${stat('Hazırlanıyor',statusCount('Hazırlanıyor'))}${stat('Teslim edildi',statusCount('Teslim edildi'))}${stat('İptal edilen',statusCount('İptal'))}</div><section class="panel visitor-panel"><div class="visitor-panel-head"><div><h3>Web sitesi ziyaretçileri</h3><p>Günlük tekil ziyaretçi istatistikleri</p></div><button class="small-btn" id="refreshVisitorStats" type="button">↻ Yenile</button></div><div id="visitorStatsContent"><p class="visitor-loading">Ziyaretçi verileri yükleniyor…</p></div></section><div class="panel"><h3>Son siparişler</h3>${orders.length?ordersTable(orders):'<p>Henüz sipariş yok. Müşteri tarafındaki siparişler demo olarak burada görünür.</p>'}</div><div class="notice">Siparişler Supabase veritabanından yüklenir. Durum değişiklikleri anında kaydedilir.</div>`}else if(adminPage==='orders'){html=`<section class="order-dashboard"><div class="order-summary-grid" id="orderCounts"></div><div class="order-control-row"><input id="orderDateFilter" type="date" aria-label="Sipariş tarihi"><div class="order-filter-group"><button class="order-filter active" data-order-filter="Aktifler">Aktifler</button><button class="order-filter" data-order-filter="Bekliyor">⏳ Bekliyor</button><button class="order-filter" data-order-filter="Hazırlanıyor">👨‍🍳 Hazırlanıyor</button><button class="order-filter" data-order-filter="Teslim edildi">✅ Teslim</button><button class="order-filter" data-order-filter="İptal">❌ İptal</button><button class="order-filter" data-order-filter="Kapalı">🔒 Kapalı</button><button class="order-filter" data-order-filter="Tümü">🧾 Tümü</button><button class="small-btn" id="refreshOrders">↻ Yenile</button><button class="small-btn order-bulk-archive-btn" id="archiveFilteredOrders" type="button">🗑️ Görüntülenenleri Sil / Arşivle</button></div></div><div class="order-search-row"><input id="orderSearch" class="order-search" placeholder="⌕ Siparişlerde ara (sipariş, ürün, müşteri, telefon...)"><span id="toggleOrderSound" class="order-sound-state">🔔 Otomatik ses aktif</span><button class="small-btn" id="testOrderSound" type="button">🔊 Sesi Test Et</button></div><div class="orders-card"><h3 class="orders-card-title"><span id="ordersCardTitle">Aktif Siparişler</span><small id="ordersVisibleCount"></small></h3><div id="ordersTableHost"></div></div></section>`}else if(adminPage==='products'){html=`<div class="panel category-create-panel"><div class="category-create-heading"><div class="category-icon">▦</div><div><h3>Yeni kategori oluştur</h3><p>Menü kategorilerini buradan ekleyip ürünleri düzenli şekilde grupla.</p></div></div><form id="categoryCreateForm" class="category-create-form"><div class="field"><label>Kategori adı</label><input name="categoryName" required placeholder="Örn. Kampanyalı Menüler"></div><button class="primary">＋ Kategori Oluştur</button></form></div><div class="panel admin-form product-create-panel"><div class="product-panel-heading"><div><h3>Yeni ürün ekle</h3><p>Ürün bilgilerini, fiyatını ve görselini gir.</p></div><span class="panel-step">ÜRÜN YÖNETİMİ</span></div><form id="productForm"><div class="field"><label>Ürün adı</label><input name="name" required></div><div class="field"><label>Kategori</label><select name="category" id="productCategorySelect" required><option value="">Kategori seçin</option>${getCategoryOrder().map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}</select><small>Kategori adlarını aşağıdaki kategori yönetiminden istediğin zaman değiştirebilirsin.</small></div><div class="field"><label>Fiyat (TL)</label><input name="price" type="number" min="1" required></div><div class="field"><label>Açıklama</label><input name="description"></div><div class="field"><label>Ürün görseli (bilgisayardan seç)</label><input name="imageFile" type="file" accept="image/*" required><small>JPG, PNG veya WebP. Görsel tarayıcıda küçültülerek saklanır.</small><div id="productImagePreview"></div></div><button class="primary">ÜRÜN EKLE</button></form></div><div class="panel"><h3>Ürün listesi</h3><div class="table-wrap"><table><thead><tr><th>Ürün</th><th>Kategori</th><th>Fiyat</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${[...products].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0)).map(p=>`<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.category)}</td><td>${money(p.price)}</td><td>${p.active?'Aktif':'Gizli'}</td><td><button class="small-btn" data-editprod="${p.id}">Düzenle</button> <button class="small-btn" data-delprod="${p.id}">Sil</button></td></tr>`).join('')}</tbody></table></div></div><div class="panel"><h3>Kategori yönetimi</h3><p class="muted">Bir kategori adını değiştirirsen o kategoriye bağlı tüm ürünler yeni adla güncellenir.</p><div class="category-manage-list">${getCategoryOrder().map((c,i,arr)=>`<div class="category-manage-row"><label>${escapeHtml(c)}</label><input aria-label="${escapeHtml(c)} yeni adı" id="categoryRename${i}" value="${escapeHtml(c)}"><button class="small-btn" data-rename-category="${encodeURIComponent(c)}" data-input="categoryRename${i}">KAYDET</button><div class="category-move-controls"><button class="small-btn" data-move-category="${encodeURIComponent(c)}" data-direction="-1" ${i===0?'disabled':''} title="Yukarı taşı">↑</button><button class="small-btn" data-move-category="${encodeURIComponent(c)}" data-direction="1" ${i===arr.length-1?'disabled':''} title="Aşağı taşı">↓</button><button class="small-btn danger" data-delete-category="${encodeURIComponent(c)}">Sil</button></div></div>`).join("")||'<p>Henüz kategori yok. İlk ürününü eklediğinde kategori burada görünür.</p>'}</div></div>`}else if(adminPage==='customization'){html=`<section class="panel product-customization-admin"><div class="customization-admin-intro"><div class="customization-admin-icon">✳</div><div><h3>Ürünlere kişiselleştirme seçenekleri ekle</h3><p class="muted">Ürün seç, çıkarılabilecek malzemeleri ve ücretli ekstraları tanımla. Yalnızca etkinleştirdiğin ürünlerde müşteriye görünür.</p></div></div><div class="field"><label>Ürün seç</label><select id="customizationProductSelect"><option value="">Ürün seçiniz</option>${[...products].sort((a,b)=>String(a.name).localeCompare(String(b.name),'tr')).map(p=>'<option value="'+escapeHtml(String(p.id))+'">'+escapeHtml(p.name)+' · '+escapeHtml(p.category||'')+'</option>').join('')}</select></div><div id="customizationEditorHost"><div class="notice">Kişiselleştirme ayarlarını düzenlemek için önce bir ürün seç.</div></div></section><div class="notice">Kişiselleştirme ayarları mevcut ürün kataloğunun içine eklenir. Ürün, fiyat, görsel, kategori, kampanya ve geçmiş sipariş kayıtların silinmez ya da sıfırlanmaz. Tam site yedeğine otomatik dahil olur.</div>` }else if(adminPage==='crossSell'){html=`<section class="panel cross-sell-admin-panel"><div class="customization-admin-intro"><div class="customization-admin-icon">✨</div><div><h3>Sepette akıllı ek satış önerileri</h3><p class="muted">Bir ana ürün seç ve müşteriye sepetinde önermek istediğin tamamlayıcı ürünleri belirle. Öneriler müşteri onayı olmadan sepete eklenmez.</p></div></div><div class="field"><label>Hangi ürün sepete eklendiğinde öneri gösterelim?</label><select id="crossSellProductSelect"><option value="">Ana ürün seçiniz</option>${[...products].sort((a,b)=>String(a.name).localeCompare(String(b.name),'tr')).map(p=>'<option value="'+escapeHtml(String(p.id))+'">'+escapeHtml(p.name)+' · '+escapeHtml(p.category||'')+'</option>').join('')}</select></div><div id="crossSellEditorHost"><div class="notice">Önerileri tanımlamak için önce ana ürün seç.</div></div></section><div class="notice">Bu ayarlar mevcut ürün kataloğunun içine kaydedilir ve telefon / bilgisayar arasında eşitlenir. Ürünler, fiyatlar, kategoriler, kampanyalar, siparişler ve müşteri kayıtları değiştirilmez.</div>`}else if(adminPage==='campaigns'){html=`<div class="panel admin-form"><h3>Kampanya oluştur</h3><form id="campaignForm"><div class="field"><label>Kampanya başlığı</label><input name="title" required></div><div class="field"><label>İlişkili ürün (kampanyanın ana ürünü)</label><select name="productId"><option value="">Ürün seç (isteğe bağlı)</option>${products.filter(p=>p.active).map(p=>`<option value="${p.id}">${escapeHtml(p.name)} — ${money(p.price)}</option>`).join('')}</select></div>${campaignFreeProductPicker()}${campaignExtraProductPicker()}<div class="field"><label>Mesaj</label><textarea name="message" required rows="3"></textarea></div><div class="field"><label>⏰ Günün fırsatı saatleri (Türkiye saati)</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><small>Başlangıç</small><input type="time" name="startTime"></div><div><small>Bitiş</small><input type="time" name="endTime"></div></div><small>Boş bırakırsan kampanya sürekli yayında kalır. Saat aralığı belirlediğinde yalnızca bu saatlerde müşterilere görünür. Gece yarısını geçen aralıklar da desteklenir.</small></div><div class="field"><label>Kampanya görseli (bilgisayardan seç)</label><input name="imageFile" type="file" accept="image/*" required><small>JPG, PNG veya WebP. Görsel tarayıcıda küçültülerek saklanır.</small><div id="campaignImagePreview"></div></div><button class="primary">KAMPANYAYI KAYDET</button></form></div><div class="panel"><h3>Kayıtlı kampanyalar</h3><p class="muted">Sıralama ana sayfadaki kampanya görünümünü belirler. Saat aralığı verilen kampanyalar Türkiye saatine göre yalnızca belirtilen zamanlarda müşterilere gösterilir.</p>${campaigns.map((c,i)=>`<div class="cart-row campaign-admin-row"><div style="flex:1;min-width:0"><b>${escapeHtml(c.title)}</b><p>${escapeHtml(c.message)}</p>${campaignFreeProducts(c).length?'<small class="campaign-admin-gift-summary">🎁 Ücretsiz seçenekler: '+campaignFreeProducts(c).map(p=>escapeHtml(p.name)).join(', ')+'</small>':''}${campaignExtraProducts(c).length?'<small class="campaign-admin-gift-summary">⚡ EKSTRA GELSİN: '+campaignExtraProducts(c).map(p=>escapeHtml(p.name)+' ('+money(p.price)+')').join(', ')+'</small>':''} </div><div class="campaign-admin-actions" style="display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;white-space:nowrap">Sıra No <input type="number" min="1" max="${campaigns.length}" step="1" value="${i+1}" data-camp-order="${i}" aria-label="${escapeHtml(c.title)} sıra numarası" style="width:58px;min-width:58px;padding:7px 5px;border:1px solid #ead8cf;border-radius:8px;font-weight:700"></label><button type="button" class="small-btn" data-save-camp-order="${i}">UYGULA</button><button type="button" class="small-btn" data-welcome-camp="${i}">${c.welcomePopup===true?"✓ Karşılama kampanyası":"Ana sayfa karşılama yap"}</button><button type="button" class="small-btn" data-editcamp="${i}">Düzenle</button><button type="button" class="small-btn" data-delcamp="${i}">Sil</button></div></div>`).join('')||'<p>Henüz kampanya eklenmedi.</p>'}</div>`}else if(adminPage==='notifications'){html=`<div class="panel"><h3>Yeni sipariş bildirimi</h3><p class="muted">Bu düğme yalnızca yönetici olarak oturum açtığın bu cihaza yeni sipariş alarmı kaydeder. Müşteri kampanya aboneliklerinden ayrıdır.</p><button class="primary" type="button" id="adminOrderPushEnable">🔔 BU CİHAZDA SİPARİŞ BİLDİRİMLERİNİ YENİLE / AÇ</button><div id="adminOrderPushStatus" class="notice">Bu cihazın sipariş bildirimi kaydı kontrol ediliyor…</div><p class="muted">Bilgisayar ve telefon için işlemi her cihazda ayrı ayrı bir kez yapın. Cihazın eski bildirimi geçersiz kaldıysa bu düğme yeni kayıt oluşturur.</p></div><div class="panel admin-form"><h3>Gerçek bildirim gönder</h3><form id="notificationForm"><div class="field"><label>Bildirim başlığı</label><input name="title" required placeholder="Günün kampanyası"></div><div class="field"><label>Bildirim mesajı</label><textarea name="message" rows="4" required placeholder="Kampanya detaylarını yaz..."></textarea></div><div class="field"><label>Bildirim görseli (isteğe bağlı)</label><input name="imageFile" type="file" accept="image/*"><small>Seçilen görsel güvenli depoya yüklenir ve bildirime eklenir.</small><div id="notificationImagePreview"></div></div><div class="notice" id="campaignPushCount">Müşteri bildirim aboneleri kontrol ediliyor…</div><div class="notice">Bu bölümdeki kampanya ve duyurular, bildirim izni verip abone olan ziyaretçilere gönderilir. Müşteriler ana sayfadaki BİLDİRİMLERİ AÇ düğmesiyle izin vermelidir. Yeni sipariş bilgileri yalnızca yönetici cihazlarına gider.</div><button class="primary" type="submit">🔔 TÜM ABONELERE GÖNDER</button></form><div id="notificationPreview"></div></div>`}else if(adminPage==='reviews'){html=`<div class="panel review-admin-panel"><div class="review-admin-heading"><div><h3>⭐ Müşteri ürün değerlendirmeleri</h3><p class="muted">Yalnızca teslim edilmiş siparişlerden gelen yorumlar burada listelenir. Onaylanan yorumlar ürün kartlarında yıldız olarak görünür.</p></div><button class="small-btn" id="refreshProductReviews">↻ Yenile</button></div><div class="review-admin-filters"><button class="review-admin-filter active" data-review-filter="pending">⏳ Bekleyenler</button><button class="review-admin-filter" data-review-filter="approved">✅ Yayındakiler</button><button class="review-admin-filter" data-review-filter="rejected">🚫 Reddedilenler</button></div><div id="productReviewCounts" class="review-admin-counts"></div><div id="productReviewsAdminHost"><p class="muted">Değerlendirmeler yükleniyor…</p></div></div>` }else if(adminPage==='customers'){html=`<div class="panel"><div class="customer-head"><div><h3>Müşteriler</h3><p class="muted">Kayıtlı müşteri bilgilerini ara ve süz.</p></div><div class="customer-total" id="customerTotal"></div></div><div class="customer-filters"><input id="customerSearch" type="search" placeholder="⌕ Müşteri adı veya telefon ara..."><select id="customerFilter"><option value="all">Tüm müşteriler</option><option value="withPhone">Telefonu olanlar</option><option value="withoutPhone">Telefonu olmayanlar</option></select><button class="small-btn" id="customerClear">Temizle</button></div><div id="customerResults"></div><div class="notice">Telefon bilgileri pazarlama mesajı izni yerine geçmez. Ticari ileti izinlerini ayrıca kaydedip yönetmelisin.</div></div>` }else if(adminPage==='loyalty'){html=`<div class="loyalty-rules"><b>⭐ Puan kazanma kuralı</b><br>Her 10 TL teslim edilmiş sipariş tutarına 1 puan. 100 puan = 10 TL indirim değeri. Puanlar sipariş "Teslim edildi" durumuna geçtiğinde otomatik eklenir. İptal edilen ve henüz teslim edilmeyen siparişler puan kazandırmaz. Önceki teslim edilmiş siparişler geriye dönük puanlandırılmaz.</div><div class="loyalty-admin-grid" style="margin-top:16px"><section class="panel"><div class="customer-head"><div><h3>⭐ Müşteri puan hesapları</h3><p class="muted">Bakiye, toplam kazanılan ve kullanılan puanlar.</p></div><button class="small-btn" id="refreshLoyaltyAccounts">↻ Yenile</button></div><input class="loyalty-admin-search" id="loyaltyAdminSearch" type="search" placeholder="Müşteri adı veya telefon ara..."><div id="loyaltyAccountsHost"><p class="muted">Puan hesapları yükleniyor…</p></div></section><section class="panel"><h3>Puan ekle / kullan / düzelt</h3><form id="loyaltyAdjustForm"><div class="field"><label>Müşteri telefon</label><input name="phone" type="tel" required placeholder="05xx xxx xx xx"></div><div class="field"><label>Müşteri adı (isteğe bağlı)</label><input name="customerName" placeholder="Müşteri adı"></div><div class="field"><label>Puan değişimi</label><input name="pointsDelta" type="number"  step="1" required placeholder="Örn. 100 veya -100"><small>Pozitif sayı puan ekler, negatif sayı puan kullanır.</small></div><div class="field"><label>İşlem açıklaması</label><input name="description" required placeholder="Örn. 100 puan karşılığı 10 TL indirim"></div><button class="primary" type="submit">PUAN İŞLEMİNİ KAYDET</button></form><div class="notice">Puan kullanımı burada yönetici tarafından kaydedilir. İndirimi müşterinin siparişine uygulamadan önce bakiyeyi ve talebi kontrol edin. Her işlem puan hareketlerine kaydedilir.</div></section></div>`}else if(adminPage==='personnel'){html=personnelAdminMarkup();}else if(adminPage==='reports'){html=`<section class="report-range-card"><div class="report-range-top"><div class="report-range-title">🗓️ Tarih Aralığı Raporu</div><div class="report-range-fields"><label>Başlangıç</label><input id="reportStart" type="date"><label>Bitiş</label><input id="reportEnd" type="date"><button class="primary" id="applyReport">Filtrele</button></div></div><div class="report-quick"><button data-report-days="0">Bugün</button><button data-report-days="7">Son 7 gün</button><button data-report-days="30">Son 30 gün</button><button data-report-days="90">Son 90 gün</button></div><div class="report-kpis" id="reportTopKpis"></div><div class="report-subline" id="reportRangeNote"></div></section><div class="report-day-row"><label>Tarih: <input id="reportDay" type="date"></label><div class="report-tools"><button class="small-btn" id="backupReport">📥 Hızlı JSON yedeği</button><button class="small-btn" id="backupFullSite">📦 TAM SİTE YEDEĞİ (VERİ + GÖRSELLER)</button><button class="small-btn" id="exportReport">CSV indir</button><button class="small-btn report-reset-button" id="resetReportHistory" type="button">🗑️ Geçmişi Sıfırla</button></div></div><section class="panel" id="fullBackupRestorePanel"><h3>♻️ Tam yedekten geri yükle</h3><p class="muted">Yalnızca bu projeden alınmış ve görselleri eksiksiz TAM SİTE YEDEĞİ JSON dosyası kabul edilir. İşlemden önce mevcut durumun ayrıca koruma yedeği indirilir.</p><div class="field"><label>Tam yedek dosyası (.json)</label><input type="file" id="restoreFullBackupFile" accept="application/json,.json"></div><div class="notice">Geri yükleme menü, kampanya, sipariş, arşiv, sadakat, ziyaret ve değerlendirme verilerini seçilen yedekten getirir. Yönetici hesabı ve bildirim cihaz izinleri güvenlik nedeniyle taşınmaz.</div><button class="primary" id="restoreFullBackupBtn" type="button">♻️ TAM YEDEĞİ GERİ YÜKLE</button><div id="restoreFullBackupStatus" class="notice">Henüz geri yükleme başlatılmadı.</div></section><div class="report-daily-grid" id="reportDayKpis"></div><div id="reportResults"></div>`}else{html=`<div class="panel"><h3>🖼️ Web sitesi logosu</h3><p class="muted">Bilgisayarından yeni logo seç. Kaydettiğinde üst bölüm, alt bölüm ve yönetim panelindeki logolar tüm cihazlarda güncellenir.</p><div class="field"><label>Yeni logo dosyası (PNG, JPG, WebP veya SVG)</label><input id="siteLogoFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><small>Önerilen: şeffaf arka planlı, yatay logo. Görsel en fazla 20 MB olabilir.</small></div><div id="siteLogoPreview" class="site-logo-preview"><img id="siteLogoPreviewImage" alt="Seçilen logo önizlemesi" style="display:none;max-width:100%;max-height:130px;object-fit:contain"><span id="siteLogoPreviewEmpty">Henüz yeni logo seçilmedi.</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" id="saveSiteLogo" type="button">LOGOYU KAYDET VE TÜM CİHAZLARA UYGULA</button><button class="small-btn" id="resetSiteLogo" type="button">Varsayılan logoya dön</button></div><div id="siteLogoStatus" class="notice" style="margin-top:12px">Mevcut logo tüm cihazlarda ortak kullanılır.</div></div><div class="panel home-slide-admin-panel">

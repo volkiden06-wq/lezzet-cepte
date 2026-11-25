@@ -17,6 +17,8 @@ const TABLES = [
   "personnel",
   "personnel_months",
   "personnel_attendance",
+  "personnel_payroll_months",
+  "personnel_advances",
 ];
 const ALLOWED_ORIGINS = new Set([
   "https://yemektadinda.com",

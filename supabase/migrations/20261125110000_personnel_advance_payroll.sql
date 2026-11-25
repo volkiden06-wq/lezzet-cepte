@@ -121,8 +121,20 @@ begin
   end if;
   select jsonb_build_object(
     'personnel_id', p_personnel_id, 'month_date', p_month,
-    'monthly_salary', coalesce(pm.monthly_salary, 0),
-    'salary_saved', (pm.id is not null), 'note', coalesce(pm.note, ''),
+    'monthly_salary', coalesce(pm.monthly_salary, (
+      select previous.monthly_salary
+      from public.personnel_payroll_months previous
+      where previous.personnel_id = p_personnel_id
+        and previous.month_date < p_month
+      order by previous.month_date desc
+      limit 1
+    ), 0),
+    'salary_saved', (pm.id is not null),
+    'salary_inherited', (pm.id is null and exists(
+      select 1 from public.personnel_payroll_months previous
+      where previous.personnel_id = p_personnel_id and previous.month_date < p_month
+    )),
+    'note', coalesce(pm.note, ''),
     'advances', coalesce((
       select jsonb_agg(jsonb_build_object(
         'id', a.id, 'advance_date', a.advance_date, 'amount', a.amount,

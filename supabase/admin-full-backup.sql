@@ -16,6 +16,11 @@ declare
   v_loyalty_transactions jsonb;
   v_visitors jsonb;
   v_reviews jsonb;
+  v_personnel jsonb;
+  v_personnel_months jsonb;
+  v_personnel_attendance jsonb;
+  v_personnel_payroll_months jsonb;
+  v_personnel_advances jsonb;
   v_storage_objects jsonb;
 begin
   if auth.uid() is null or not coalesce(public.is_admin(), false) then
@@ -44,6 +49,21 @@ begin
   select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(r) order by r.created_at, r.id), '[]'::jsonb)
   into v_reviews from public.product_reviews r;
 
+  select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(p) order by p.id), '[]'::jsonb)
+  into v_personnel from public.personnel p;
+
+  select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(m) order by m.personnel_id, m.month_date), '[]'::jsonb)
+  into v_personnel_months from public.personnel_months m;
+
+  select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(a) order by a.personnel_id, a.attendance_date), '[]'::jsonb)
+  into v_personnel_attendance from public.personnel_attendance a;
+
+  select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(p) order by p.personnel_id, p.month_date), '[]'::jsonb)
+  into v_personnel_payroll_months from public.personnel_payroll_months p;
+
+  select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(a) order by a.personnel_id, a.advance_date, a.id), '[]'::jsonb)
+  into v_personnel_advances from public.personnel_advances a;
+
   select coalesce(
     pg_catalog.jsonb_agg(
       pg_catalog.jsonb_build_object(
@@ -71,6 +91,11 @@ begin
       'loyalty_transactions', v_loyalty_transactions,
       'site_daily_visitors', v_visitors,
       'product_reviews', v_reviews,
+      'personnel', v_personnel,
+      'personnel_months', v_personnel_months,
+      'personnel_attendance', v_personnel_attendance,
+      'personnel_payroll_months', v_personnel_payroll_months,
+      'personnel_advances', v_personnel_advances,
       'catalog_sync_events', (
         select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(e)), '[]'::jsonb)
         from public.catalog_sync_events e
@@ -96,6 +121,11 @@ begin
       'loyalty_transactions', pg_catalog.jsonb_array_length(v_loyalty_transactions),
       'site_visits', pg_catalog.jsonb_array_length(v_visitors),
       'product_reviews', pg_catalog.jsonb_array_length(v_reviews),
+      'personnel', pg_catalog.jsonb_array_length(v_personnel),
+      'personnel_months', pg_catalog.jsonb_array_length(v_personnel_months),
+      'personnel_attendance', pg_catalog.jsonb_array_length(v_personnel_attendance),
+      'personnel_payroll_months', pg_catalog.jsonb_array_length(v_personnel_payroll_months),
+      'personnel_advances', pg_catalog.jsonb_array_length(v_personnel_advances),
       'published_product_reviews', (select count(*) from public.product_reviews where moderation_status = 'approved'),
       'storage_objects', pg_catalog.jsonb_array_length(v_storage_objects)
     )

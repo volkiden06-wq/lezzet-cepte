@@ -4171,11 +4171,11 @@ async function voidPersonnelAdvance(id){
   personnelPayrollData.advances=Array.isArray(fresh?.advances)?fresh.advances:[];personnelMonthMarkup();toast('Avans iptal edildi. Kayıt geçmişte korundu.');
  }catch(error){toast(error.message||'Avans iptal edilemedi.')}
 }
-function startPersonnelRealtime(){
+async function startPersonnelRealtime(){
  if(!supabaseAccessToken||!window.supabase||typeof window.supabase.createClient!=='function')return false;
  try{
   if(!personnelRealtimeClient)personnelRealtimeClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},realtime:{params:{eventsPerSecond:4}}});
-  personnelRealtimeClient.realtime.setAuth(supabaseAccessToken).catch(()=>{});
+  await personnelRealtimeClient.realtime.setAuth(supabaseAccessToken);
   if(personnelRealtimeChannel){try{personnelRealtimeClient.removeChannel(personnelRealtimeChannel).catch(()=>{})}catch(e){}}
   const channel=personnelRealtimeClient.channel('yemek-tadinda-personnel-sync')
    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'personnel_sync_events',filter:'id=eq.1'},()=>{
@@ -4308,7 +4308,7 @@ async function loadPersonnelYearSummary(){
   $('#personnelYearCsv').onclick=()=>{
    const rows=[['Yıl','Ay','Çalışma Günü','Normal İzin','Yıllık İzin','Devamsız','Puantajı Hazırlayan']];
    personnelYearRows.forEach(r=>rows.push([year,months[Number(r.month)-1],r.work_days,r.leave_days,r.annual_leave_days,r.absent_days||0,r.signatory_name]));
-   rows.push([year,'TOPLAM',totals.work,totals.leave,totals.annual,'']);
+   rows.push([year,'TOPLAM',totals.work,totals.leave,totals.annual,personnelYearRows.reduce((sum,r)=>sum+Number(r.absent_days||0),0),'']);
    personnelDownloadCsv('personel-yillik-ozet-'+personnelSelectedId+'-'+year+'.csv',rows);
   };
  }catch(error){host.innerHTML='<div class="notice">Yıllık özet yüklenemedi: '+escapeHtml(error.message||'Bilinmeyen hata')+'</div>'}

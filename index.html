@@ -4028,6 +4028,7 @@ let personnelRealtimeClient=null;
 let personnelRealtimeChannel=null;
 let personnelRealtimeDebounce=null;
 let personnelSyncIgnoreUntil=0;
+let personnelVisibilityListenerInstalled=false;
 
 function personnelAdminMarkup(){
  return '<div class="personnel-top-grid">'+
@@ -4173,6 +4174,18 @@ async function voidPersonnelAdvance(id){
 }
 async function startPersonnelRealtime(){
  if(!supabaseAccessToken||!window.supabase||typeof window.supabase.createClient!=='function')return false;
+ if(!personnelVisibilityListenerInstalled){
+  document.addEventListener('visibilitychange',()=>{
+   if(document.hidden||adminPage!=='personnel'||personnelMonthDirty||personnelPayrollDirty)return;
+   if(personnelRealtimeDebounce)clearTimeout(personnelRealtimeDebounce);
+   personnelRealtimeDebounce=setTimeout(async()=>{
+    personnelRealtimeDebounce=null;
+    await loadPersonnelRows().catch(()=>{});
+    if(personnelSelectedId)await loadPersonnelMonth(personnelSelectedId,personnelMonthValue);
+   },200);
+  });
+  personnelVisibilityListenerInstalled=true;
+ }
  try{
   if(!personnelRealtimeClient)personnelRealtimeClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},realtime:{params:{eventsPerSecond:4}}});
   await personnelRealtimeClient.realtime.setAuth(supabaseAccessToken);

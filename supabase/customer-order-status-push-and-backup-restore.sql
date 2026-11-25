@@ -95,6 +95,9 @@ DECLARE
   v_catalog public.site_catalog%ROWTYPE;
   v_restored jsonb;
   v_seq text;
+  v_table text;
+  v_max bigint;
+  v_has_personnel_backup boolean := false;
 BEGIN
   IF auth.uid() IS NULL OR NOT coalesce(public.is_admin(),false) THEN
     RAISE EXCEPTION 'Yedeği geri yüklemek için yönetici oturumu gerekli.' USING errcode='42501';
@@ -132,6 +135,28 @@ BEGIN
     RAISE EXCEPTION 'Yedek kayıt sayıları tutarsız; hiçbir veri değiştirilmedi.';
   END IF;
 
+  -- Older full backups do not contain personnel data. Preserve current personnel
+  -- data for those files. New backups must include all employee-related arrays.
+  v_has_personnel_backup := v_db ? 'personnel'
+    OR v_db ? 'personnel_months'
+    OR v_db ? 'personnel_attendance'
+    OR v_db ? 'personnel_payroll_months'
+    OR v_db ? 'personnel_advances';
+  IF v_has_personnel_backup AND (
+    jsonb_typeof(v_db->'personnel') IS DISTINCT FROM 'array'
+    OR jsonb_typeof(v_db->'personnel_months') IS DISTINCT FROM 'array'
+    OR jsonb_typeof(v_db->'personnel_attendance') IS DISTINCT FROM 'array'
+    OR jsonb_typeof(v_db->'personnel_payroll_months') IS DISTINCT FROM 'array'
+    OR jsonb_typeof(v_db->'personnel_advances') IS DISTINCT FROM 'array'
+    OR coalesce((p_backup->'counts'->>'personnel')::integer, -1) <> jsonb_array_length(v_db->'personnel')
+    OR coalesce((p_backup->'counts'->>'personnel_months')::integer, -1) <> jsonb_array_length(v_db->'personnel_months')
+    OR coalesce((p_backup->'counts'->>'personnel_attendance')::integer, -1) <> jsonb_array_length(v_db->'personnel_attendance')
+    OR coalesce((p_backup->'counts'->>'personnel_payroll_months')::integer, -1) <> jsonb_array_length(v_db->'personnel_payroll_months')
+    OR coalesce((p_backup->'counts'->>'personnel_advances')::integer, -1) <> jsonb_array_length(v_db->'personnel_advances')
+  ) THEN
+    RAISE EXCEPTION 'Personel, puantaj, maaş veya avans yedeği eksik/tutarsız; hiçbir veri değiştirilmedi.';
+  END IF;
+
   -- İçeri alma sırasında eski sipariş bildirimleri ve puan tetikleyicileri çalıştırılmaz.
   ALTER TABLE public.orders DISABLE TRIGGER USER;
   DELETE FROM public.loyalty_transactions;
@@ -149,6 +174,36 @@ BEGIN
   INSERT INTO public.site_daily_visitors SELECT x.* FROM pg_catalog.jsonb_populate_recordset(NULL::public.site_daily_visitors,v_db->'site_daily_visitors') x;
   INSERT INTO public.product_reviews SELECT x.* FROM pg_catalog.jsonb_populate_recordset(NULL::public.product_reviews,v_db->'product_reviews') x;
   INSERT INTO public.catalog_sync_events SELECT x.* FROM pg_catalog.jsonb_populate_recordset(NULL::public.catalog_sync_events,v_db->'catalog_sync_events') x;
+
+  IF v_has_personnel_backup THEN
+    DELETE FROM public.personnel_advances;
+    DELETE FROM public.personnel_payroll_months;
+    DELETE FROM public.personnel_attendance;
+    DELETE FROM public.personnel_months;
+    DELETE FROM public.personnel;
+
+    INSERT INTO public.personnel
+      SELECT x.* FROM pg_catalog.jsonb_populate_recordset(NULL::public.personnel,v_db->'personnel') x;
+    INSERT INTO public.personnel_months
+      SELECT x.* FROM pg_catalog.jsonb_populate_recordset(NULL::public.personnel_months,v_db->'personnel_months') x;
+    INSERT INTO public.personnel_attendance
+      SELECT x.* FROM pg_catalog.jsonb_populate_recordset(NULL::public.personnel_attendance,v_db->'personnel_attendance') x;
+    INSERT INTO public.personnel_payroll_months
+      SELECT x.* FROM pg_catalog.jsonb_populate_recordset(NULL::public.personnel_payroll_months,v_db->'personnel_payroll_months') x;
+    INSERT INTO public.personnel_advances
+      SELECT x.* FROM pg_catalog.jsonb_populate_recordset(NULL::public.personnel_advances,v_db->'personnel_advances') x;
+
+    FOREACH v_table IN ARRAY ARRAY[
+      'personnel','personnel_months','personnel_attendance',
+      'personnel_payroll_months','personnel_advances'
+    ] LOOP
+      v_seq := pg_catalog.pg_get_serial_sequence('public.' || v_table, 'id');
+      IF v_seq IS NOT NULL THEN
+        EXECUTE pg_catalog.format('SELECT max(id) FROM public.%I', v_table) INTO v_max;
+        PERFORM pg_catalog.setval(v_seq::regclass, coalesce(v_max, 1), v_max IS NOT NULL);
+      END IF;
+    END LOOP;
+  END IF;
 
   v_catalog:=pg_catalog.jsonb_populate_record(NULL::public.site_catalog,v_db->'site_catalog');
   INSERT INTO public.site_catalog(id,products,categories,updated_at,campaigns)
@@ -183,7 +238,12 @@ BEGIN
     'loyalty_accounts',(SELECT count(*) FROM public.loyalty_accounts),
     'loyalty_transactions',(SELECT count(*) FROM public.loyalty_transactions),
     'site_visits',(SELECT count(*) FROM public.site_daily_visitors),
-    'product_reviews',(SELECT count(*) FROM public.product_reviews)
+    'product_reviews',(SELECT count(*) FROM public.product_reviews),
+    'personnel',(SELECT count(*) FROM public.personnel),
+    'personnel_months',(SELECT count(*) FROM public.personnel_months),
+    'personnel_attendance',(SELECT count(*) FROM public.personnel_attendance),
+    'personnel_payroll_months',(SELECT count(*) FROM public.personnel_payroll_months),
+    'personnel_advances',(SELECT count(*) FROM public.personnel_advances)
   ) INTO v_restored;
   RETURN pg_catalog.jsonb_build_object(
     'success',true,'restored_at',clock_timestamp(),'counts',v_restored,

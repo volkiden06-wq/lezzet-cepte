@@ -12,4 +12,7 @@ async function adminPanel(){try{const rows=await api('rpc/admin_list_gift_vouche
 }
 function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 async function addAdminButton(){if(document.getElementById('ytGiftAdmin'))return;if(!await adminCheck())return;const b=document.createElement('button');b.id='ytGiftAdmin';b.textContent='🎁 ÇEK YÖNETİMİ';b.style.cssText='position:fixed;right:18px;bottom:78px;z-index:99990;padding:12px 16px;background:#171719;color:white;border:0;border-radius:50px;font-weight:bold;box-shadow:0 6px 22px #0003';b.onclick=adminPanel;document.body.appendChild(b)}
+// Delegated handler to catch card click regardless of initialization timing.
+document.addEventListener('click',function(e){var t=e.target&&e.target.closest&&e.target.closest('#giftVoucherFeatureButton');if(!t)return;e.preventDefault();e.stopPropagation();buy();},true);
+
 })();

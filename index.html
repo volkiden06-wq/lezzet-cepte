@@ -2740,7 +2740,7 @@ function startOrderPolling(){
 }
 async function updateCloudOrderStatus(orderNumber,status){await supabaseRequest(`/rest/v1/orders?order_number=eq.${encodeURIComponent(orderNumber)}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({status})});}
 
-async function submitOrderToSupabase(order){
+async function submitOrderToSupabase(order,giftVoucherCode='',giftVoucherAmount=0){
   const payload={
     p_order_number:String(order.orderNumber),
     p_customer_name:String(order.name||'').trim(),
@@ -2751,9 +2751,11 @@ async function submitOrderToSupabase(order){
     p_payment_method:order.paymentMethod,
     p_notes:String(order.note||''),
     p_points_to_use:Number(order.pointsRedeemed)||0,
-    p_verification_order_number:order.verificationOrderNumber||null
+    p_verification_order_number:order.verificationOrderNumber||null,
+    p_gift_voucher_code:giftVoucherCode||null,
+    p_gift_voucher_amount:Number(giftVoucherAmount)||0
   };
-  const response=await fetch(`${SUPABASE_URL}/rest/v1/rpc/create_customer_order_with_points`,{
+  const response=await fetch(`${SUPABASE_URL}/rest/v1/rpc/create_customer_order_with_gift_voucher`,{
     method:'POST',
     headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':`Bearer ${supabaseAccessToken||SUPABASE_PUBLISHABLE_KEY}`,'Content-Type':'application/json'},
     body:JSON.stringify(payload)
@@ -3183,7 +3185,7 @@ function savePendingLoyaltyUse(value){
  try{sessionStorage.setItem('lc_pending_loyalty_use',JSON.stringify(value))}catch(error){console.warn('Sadakat tercihi saklanamadı:',error)}
 }
 let checkoutLoyaltyState=null;
-function cartModal(){checkoutLoyaltyState=readPendingLoyaltyUse();const rows=cart.map((x,index)=>{const p=products.find(p=>String(p.id)===String(x.id));if(!p)return '';const customization=readItemCustomization(x),extraTotal=cartLineExtraTotal(x),unitPrice=cartLineUnitPrice(x,p),details=[customization.removedIngredients.length?'Çıkarılacak: '+customization.removedIngredients.join(', '):'',customization.extras.length?'Ekstralar: '+customization.extras.map(item=>item.name+' (+'+money(item.price)+')').join(', '):'',customization.preparationNote?'Not: '+customization.preparationNote:''].filter(Boolean);const editButton=(getProductCustomizationConfig(p).enabled||x.customization)?'<button type="button" class="cart-customize-edit" data-edit-customization="'+index+'">Düzenle</button>':'';return '<div class="cart-row"><div class="cart-row-main"><b>'+escapeHtml(p.name)+'</b>'+(x.campaignTitle?'<small class="campaign-cart-label">'+(x.isFreeGift?'🎁 ÜCRETSİZ HEDİYE · ':x.isCampaignExtra?'⚡ EKSTRA GELSİN · ':'🎁 ')+escapeHtml(x.campaignTitle)+'</small>':'')+(x.freeGiftName&&!x.isFreeGift?'<small class="campaign-cart-gift">Ücretsiz hediye: '+escapeHtml(x.freeGiftName)+'</small>':'')+(details.length?'<small class="cart-customization-details">'+details.map(escapeHtml).join('<br>')+'</small>':'')+'<div class="price">'+money(unitPrice*x.qty)+'</div>'+(extraTotal>0?'<small class="cart-customization-price">'+money(p.price)+' + '+money(extraTotal)+' ekstra / adet</small>':'')+editButton+'</div><div class="qty"><button data-minus-line="'+index+'">−</button><b>'+x.qty+'</b><button data-plus-line="'+index+'">+</button><button data-remove-line="'+index+'" aria-label="Sil">×</button></div></div>'}).join('');openModal('Sepetim',`${rows||'<p>Sepetin henüz boş. Menüden ürün ekleyebilirsin.</p>'}${rows?cartCrossSellMarkup():''}${rows?`<div class="total"><span>Ürün toplamı</span><span id="checkoutSubtotal">${money(total())}</span></div><div class="total"><span>⭐ Sadakat indirimi</span><span id="checkoutDiscount">${money(0)}</span></div><div class="total"><b>Ödenecek tutar</b><b id="checkoutDue">${money(total())}</b></div><form id="checkout"><div class="field"><label>Ad soyad</label><input name="name" required placeholder="Adınız soyadınız"></div><div class="field"><label>Telefon</label><input name="phone" required type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></div><section style="margin:12px 0;padding:14px;border:1px solid #e6d6aa;border-radius:14px;background:#fffaf0"><b style="display:block;margin-bottom:6px">⭐ Sadakat puanların</b><div id="checkoutLoyaltyStatus" style="font-size:13px;color:#6f6250;margin:8px 0">\${checkoutLoyaltyState?checkoutLoyaltyState.pointsBalance.toLocaleString('tr-TR')+' puan · '+money(checkoutLoyaltyState.pointsBalance/10)+' indirim değeri':'Puanlarını görmek ve kullanıma açmak için Siparişlerim bölümündeki sipariş detayına git.'}</div><button type="button" class="ghost" id="checkoutLoyaltyToggle" style="width:100%" \${!checkoutLoyaltyState||checkoutLoyaltyState.pointsBalance<100?'disabled':''}>\${checkoutLoyaltyState?.apply?'✓ PUAN KULLANILIYOR · VAZGEÇ':'PUAN KULLAN'}</button><small style="display:block;color:#806d4d;margin-top:8px">100 puan = 10 TL indirim. Puan kullanımını yalnızca sen açarsın. En az 100 puan kullanılabilir.</small></section><div class="field"><label>Sipariş türü</label><select name="type"><option>Adrese teslim</option><option>Gel-al</option></select></div><div class="field"><label>Ödeme yöntemi</label><select name="paymentMethod" required><option value="Kapıda Nakit">KAPIDA NAKİT</option><option value="Kapıda Kredi Kartı">KAPIDA KREDİ KARTI</option></select></div><div class="field"><label>Teslimat adresi <span style="color:#e11d2e">*</span></label><textarea name="note" rows="3" required minlength="10" autocomplete="street-address" placeholder="Mahalle, cadde, sokak, bina ve daire numarası"></textarea></div><button class="primary" id="checkoutSubmit" style="width:100%">SİPARİŞ OLUŞTUR · ${money(total())}</button><p style="color:#777;font-size:12px">Siparişiniz güvenli bağlantı üzerinden işletme sistemine gönderilir.</p></form>`:''}`);$('#modalBody').querySelectorAll('[data-plus-line]').forEach(b=>b.onclick=()=>changeCartLine(Number(b.dataset.plusLine),1));$('#modalBody').querySelectorAll('[data-minus-line]').forEach(b=>b.onclick=()=>changeCartLine(Number(b.dataset.minusLine),-1));$('#modalBody').querySelectorAll('[data-remove-line]').forEach(b=>b.onclick=()=>{const index=Number(b.dataset.removeLine),row=cart[index];if(row)changeCartLine(index,-Number(row.qty||1))});$('#modalBody').querySelectorAll('[data-edit-customization]').forEach(b=>b.onclick=()=>openProductCustomization(cart[Number(b.dataset.editCustomization)]?.id,Number(b.dataset.editCustomization)));$('#modalBody').querySelectorAll('[data-cart-cross-sell]').forEach(button=>button.onclick=()=>{const product=products.find(item=>String(item.id)===String(button.dataset.cartCrossSell));if(!product)return;if(getProductCustomizationConfig(product).enabled){closeModal();openProductCustomization(product.id);return}add(product.id);cartModal()});const f=$('#checkout');if(f){
+function cartModal(){checkoutLoyaltyState=readPendingLoyaltyUse();const rows=cart.map((x,index)=>{const p=products.find(p=>String(p.id)===String(x.id));if(!p)return '';const customization=readItemCustomization(x),extraTotal=cartLineExtraTotal(x),unitPrice=cartLineUnitPrice(x,p),details=[customization.removedIngredients.length?'Çıkarılacak: '+customization.removedIngredients.join(', '):'',customization.extras.length?'Ekstralar: '+customization.extras.map(item=>item.name+' (+'+money(item.price)+')').join(', '):'',customization.preparationNote?'Not: '+customization.preparationNote:''].filter(Boolean);const editButton=(getProductCustomizationConfig(p).enabled||x.customization)?'<button type="button" class="cart-customize-edit" data-edit-customization="'+index+'">Düzenle</button>':'';return '<div class="cart-row"><div class="cart-row-main"><b>'+escapeHtml(p.name)+'</b>'+(x.campaignTitle?'<small class="campaign-cart-label">'+(x.isFreeGift?'🎁 ÜCRETSİZ HEDİYE · ':x.isCampaignExtra?'⚡ EKSTRA GELSİN · ':'🎁 ')+escapeHtml(x.campaignTitle)+'</small>':'')+(x.freeGiftName&&!x.isFreeGift?'<small class="campaign-cart-gift">Ücretsiz hediye: '+escapeHtml(x.freeGiftName)+'</small>':'')+(details.length?'<small class="cart-customization-details">'+details.map(escapeHtml).join('<br>')+'</small>':'')+'<div class="price">'+money(unitPrice*x.qty)+'</div>'+(extraTotal>0?'<small class="cart-customization-price">'+money(p.price)+' + '+money(extraTotal)+' ekstra / adet</small>':'')+editButton+'</div><div class="qty"><button data-minus-line="'+index+'">−</button><b>'+x.qty+'</b><button data-plus-line="'+index+'">+</button><button data-remove-line="'+index+'" aria-label="Sil">×</button></div></div>'}).join('');openModal('Sepetim',`${rows||'<p>Sepetin henüz boş. Menüden ürün ekleyebilirsin.</p>'}${rows?cartCrossSellMarkup():''}${rows?`<div class="total"><span>Ürün toplamı</span><span id="checkoutSubtotal">${money(total())}</span></div><div class="total"><span>⭐ Sadakat indirimi</span><span id="checkoutDiscount">${money(0)}</span></div><div class="total"><b>Ödenecek tutar</b><b id="checkoutDue">${money(total())}</b></div><form id="checkout"><div class="field"><label>Ad soyad</label><input name="name" required placeholder="Adınız soyadınız"></div><div class="field"><label>Telefon</label><input name="phone" required type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx"></div><section id="giftVoucherCheckout" style="margin:12px 0;padding:14px;border:1px solid #d9e5fb;border-radius:14px;background:#f7faff"><b style="display:block;margin-bottom:8px">🎁 Hediye çekin</b><div style="display:flex;gap:8px"><input id="checkoutGiftCode" placeholder="Hediye çek kodu" style="min-width:0;flex:1;padding:11px;border:1px solid #d5dce8;border-radius:10px;text-transform:uppercase"><button type="button" id="checkoutGiftCheck" class="ghost">Kontrol et</button></div><div id="checkoutGiftStatus" style="font-size:13px;margin-top:8px;color:#53657b">Kodunuzu kontrol edin. Uygun bakiye sipariş tutarından düşülür.</div></section><section style="margin:12px 0;padding:14px;border:1px solid #e6d6aa;border-radius:14px;background:#fffaf0"><b style="display:block;margin-bottom:6px">⭐ Sadakat puanların</b><div id="checkoutLoyaltyStatus" style="font-size:13px;color:#6f6250;margin:8px 0">\${checkoutLoyaltyState?checkoutLoyaltyState.pointsBalance.toLocaleString('tr-TR')+' puan · '+money(checkoutLoyaltyState.pointsBalance/10)+' indirim değeri':'Puanlarını görmek ve kullanıma açmak için Siparişlerim bölümündeki sipariş detayına git.'}</div><button type="button" class="ghost" id="checkoutLoyaltyToggle" style="width:100%" \${!checkoutLoyaltyState||checkoutLoyaltyState.pointsBalance<100?'disabled':''}>\${checkoutLoyaltyState?.apply?'✓ PUAN KULLANILIYOR · VAZGEÇ':'PUAN KULLAN'}</button><small style="display:block;color:#806d4d;margin-top:8px">100 puan = 10 TL indirim. Puan kullanımını yalnızca sen açarsın. En az 100 puan kullanılabilir.</small></section><div class="field"><label>Sipariş türü</label><select name="type"><option>Adrese teslim</option><option>Gel-al</option></select></div><div class="field"><label>Ödeme yöntemi</label><select name="paymentMethod" required><option value="Kapıda Nakit">KAPIDA NAKİT</option><option value="Kapıda Kredi Kartı">KAPIDA KREDİ KARTI</option></select></div><div class="field"><label>Teslimat adresi <span style="color:#e11d2e">*</span></label><textarea name="note" rows="3" required minlength="10" autocomplete="street-address" placeholder="Mahalle, cadde, sokak, bina ve daire numarası"></textarea></div><button class="primary" id="checkoutSubmit" style="width:100%">SİPARİŞ OLUŞTUR · ${money(total())}</button><p style="color:#777;font-size:12px">Siparişiniz güvenli bağlantı üzerinden işletme sistemine gönderilir.</p></form>`:''}`);$('#modalBody').querySelectorAll('[data-plus-line]').forEach(b=>b.onclick=()=>changeCartLine(Number(b.dataset.plusLine),1));$('#modalBody').querySelectorAll('[data-minus-line]').forEach(b=>b.onclick=()=>changeCartLine(Number(b.dataset.minusLine),-1));$('#modalBody').querySelectorAll('[data-remove-line]').forEach(b=>b.onclick=()=>{const index=Number(b.dataset.removeLine),row=cart[index];if(row)changeCartLine(index,-Number(row.qty||1))});$('#modalBody').querySelectorAll('[data-edit-customization]').forEach(b=>b.onclick=()=>openProductCustomization(cart[Number(b.dataset.editCustomization)]?.id,Number(b.dataset.editCustomization)));$('#modalBody').querySelectorAll('[data-cart-cross-sell]').forEach(button=>button.onclick=()=>{const product=products.find(item=>String(item.id)===String(button.dataset.cartCrossSell));if(!product)return;if(getProductCustomizationConfig(product).enabled){closeModal();openProductCustomization(product.id);return}add(product.id);cartModal()});const f=$('#checkout');if(f){
  const phoneField=f.elements.namedItem('phone');
  const loyaltyStatus=$('#checkoutLoyaltyStatus');
  const loyaltyToggle=$('#checkoutLoyaltyToggle');
@@ -3225,6 +3227,27 @@ function cartModal(){checkoutLoyaltyState=readPendingLoyaltyUse();const rows=car
  });
  updateCheckoutPreview();
 }
+let checkoutGiftVoucher=null;
+const giftCheckButton=$('#checkoutGiftCheck');
+const giftCodeField=$('#checkoutGiftCode');
+const giftStatus=$('#checkoutGiftStatus');
+if(giftCheckButton&&giftCodeField&&giftStatus){
+ giftCheckButton.onclick=async()=>{
+  const code=String(giftCodeField.value||'').trim().toUpperCase();
+  if(code.length<4){giftStatus.textContent='Geçerli bir kod girin.';checkoutGiftVoucher=null;return;}
+  giftCheckButton.disabled=true;giftCheckButton.textContent='Kontrol…';
+  try{
+   const resp=await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_gift_voucher`,{method:'POST',headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${supabaseAccessToken||SUPABASE_PUBLISHABLE_KEY}`,'Content-Type':'application/json'},body:JSON.stringify({p_code:code})});
+   const data=await resp.json();if(!resp.ok)throw new Error(data?.message||'Kod doğrulanamadı');
+   const result=Array.isArray(data)?data[0]:data;
+   if(result?.valid!==true)throw new Error('Kod geçersiz');
+   checkoutGiftVoucher={code,balance:Number(result.balance)||0};
+   giftStatus.textContent='✓ Kod geçerli · '+money(checkoutGiftVoucher.balance)+' bakiye. Sipariş tutarına uygulanacak.';giftStatus.style.color='#16834a';
+  }catch(err){checkoutGiftVoucher=null;giftStatus.textContent=err.message||'Kod kontrol edilemedi';giftStatus.style.color='#c62828'}
+  finally{giftCheckButton.disabled=false;giftCheckButton.textContent='Kontrol et'}
+ };
+ giftCodeField.addEventListener('input',()=>{checkoutGiftVoucher=null;giftStatus.textContent='Kod değişti. Yeniden kontrol edin.';giftStatus.style.color='#53657b'});
+}
 if(f)f.onsubmit=async e=>{
   e.preventDefault();
   const fd=new FormData(f);
@@ -3241,6 +3264,10 @@ if(f)f.onsubmit=async e=>{
    if(!checkoutLoyaltyState||checkoutLoyaltyState.phoneDigits!==phoneDigits){toast('Sadakat puanı için kayıtlı müşteri telefonu eşleşmiyor.');return;}
    if(pointsToUse<100){toast('Bu siparişte kullanılabilecek en az 100 puan bulunmuyor.');return;}
   }
+  const dueBeforeVoucher=Math.max(0,subtotal-(pointsToUse/10));
+  const voucherCode=checkoutGiftVoucher?.code||'';
+  const voucherAmount=voucherCode?Math.min(checkoutGiftVoucher.balance,dueBeforeVoucher):0;
+  if(giftCodeField?.value?.trim()&&!voucherCode){toast('Hediye çek kodunu kontrol etmelisiniz.');return;}
   if(submitButton){submitButton.disabled=true;submitButton.textContent='SİPARİŞ GÖNDERİLİYOR…'}
   const orderNumber='LC-'+Date.now().toString(36).toUpperCase();
   const discountAmount=Number((pointsToUse/10).toFixed(2));
@@ -3249,11 +3276,13 @@ if(f)f.onsubmit=async e=>{
   let whatsappTab=null;
   try{whatsappTab=window.open('about:blank','_blank');}catch{}
   try{
-    const savedOrder=await submitOrderToSupabase(order);
+    const savedOrder=await submitOrderToSupabase(order,voucherCode,voucherAmount);
     order.subtotal=Number(savedOrder?.subtotal??order.subtotal);
     order.discountAmount=Number(savedOrder?.discount_amount??order.discountAmount);
     order.pointsRedeemed=Number(savedOrder?.points_redeemed??order.pointsRedeemed);
-    order.total=Number(savedOrder?.total??order.total);
+    order.total=Number(savedOrder?.final_total??savedOrder?.total??order.total);
+    order.giftVoucherUsed=Number(savedOrder?.gift_voucher_used)||0;
+    order.giftVoucherCode=savedOrder?.gift_voucher_code||voucherCode||'';
     order.pointsBalance=Number(savedOrder?.points_balance??0);
     if(order.pointsRedeemed>0){
      try{sessionStorage.removeItem('lc_pending_loyalty_use')}catch{}

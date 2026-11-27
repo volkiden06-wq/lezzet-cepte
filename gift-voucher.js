@@ -24,8 +24,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  page.querySelector('#giftVoucherRefresh').onclick=render;page.querySelectorAll('[data-action]').forEach(btn=>btn.onclick=async()=>{btn.disabled=true;try{const id=btn.dataset.id,act=btn.dataset.action;await rpc(act==='paid'?'set_gift_voucher_request_paid':act==='approve'?'approve_gift_voucher_request':'cancel_gift_voucher_request',{p_request_id:id});await render()}catch(e){alert(e.message);btn.disabled=false}});
  }catch(e){page.innerHTML='<div style="padding:20px"><h2>🎁 Hediye Çeki Talepleri</h2><p>'+esc2(e.message)+'</p><button onclick="location.reload()">Yeniden dene</button></div>'}};
  function alertSound(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.value=.12;o.start();o.stop(ctx.currentTime+.18);o.onended=()=>ctx.close()}catch(e){}}
- nav.addEventListener('click',e=>{const btn=e.target.closest('button[data-page="giftVouchers"]');if(!btn)return;shownPage=true;nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(title)title.textContent='Hediye Çeki Talepleri';render()});
+ nav.addEventListener('click',e=>{const btn=e.target.closest('button[data-page="giftVouchers"]');if(!btn)return;e.preventDefault();e.stopPropagation();shownPage=true;nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(title)title.textContent='Hediye Çeki Talepleri';render()});
  const observer=new MutationObserver(()=>{if(admin.classList.contains('hidden'))shownPage=false});observer.observe(admin,{attributes:true,attributeFilter:['class']});
- setInterval(()=>{if(!admin.classList.contains('hidden'))render()},30000);
+ setInterval(()=>{if(!admin.classList.contains('hidden')&&nav.querySelector('button[data-page="giftVouchers"]')?.classList.contains('active'))render()},30000);
 })();
 })();

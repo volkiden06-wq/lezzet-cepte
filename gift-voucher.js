@@ -34,6 +34,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  function gkey(x){return x}
  search.addEventListener('input',()=>show(activeGroup));page.querySelector('#giftVoucherRefresh').onclick=refresh;page.querySelectorAll('.giftGroupTab').forEach(b=>b.onclick=()=>show(b.dataset.group));show('new');
 }
+ nav.addEventListener('click',e=>{const clicked=e.target.closest('button[data-page]');if(clicked&&clicked.dataset.page!=='giftVouchers'){activePage=false;}},true);
  nav.addEventListener('click',e=>{const btn=e.target.closest('button[data-page="giftVouchers"]');if(!btn)return;e.preventDefault();e.stopPropagation();activePage=true;try{if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(title)title.textContent='Hediye Çeki Talepleri';refresh()});
  const observer=new MutationObserver(()=>{if(admin.classList.contains('hidden'))activePage=false});observer.observe(admin,{attributes:true,attributeFilter:['class']});
  setInterval(refresh,20000); // admin visibility is checked inside refresh
